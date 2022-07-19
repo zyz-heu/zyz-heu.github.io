@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Delivery | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1.nmap scan and add helpdesk.delivery.htb to &#x2F;etc&#x2F;hosts  echo &quot;10.10.10.222 helpdesk.delivery.htb&quot; &gt;&gt; &#x2F;etc&#x2F;hosts  2.websitethe port 80 shows nothing,but we can change to http:&#x2F;&#x2F;helpdes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Delivery">
+<meta property="og:url" content="http://example.com/2022/07/18/Delivery/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1.nmap scan and add helpdesk.delivery.htb to &#x2F;etc&#x2F;hosts  echo &quot;10.10.10.222 helpdesk.delivery.htb&quot; &gt;&gt; &#x2F;etc&#x2F;hosts  2.websitethe port 80 shows nothing,but we can change to http:&#x2F;&#x2F;helpdes">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/nmap.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/osTicket.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/mattermost.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/newticket.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/viewticket.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/step1.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/step2.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/step3.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/step4.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/step5.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/step6.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/creds.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/userflag.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/sqlpass.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/database.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/Users.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/hashcrack.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/result.png">
+<meta property="og:image" content="http://example.com/2022/07/18/Delivery/root.png">
+<meta property="article:published_time" content="2022-07-18T14:00:34.000Z">
+<meta property="article:modified_time" content="2022-07-19T12:31:15.859Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/07/18/Delivery/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Delivery" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/18/Delivery/" class="article-date">
+  <time class="dt-published" datetime="2022-07-18T14:00:34.000Z" itemprop="datePublished">2022-07-18</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Delivery
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/18/Delivery/nmap.png">
+and add helpdesk.delivery.htb to /etc/hosts
+
+<pre><code>echo &quot;10.10.10.222 helpdesk.delivery.htb&quot; &gt;&gt; /etc/hosts
+</code></pre>
+<h4 id="2-website"><a href="#2-website" class="headerlink" title="2.website"></a>2.website</h4><p>the port 80 shows nothing,but we can change to <a target="_blank" rel="noopener" href="http://helpdesk.delivery.htb/index.php">http://helpdesk.delivery.htb/index.php</a> to get some information<br><img src="/2022/07/18/Delivery/osTicket.png"><br>it shows it’s run a osTicket structer on 80<br>and on port 8065,it shows another login page<br><img src="/2022/07/18/Delivery/mattermost.png"><br>i first add a user in mattermost and try to find a exploit<br>it need me to varify<br>so let’s use searchsploit osticket and try to exploit<br>all the register need verify<br>as a guest,we can open a new ticket and see it’s feedback<br><img src="/2022/07/18/Delivery/newticket.png"></p>
+<h4 id="3-getting-webshell-access"><a href="#3-getting-webshell-access" class="headerlink" title="3.getting webshell access"></a>3.getting webshell access</h4><p>because the machine can not access to the internet,the verify step is unable<br>but when I created a ticket, it offered the ability to update the ticket over email. I can use that to get the verification email.<br><img src="/2022/07/18/Delivery/viewticket.png"><br>I’ll create a ticket and get the email address for it. Then sign up for a MatterMost account:<br><img src="/2022/07/18/Delivery/step1.png"><br><img src="/2022/07/18/Delivery/step2.png"><br>the default email is <a href="mailto:&#50;&#x32;&#48;&#x30;&#x34;&#x39;&#x33;&#x40;&#100;&#101;&#108;&#105;&#118;&#101;&#114;&#x79;&#x2e;&#104;&#x74;&#x62;">&#50;&#x32;&#48;&#x30;&#x34;&#x39;&#x33;&#x40;&#100;&#101;&#108;&#105;&#118;&#101;&#114;&#x79;&#x2e;&#104;&#x74;&#x62;</a><br>register a new account use <a href="mailto:&#x32;&#x32;&#x30;&#48;&#x34;&#x39;&#x33;&#64;&#x64;&#x65;&#108;&#x69;&#x76;&#101;&#x72;&#121;&#46;&#x68;&#116;&#98;">&#x32;&#x32;&#x30;&#48;&#x34;&#x39;&#x33;&#64;&#x64;&#x65;&#108;&#x69;&#x76;&#101;&#x72;&#121;&#46;&#x68;&#116;&#98;</a><br><img src="/2022/07/18/Delivery/step3.png"><br>check the ticketnum use 2200493<br><img src="/2022/07/18/Delivery/step4.png"><br>and now we get the verify mail<br><img src="/2022/07/18/Delivery/step5.png"><br>verify the link and we can get in<br><img src="/2022/07/18/Delivery/step6.png"><br>in the website,we can see a credential —maildeliverer:Youve_G0t_Mail!<br>and it shows a hint that may password are PleaseSubscribe!<br><img src="/2022/07/18/Delivery/creds.png"><br>then i can try to use creds i just get to ssh the machine<br><img src="/2022/07/18/Delivery/userflag.png"></p>
+<h4 id="4-getting-root-access"><a href="#4-getting-root-access" class="headerlink" title="4.getting root access"></a>4.getting root access</h4><p>Mattermost stores it’s configuration in &#x2F;opt&#x2F;mattermost&#x2F;config&#x2F;config.json. The database connection information is in here:<br><img src="/2022/07/18/Delivery/sqlpass.png"></p>
+<p>username:mmuser<br>password:Crack_The_MM_Admin_PW<br>database:mattermost<br><img src="/2022/07/18/Delivery/database.png"><br>we can get username and password from the table User</p>
+<pre><code>select Username,Password from Users;
+</code></pre>
+<img src="/2022/07/18/Delivery/Users.png">
+
+<h5 id="crack-root-password"><a href="#crack-root-password" class="headerlink" title="crack root password"></a>crack root password</h5><p>we can save the hash to a file and save the hint PleaseSubscribe! to another file<br><img src="/2022/07/18/Delivery/hashcrack.png"><br>and the result is PleaseSubscribe!21<br><img src="/2022/07/18/Delivery/result.png"><br>finally,we get the root<br><img src="/2022/07/18/Delivery/root.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/18/Delivery/" data-id="cl5s5p57i0001k4cp1ymycikk" data-title="Delivery" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2022/07/17/Horizontall/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Horizontall</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/07/18/Delivery/">Delivery</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/17/Horizontall/">Horizontall</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/16/Previse/">Previse</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/16/Armageddon/">Armageddon</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/15/Forlic/">Forlic</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

