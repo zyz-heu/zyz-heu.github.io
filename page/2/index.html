@@ -4,24 +4,15 @@
   <meta charset="utf-8">
   
   
-  <title>first_blog | Hexo</title>
+  <title>Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="h1 标题h2 标题h3 标题h4 标题h5 标题h6 标题水平线   文本样式This is bold text This is bold text This is italic text This is italic text Strikethrough 列表无序  Create a list by starting a line with +, -, or * Sub-lists are m">
-<meta property="og:type" content="article">
-<meta property="og:title" content="first_blog">
-<meta property="og:url" content="http://example.com/2022/07/13/first-blog/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://example.com/page/2/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="h1 标题h2 标题h3 标题h4 标题h5 标题h6 标题水平线   文本样式This is bold text This is bold text This is italic text This is italic text Strikethrough 列表无序  Create a list by starting a line with +, -, or * Sub-lists are m">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/creds.jpg">
-<meta property="og:image" content="http://example.com/2022/07/13/first-blog/creds.jpg">
-<meta property="og:image" content="http://example.com/2022/07/13/first-blog/creds.jpg">
-<meta property="og:image" content="http://example.com/2022/07/13/first-blog/creds.jpg">
-<meta property="article:published_time" content="2022-07-13T14:35:48.000Z">
-<meta property="article:modified_time" content="2022-07-13T15:47:20.609Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/creds.jpg">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -78,7 +69,59 @@
 </header>
 
       <div class="outer">
-        <section id="main"><article id="post-first-blog" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+        <section id="main">
+  
+    <article id="post-Nibbles" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/14/Nibbles/" class="article-date">
+  <time class="dt-published" datetime="2022-07-14T10:10:31.000Z" itemprop="datePublished">2022-07-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/07/14/Nibbles/">Nibbles</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><p>nmap -sCV –min-rate&#x3D;10000 -p- 10.10.10.75<br><img src="/2022/07/14/Nibbles/nmap.png" width="50%"></p>
+<h4 id="2-site"><a href="#2-site" class="headerlink" title="2.site"></a>2.site</h4><h5 id="web"><a href="#web" class="headerlink" title="web"></a>web</h5><p>in the website,it just has hello world,but in the source code,it hides a hint<br><code>&lt;!-- /nibbleblog/ directory. Nothing interesting here! --&gt;</code><br>visit it</p>
+<h5 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h5><p>we use dirsearch to display its menu and we can find some pages that can visit<br><img src="/2022/07/14/Nibbles/dirsearch.png" width="50%"><br>when we visit some of them,we can get it’s machine menu<br>In exploring the resulting paths, &#x2F;nibbleblog&#x2F;content is interesting, and has dir lists enabled. Digging deeper, there’s a page at &#x2F;nibbleblog&#x2F;content&#x2F;private&#x2F;user.xml which reveals a user, admin, as well as the IPs that have tried to log in as it<br><img src="/2022/07/14/Nibbles/user.png" width="50%"></p>
+<h5 id="logging-into-admin"><a href="#logging-into-admin" class="headerlink" title="logging into admin"></a>logging into admin</h5><p>visit <a target="_blank" rel="noopener" href="http://10.10.10.75/nibbleblog/admin.php">http://10.10.10.75/nibbleblog/admin.php</a><br>we don’t have the creds,in most writeups says they guess the password or use the information get from  <a target="_blank" rel="noopener" href="http://10.10.10.75/nibbleblog/content/private/config.xml-admin-nibbles">http://10.10.10.75/nibbleblog/content/private/config.xml-admin-nibbles</a></p>
+<h5 id="Exploitaion"><a href="#Exploitaion" class="headerlink" title="Exploitaion"></a>Exploitaion</h5><p>in the settings page, we konw that the site is nibbleblog 4.0.3<br>we can use searchspolit to find some poc<br>it has a fileupload exploit<br>we use msf to get webshell<br><img src="/2022/07/14/Nibbles/msf.png" width="50%"><br>after this,we can get user.txt<br><img src="/2022/07/14/Nibbles/userflag.png" width="50%"></p>
+<h4 id="3-getting-root"><a href="#3-getting-root" class="headerlink" title="3.getting root"></a>3.getting root</h4><h5 id="first-get-a-fully-interactive-shell-using-the-python-pty-spawn-one-liner"><a href="#first-get-a-fully-interactive-shell-using-the-python-pty-spawn-one-liner" class="headerlink" title="first get a fully interactive shell using the python pty.spawn one liner"></a>first get a fully interactive shell using the python pty.spawn one liner</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 -c &#x27;import pty;pty.spawn(&quot;/bin/bash&quot;)&#x27;</span><br></pre></td></tr></table></figure>
+<img src="/2022/07/14/Nibbles/root1.png" width="50%">
+so we can try run monitor.sh and the color of text changed
+<img src="/2022/07/14/Nibbles/root2.png" width="50%">
+
+<p><a target="_blank" rel="noopener" href="https://medium.com/schkn/linux-privilege-escalation-using-text-editors-and-files-part-1-a8373396708d">sudo trick</a><br>from this article,we can learn that how to use sudo-enabled files to open system-level tools like &#x2F;bin&#x2F;bash.<br>If you have write and execute permissions to a file that runs with elevated privileges, you can add commands such as system calls to get what you want.<br>we can use the next command to get the root</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;#! /bin/bash&quot; &gt; monitor.sh</span><br><span class="line">echo &quot;/bin/bash -i&quot; &gt;&gt; monitor.sh</span><br><span class="line">sudo ./monitor.sh</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/14/Nibbles/" data-id="cl5v6ykmz0006yacp2bh067jz" data-title="Nibbles" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-first-blog" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2022/07/13/first-blog/" class="article-date">
   <time class="dt-published" datetime="2022-07-13T14:35:48.000Z" itemprop="datePublished">2022-07-13</time>
@@ -91,8 +134,8 @@
       <header class="article-header">
         
   
-    <h1 class="p-name article-title" itemprop="headline name">
-      first_blog
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/07/13/first-blog/">first_blog</a>
     </h1>
   
 
@@ -177,24 +220,17 @@ line 3 of code
     </footer>
   </div>
   
-    
-<nav id="article-nav">
-  
-    <a href="/2022/07/14/Nibbles/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          Nibbles
-        
-      </div>
-    </a>
-  
-  
-</nav>
-
-  
 </article>
 
+
+
+  
+
+
+  <nav id="page-nav">
+    
+    <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+  </nav>
 
 </section>
         
