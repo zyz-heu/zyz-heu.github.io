@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>openadmin | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan #### port explore 只开放了22和80端口 80端口是apache的默认界面 22端口无法匿名登录 #### 目录遍历  扫出两个页面，一个是music一个是ona opennetadmin显示是v18.1.1,searchsploit后发现有远程代码执行漏洞 在github上找一个利用脚本，成功获得www权限  #### user 用www权限可以发现存在两个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="openadmin">
+<meta property="og:url" content="http://example.com/2022/09/01/openadmin/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan #### port explore 只开放了22和80端口 80端口是apache的默认界面 22端口无法匿名登录 #### 目录遍历  扫出两个页面，一个是music一个是ona opennetadmin显示是v18.1.1,searchsploit后发现有远程代码执行漏洞 在github上找一个利用脚本，成功获得www权限  #### user 用www权限可以发现存在两个">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/09/01/openadmin/nmap.png">
+<meta property="og:image" content="http://example.com/2022/09/01/openadmin/dirsearch.png">
+<meta property="og:image" content="http://example.com/2022/09/01/openadmin/www.png">
+<meta property="og:image" content="http://example.com/2022/09/01/openadmin/user.png">
+<meta property="og:image" content="http://example.com/2022/09/01/openadmin/database.png">
+<meta property="og:image" content="http://example.com/2022/09/01/openadmin/jimmy1.png">
+<meta property="og:image" content="http://example.com/2022/09/01/openadmin/net.png">
+<meta property="og:image" content="http://example.com/2022/09/01/openadmin/joanna.png">
+<meta property="og:image" content="http://example.com/2022/09/01/openadmin/ssh1.png">
+<meta property="og:image" content="http://example.com/2022/09/01/openadmin/ssh2.png">
+<meta property="og:image" content="http://example.com/2022/09/01/openadmin/sudo.png">
+<meta property="article:published_time" content="2022-09-02T02:44:50.000Z">
+<meta property="article:modified_time" content="2022-09-02T07:16:51.430Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/09/01/openadmin/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-openadmin" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/09/01/openadmin/" class="article-date">
+  <time class="dt-published" datetime="2022-09-02T02:44:50.000Z" itemprop="datePublished">2022-09-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      openadmin
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/01/openadmin/nmap.png">
+#### port explore
+只开放了22和80端口
+80端口是apache的默认界面
+22端口无法匿名登录
+#### 目录遍历
+<img src="/2022/09/01/openadmin/dirsearch.png">
+扫出两个页面，一个是music一个是ona
+opennetadmin显示是v18.1.1,searchsploit后发现有远程代码执行漏洞
+在github上找一个利用脚本，成功获得www权限
+<img src="/2022/09/01/openadmin/www.png">
+#### user
+用www权限可以发现存在两个用户jimmy和joanna
+<img src="/2022/09/01/openadmin/user.png">
+往目标机传一个linenum.sh试试
+没有什么特别可以注意的
+在local中的一个数据库配置文件里找到了数据库的密码
+`
+'db_login' => 'ona_sys',
+ 'db_passwd' => 'n1nj4W4rri0R!',
+ 'db_database' => 'ona_default',
+`
+<img src="/2022/09/01/openadmin/database.png">
+用数据库的密码尝试登录jimmy和joanna
+jimmy成功登上去了
+但是jimmy的文件夹下是空的，要尝试换成joanna
+在一个叫internal的文件夹里有几个页面
+<img src="/2022/09/01/openadmin/jimmy1.png">
+这里有一个密码
+可以留意一下
+`curl http://10.10.10.171/main.php`一无所获
+查看本机开的端口，有一个52846
+<img src="/2022/09/01/openadmin/net.png">
+用curl去访问，得到一个加密的私钥
+<img src="/2022/09/01/openadmin/joanna.png">
+`ssh2john rsa > password.txt`
+`john -w=/usr/share/wordlists/rockyou.txt password.txt`
+<img src="/2022/09/01/openadmin/ssh1.png">
+密码是bloodninjas
+用ssh连joanna,发现bloodninjas并不是连接密码，是验证密码
+`chmod 600 rsa`
+`ssh -i rsa joanna@10.10.10.171`
+<img src="/2022/09/01/openadmin/ssh2.png">
+joanna有一个用nano读priv的sudo权限
+<img src="/2022/09/01/openadmin/sudo.png">
+用nano读priv以后使用ctrl+R读取需要读得文件
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/09/01/openadmin/" data-id="cl7k58yjl000117cpgfhqbewf" data-title="openadmin" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/09/02/bounty/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          bounty
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/09/01/postman/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">postman</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/haircut/">haircut</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/cronos/">cronos</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/bastard/">bastard</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/05/popcorn/">popcorn</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

