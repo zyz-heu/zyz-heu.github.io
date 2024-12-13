@@ -128,13 +128,13 @@
 `guestmount --add /mnt/WindowsImageBackup/L4mpje-PC/Backup\ 2019-02-22\ 124351/9b9cfbc3-369e-11e9-a17c-806e6f6e6963.vhd --inspector --ro /mnt2/`
 第一个vhd挂载失败，第二个挂载上以后卡死，暂时做不了
 
-<p>根据writeup，用ssh连接<a href="mailto:&#76;&#x34;&#x6d;&#112;&#x6a;&#101;&#x40;&#x31;&#48;&#x2e;&#49;&#48;&#46;&#49;&#x30;&#46;&#49;&#51;&#52;">&#76;&#x34;&#x6d;&#112;&#x6a;&#101;&#x40;&#x31;&#48;&#x2e;&#49;&#48;&#46;&#49;&#x30;&#46;&#49;&#51;&#52;</a>，密码为bureaulampje</p>
+<p>根据writeup，用ssh连接<a href="mailto:&#x4c;&#52;&#x6d;&#112;&#106;&#x65;&#64;&#49;&#48;&#46;&#49;&#x30;&#x2e;&#49;&#x30;&#x2e;&#x31;&#51;&#52;">&#x4c;&#52;&#x6d;&#112;&#106;&#x65;&#64;&#49;&#48;&#46;&#49;&#x30;&#x2e;&#49;&#x30;&#x2e;&#x31;&#51;&#52;</a>，密码为bureaulampje</p>
 <h4 id="root"><a href="#root" class="headerlink" title="root"></a>root</h4><p>在programfiles文件夹中，存在一个mRemoteNG<br>同样它也是一个远程连接工具<br>在用户的AppData文件夹下存在confCons.xml文件<br><img src="/2022/09/05/bastion/node1.png"><br><img src="/2022/09/05/bastion/node2.png"><br>里面存了一个DC和一个L4mpje-PC的帐号和密码<br>可以用(mRemoteNG Decrypt)[<a target="_blank" rel="noopener" href="https://github.com/kmahyyg/mremoteng-decrypt]%E7%A0%B4%E8%A7%A3%E8%AF%A5%E5%8A%A0%E5%AF%86%E5%AF%86%E7%A0%81">https://github.com/kmahyyg/mremoteng-decrypt]破解该加密密码</a><br><img src="/2022/09/05/bastion/pass.png"><br>得到administrator的登陆密码为thXLHM96BeKL0ER2<br>用ssh连接，成功获得administrator权限<br><img src="/2022/09/05/bastion/root.png"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/09/05/bastion/" data-id="cl7ogf01d0000z0cpatfp63o6" data-title="bastion" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/05/bastion/" data-id="cm4ma4vzu000jefcpez2q5rxp" data-title="bastion" class="article-share-link">Share</a>
       
       
       
