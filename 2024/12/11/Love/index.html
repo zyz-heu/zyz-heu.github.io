@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Love | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="nmap scan 可以看到开放的端口较多，继续用nmap对低端口进行扫描   443端口在nmap时是有一个子域名的,可以把它加到&#x2F;etc&#x2F;hosts里  这里可以直接 1sed -i &amp;#x27;1i x.x.x.x love.htb&amp;#x27; &#x2F;etc&#x2F;hosts 直接添加到第一行 如果是想插入到最后一行，是 1sed -i &amp;#x27;$a x.x.x.x love.htb&amp;#x27;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Love">
+<meta property="og:url" content="http://example.com/2024/12/11/Love/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nmap scan 可以看到开放的端口较多，继续用nmap对低端口进行扫描   443端口在nmap时是有一个子域名的,可以把它加到&#x2F;etc&#x2F;hosts里  这里可以直接 1sed -i &amp;#x27;1i x.x.x.x love.htb&amp;#x27; &#x2F;etc&#x2F;hosts 直接添加到第一行 如果是想插入到最后一行，是 1sed -i &amp;#x27;$a x.x.x.x love.htb&amp;#x27;">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/nmap1.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/nmap2.1.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/nmap2.2.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/nmap3.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/web80_1.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/web_443_1.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/web_443_2.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/web_443_3.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/web_443_4.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/web_443_5.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/web_443_6.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/dirsearch.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/web_80_admin.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/web_80_2.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/voting_system.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/user.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/update_upload.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/root_1.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/root_2.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/root_3.png">
+<meta property="og:image" content="http://example.com/2024/12/11/Love/root_4.png">
+<meta property="article:published_time" content="2024-12-12T01:23:49.000Z">
+<meta property="article:modified_time" content="2024-12-13T03:46:22.988Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/12/11/Love/nmap1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Love" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/12/11/Love/" class="article-date">
+  <time class="dt-published" datetime="2024-12-12T01:23:49.000Z" itemprop="datePublished">2024-12-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Love
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2024/12/11/Love/nmap1.png">
+可以看到开放的端口较多，继续用nmap对低端口进行扫描
+<img src="/2024/12/11/Love/nmap2.1.png">
+<img src="/2024/12/11/Love/nmap2.2.png">
+443端口在nmap时是有一个子域名的,可以把它加到/etc/hosts里
+<img src="/2024/12/11/Love/nmap3.png">
+这里可以直接
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">&#x27;1i x.x.x.x love.htb&#x27;</span> /etc/hosts</span><br></pre></td></tr></table></figure>
+直接添加到第一行
+如果是想插入到最后一行，是
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">&#x27;$a x.x.x.x love.htb&#x27;</span> /etc/hosts</span><br></pre></td></tr></table></figure>
+
+<h4 id="web部分"><a href="#web部分" class="headerlink" title="web部分"></a>web部分</h4><img src="/2024/12/11/Love/web80_1.png">
+80端口是一个voting system的页面,需要voter's ID和password,目前我们在这上面并没有突破点<br>
+当我们尝试去访问443端口时，我们会发现它返回的是403 forbidden,查看其证书的时候也表示它的子域名是staging.love.htb,所以我们可以尝试用staging.love.htb去访问一下看看
+<img src="/2024/12/11/Love/web_443_1.png">
+<img src="/2024/12/11/Love/web_443_2.png">
+有一个Home和一个Demo,Home页面应该就是一个简单的注册投票页面，Demo里看起来是一个扫描文件的页面
+<img src="/2024/12/11/Love/web_443_3.png">
+我们可以尝试让他来扫描我们本地的文件，是可以扫到的
+<img src="/2024/12/11/Love/web_443_4.png">
+我们接下来可以尝试去扫127.0.0.1看看有没有做限制
+<img src="/2024/12/11/Love/web_443_5.png">
+我们还有一个5000端口没有访问过，可以一起看看
+<img src="/2024/12/11/Love/web_443_6.png">
+可以看到，我们直接scan到了一个username和一个password<br>
+再我们对目录进行扫描后，我们可以看到一个/admin,出来的登录页面是需要username和password的，和之前看到的需要voter's ID和password不一样，所以我们可以尝试用刚才scan到的用户名密码尝试登录一下
+<img src="/2024/12/11/Love/dirsearch.png">
+<img src="/2024/12/11/Love/web_80_admin.png">
+<img src="/2024/12/11/Love/web_80_2.png">
+用searchspolit搜索voting system,可以看到几个结果，尝试File Upload RCE
+<img src="/2024/12/11/Love/voting_system.png">
+获得了user权限
+<img src="/2024/12/11/Love/user.png">
+或者我们可以在update中上传图片里传一个图片马，直接执行反弹shell的命令来实现user权限的获取
+<img src="/2024/12/11/Love/update_upload.png">
+
+<h4 id="root权限"><a href="#root权限" class="headerlink" title="root权限"></a>root权限</h4><p>得到user权限后，我们可以上传winPEAS.exe进行信息收集，可以看到该靶机的AlwaysInstallElevated 中HKLM和HKCU都是1,HKLM是HKEY_LOCAL_MACHINE,HKCU是HLEY_CURRENT_USER,它控制MSI安装包是否可以在管理员权限下运行，如果两者的值都是1,在使用msiexec执行msi安装包的时候，windows installer服务会在system上下文中运行msi包，而不是普通用户的上下文<br><img src="/2024/12/11/Love/root_1.png"><br>用msfvenom生成一个反弹windows shell的msi文件，上传到靶机，然后执行，最后我们就获得到里root权限<br><img src="/2024/12/11/Love/root_2.png"><br><code>msiexec /quiet /qn /i rev.msi</code>的意思是启用完全静默模式，无用户界面，&#x2F;i是安装模式为（install）<br><img src="/2024/12/11/Love/root_3.png"><br><img src="/2024/12/11/Love/root_4.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/12/11/Love/" data-id="cm4kp0xck0000b8cpd59kaeqx" data-title="Love" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2022/09/10/solidstate/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">solidstate</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">December 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/12/11/Love/">Love</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/10/solidstate/">solidstate</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/07/nineveh/">nineveh</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/haircut/">haircut</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/06/cronos/">cronos</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

